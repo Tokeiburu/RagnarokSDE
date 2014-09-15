@@ -106,7 +106,9 @@
     <Compile Include="Core\Avalon\RegexSearchStrategy.cs" />
     <Compile Include="Core\VirtualFileDataObject.cs" />
     <Compile Include="Main.cs" />
+    <Compile Include="Tools\DatabaseEditor\Engines\Backup.cs" />
     <Compile Include="Tools\DatabaseEditor\Engines\BackupEngine.cs" />
+    <Compile Include="Tools\DatabaseEditor\Engines\BackupInfo.cs" />
     <Compile Include="Tools\DatabaseEditor\Engines\Parsers\SqlParser.cs" />
     <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\Writers\LineStreamReader.cs" />
     <Compile Include="Tools\DatabaseEditor\Generic\TabsMakerCore\GSearchEngineFilter.cs" />

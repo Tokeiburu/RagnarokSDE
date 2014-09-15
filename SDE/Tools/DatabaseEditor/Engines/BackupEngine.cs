@@ -14,6 +14,7 @@ using Utilities.Extension;
 namespace SDE.Tools.DatabaseEditor.Engines {
 	public sealed class BackupEngine {
 		private static readonly BackupEngine _instance = new BackupEngine();
+		public const int MaximumNumberOfBackups = 30;
 		public const string InfoName = "restore.inf";
 
 		private string _grfPath {
@@ -66,7 +67,7 @@ namespace SDE.Tools.DatabaseEditor.Engines {
 
 			List<string> paths = GetBackupFiles().OrderBy(long.Parse).ToList();
 
-			while (paths.Count > 30) {
+			while (paths.Count > MaximumNumberOfBackups) {
 				RemoveBackupDelayed(paths[0]);
 				paths.RemoveAt(0);
 			}
@@ -88,23 +89,6 @@ namespace SDE.Tools.DatabaseEditor.Engines {
 			_grf.Commands.RemoveFolder(backup);
 			_grf.SyncQuickMerge(null);
 			_grf.Close();
-		}
-
-		public class BackupInfo {
-			private readonly ConfigAsker _info;
-
-			public BackupInfo(ConfigAsker info) {
-				_info = info;
-			}
-
-			public string DestinationPath {
-				get { return _info["[Backup - Destination path]", null]; }
-				set { _info["[Backup - Destination path]"] = value; }
-			}
-
-			public byte[] GetData() {
-				return ((TextConfigAsker) _info).GetByteData();
-			}
 		}
 
 		public void Restore(string backup) {
@@ -140,24 +124,6 @@ namespace SDE.Tools.DatabaseEditor.Engines {
 			_grf.SyncQuickMerge(null);
 			_grf.Close();
 		}
-
-		//public void Backup(string physicalPath, string logicalPath) {
-		//    string relativePath = logicalPath.ReplaceFirst(GrfPath.GetDirectoryName(SdeFiles.ServerDbPath) + "\\", "");
-
-		//    if (String.IsNullOrEmpty(relativePath)) {
-		//        return;
-		//    }
-
-		//    _validateOpened();
-
-		//    if (!_paths.ContainsKey(_currentId)) {
-		//        _paths[_currentId] = _getGrfPath();
-		//    }
-
-		//    string fullPath = GrfPath.Combine(_paths[_currentId], relativePath);
-
-		//    _grf.Commands.AddFileAbsolute(fullPath, file);
-		//}
 
 		public void Backup(string file) {
 			if (!SDEAppConfiguration.BackupsManagerState) return;
@@ -209,18 +175,6 @@ namespace SDE.Tools.DatabaseEditor.Engines {
 			}
 
 			_grf.Close();
-		}
-	}
-
-	public class Backup {
-		public string BackupDate { get; set; }
-		public FileEntry Entry { get; set; }
-		public BackupEngine.BackupInfo Info { get; set; }
-
-		public Backup(string backup) {
-			BackupDate = backup;
-			Entry = BackupEngine.Instance.Grf.FileTable[GrfPath.Combine(BackupDate, BackupEngine.InfoName)];
-			Info = new BackupEngine.BackupInfo(new ReadonlyConfigAsker(Entry.GetDecompressedData()));
 		}
 	}
 }
