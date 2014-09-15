@@ -1,0 +1,36 @@
+﻿<UserControl x:Class="SDE.WPF.FancyButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Border Name="_border" MouseLeftButtonUp="_border_MouseLeftButtonUp" MouseLeftButtonDown="_border_MouseLeftButtonDown"  MouseEnter="_border_MouseEnter" MouseLeave="_border_MouseLeave" Background="#01000000">
+        <Grid>
+            <Border BorderThickness="1" Name="_borderOverlay" CornerRadius="1" Background="#F3F6FB" BorderBrush="#DDE4EE" Visibility="Hidden" />
+            <Border BorderThickness="1" Name="_borderOverlayPressed" CornerRadius="1" Background="#E3EAF6" BorderBrush="#C9D5E5" Visibility="Hidden" />
+            <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+                
+                <Image Name="_imageIcon" Grid.Column="0" VerticalAlignment="Center" Stretch="None" HorizontalAlignment="Center" />
+                <Grid Grid.Column="1" VerticalAlignment="Center">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Name="_tbIdentifier" Text="Header" FontSize="15" Visibility="Collapsed" Foreground="#0577C1" Margin="3 3 3 0" />
+                    <TextBlock Grid.Row="1" Text="Description" Name="_tbDescription" Visibility="Collapsed" TextWrapping="Wrap" Margin="3 0 3 3" />
+                </Grid>
+                <TextBlock Grid.Row="1" HorizontalAlignment="Center" Name="_tbSubDescription" Visibility="Collapsed" TextWrapping="Wrap" Margin="3 0 3 3" />
+            </Grid>
+            <Border BorderThickness="1" Name="_borderOverlayEnabled" CornerRadius="1" Background="#81F3F3F3" BorderBrush="#81F3F3F3" Visibility="Hidden" />
+        </Grid>
+    </Border>
+</UserControl>

@@ -1,0 +1,211 @@
+﻿<Styles:TkWindow x:Class="SDE.Tools.DatabaseEditor.SDEditor"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary" SnapsToDevicePixels="True"
+                 xmlns:WPF="clr-namespace:SDE.Tools.DatabaseEditor.WPF"
+                 xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
+                 xmlns:WPF1="clr-namespace:SDE.WPF" Height="600" Width="941">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Menu Height="30">
+            <MenuItem>
+                <MenuItem.Header>
+                    <Label Content="File" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="-5 0 -5 0" />
+                </MenuItem.Header>
+                <MenuItem Name="_menuItemNewProject" Click="_menuItemNewProject_Click"  Header="New project" >
+                    <MenuItem.Icon>
+                        <Image Source="..\..\Resources\add.png" Height="16" Width="16" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="_menuItemProjectLoadAs" Click="_menuItemProjectLoadAs_Click" Header="Load project..." >
+                    <MenuItem.Icon>
+                        <Image Source="..\..\Resources\newFile.png" Height="16" Width="16" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="_menuItemProjectSaveAs" Click="_menuItemProjectSaveAs_Click" Header="Save project info..." >
+                    <MenuItem.Icon>
+                        <Image Source="..\..\Resources\save.png" Height="16" Width="16" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="_menuItemDatabaseSave" Click="_menuItemDatabaseSave_Click" Header="Save database (quick)" InputGestureText="Ctrl-S" >
+                    <MenuItem.Icon>
+                        <Image Source="..\..\Resources\empty.png" Height="16" Width="16" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="_menuItemDatabaseSaveAll" Click="_menuItemDatabaseSaveAll_Click" Header="Save database" InputGestureText="Ctrl-Shift-S" >
+                    <MenuItem.Icon>
+                        <Image Source="..\..\Resources\empty.png" Height="16" Width="16" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator />
+                <MenuItem Header="Export" >
+                    <MenuItem.Icon>
+                        <Image Source="..\..\Resources\export.png" Height="16" Width="16" />
+                    </MenuItem.Icon>
+                    <MenuItem Header="rAthena">
+                        <MenuItem Name="_menuItemExportRaRenewal" Click="_menuItemExportRaRenewal_Click" Header="Export project - Renewal" />
+                        <MenuItem Name="_menuItemExportRaPreRenewal" Click="_menuItemExportRaPreRenewal_Click" Header="Export project - Pre-Renewal" />
+                    </MenuItem>
+                    <MenuItem Header="Hercules">
+                        <MenuItem Name="_menuItemExportHercRenewal" Click="_menuItemExportHercRenewal_Click" Header="Export project - Renewal" />
+                        <MenuItem Name="_menuItemExportHercPreRenewal" Click="_menuItemExportHercPreRenewal_Click" Header="Export project - Pre-Renewal" />
+                    </MenuItem>
+                </MenuItem>
+                <MenuItem Header="Sql Export (disabled)" IsEnabled="False" >
+                    <MenuItem.Icon>
+                        <Image Source="..\..\Resources\dbBlack.png" Height="16" Width="16" />
+                    </MenuItem.Icon>
+                    <MenuItem Header="rAthena">
+                        <MenuItem Name="_menuItemExportSqlRaRenewal" Click="_menuItemExportSqlRaRenewal_Click" Header="Export project - Renewal" />
+                        <MenuItem Name="_menuItemExportSqlRaPreRenewal" Click="_menuItemExportSqlRaPreRenewal_Click" Header="Export project - Pre-Renewal" />
+                    </MenuItem>
+                    <MenuItem Header="Hercules">
+                        <MenuItem Name="_menuItemExportSqlHercRenewal" Click="_menuItemExportSqlHercRenewal_Click" Header="Export project - Renewal" />
+                        <MenuItem Name="_menuItemExportSqlHercPreRenewal" Click="_menuItemExportSqlHercPreRenewal_Click" Header="Export project - Pre-Renewal" />
+                    </MenuItem>
+                </MenuItem>
+                <Separator />
+                <MenuItem Name="_menuItemRecentProjects" IsEnabled="False" Header="Recent projects">
+                </MenuItem>
+                <Separator />
+                <MenuItem Name="_menuItemAbout" Header="About..." Click="_menuItemAbout_Click" >
+                    <MenuItem.Icon>
+                        <Image Source="..\..\Resources\help.png" Height="16" Width="16" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="_menuItemClose" Header="Close" Click="_menuItemClose_Click" />
+            </MenuItem>
+            <MenuItem>
+                <MenuItem.Header>
+                    <Label Content="Edit" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="-5 0 -5 0" />
+                </MenuItem.Header>
+                <MenuItem Name="_menuItemUndoAll" Header="Undo all changes" Click="_menuItemUndoAll_Click" >
+                    <MenuItem.Icon>
+                        <Image Source="../../Resources/undo.png"  />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="_menuItemReload" Header="Reload database" Click="_menuItemReloadDatabase_Click" >
+                    <MenuItem.Icon>
+                        <Image Source="../../Resources/refresh.png"  />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator />
+                <MenuItem Header="Undo" InputGestureText="Ctrl-Alt-Z" IsEnabled="{Binding ElementName=_tmbUndo, Path=IsEnabled}" Click="_tbmUndo_Click" >
+                    <MenuItem.Icon>
+                        <Image Source="../../Resources/undo.png"  />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Redo" InputGestureText="Ctrl-Alt-Y" IsEnabled="{Binding ElementName=_tmbRedo, Path=IsEnabled}" Click="_tbmRedo_Click" >
+                    <MenuItem.Icon>
+                        <Image Source="../../Resources/redo.png"  />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Navigate backward" InputGestureText="Alt-Z" IsEnabled="{Binding ElementName=_tnbUndo, Path=IsEnabled}" Click="_tnbUndo_Click" >
+                    <MenuItem.Icon>
+                        <Image Source="../../Resources/backward.png"  />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Navigate forward" InputGestureText="Alt-Y, Alt-X" IsEnabled="{Binding ElementName=_tnbRedo, Path=IsEnabled}" Click="_tnbRedo_Click" >
+                    <MenuItem.Icon>
+                        <Image Source="../../Resources/forward.png"  />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator />
+                <MenuItem Name="_menuItemAddItem" Header="Add item" Click="_menuItemAddItem_Click" InputGestureText="Ctrl-N" >
+                    <MenuItem.Icon>
+                        <Image Source="../../Resources/add.png"  />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="_menuItemAddItemRaw" Header="Add item from raw db line" Click="_menuItemAddItemRaw_Click" >
+                    <MenuItem.Icon>
+                        <Image Source="../../Resources/add.png"  />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="_menuItemChangeId" Header="Change ID..." Click="_menuItemChangeId_Click" InputGestureText="Ctrl-D" >
+                    <MenuItem.Icon>
+                        <Image Source="../../Resources/properties.png"  />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="_menuItemCopyItemTo" Header="Copy selected item to..." Click="_menuItemCopyItemTo_Click" InputGestureText="Ctrl-Shift-D" >
+                    <MenuItem.Icon>
+                        <Image Source="../../Resources/imconvert.png"  />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="_menuItemDeleteItem" Header="Delete item" Click="_menuItemDeleteItem_Click" InputGestureText="Delete" >
+                    <MenuItem.Icon>
+                        <Image Source="../../Resources/delete.png"  />
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem>
+                <MenuItem.Header>
+                    <Label Content="Tools" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="-5 0 -5 0" />
+                </MenuItem.Header>
+                <MenuItem Name="_menuItemBackups" Header="Backups manager" Click="_menuItemBackups_Click" >
+                    <MenuItem.Icon>
+                        <Image Source="../../Resources/archive.png"  />
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+        </Menu>
+        <DockPanel Margin="120 0 0 0" HorizontalAlignment="Left">
+            <WPF1:ToggleMemoryButton x:Name="_tmbUndo" PrimaryButtonImagePath="undo.png" DisplayFormat="Undo {0} action" />
+            <WPF1:ToggleMemoryButton x:Name="_tmbRedo" PrimaryButtonImagePath="redo.png" DisplayFormat="Redo {0} action" />
+            <WPF1:ToggleMemoryButton Margin="10 0 0 0" x:Name="_tnbUndo" PrimaryButtonImagePath="backward.png" DisplayFormat="Go back {0} element" />
+            <WPF1:ToggleMemoryButton x:Name="_tnbRedo" PrimaryButtonImagePath="forward.png" DisplayFormat="Go forward {0} element" />
+        </DockPanel>
+        <Styles:TkProgressBar Name="_progressBar" Width="300" HorizontalAlignment="Right" Margin="0 0 3 0"  />
+        <Border Background="#F7F9FD" Grid.Row="1">
+            <Grid>
+                <TabControl Name="_mainTabControl" Background="White" SelectionChanged="_mainTabControl_SelectionChanged" Style="{DynamicResource TabControlStyled}">
+                    <TabItem Style="{DynamicResource TabItemStyledLess}">
+                        <TabItem.Header>
+                            <WPF:DisplayLabel FontWeight="Bold" DisplayText="Settings" />
+                        </TabItem.Header>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <StackPanel>
+                            <!--<CheckBox Margin="3" Name="_cbEntirelyRewriteTxt" Content="Entirely rewrite the txt files (will remove comments)" />-->
+                                <CheckBox Margin="3" Name="_cbAssociate" Content="Associates .sde file extension with this tool" Checked="_cbAssociate_Checked" Unchecked="_cbAssociate_Unchecked" />
+                                <CheckBox Margin="3" Name="_cbStackTrace" Content="Enable debugger stack trace viewer" />
+                                <CheckBox Margin="3" Name="_cbEnableBackups" Content="Enable backups manager" />
+                                <DockPanel>
+                                    <Label Content="Display encoding" Padding="0" Margin="3" VerticalAlignment="Center" />
+                                    <ComboBox Grid.Column="1" Margin="3" Name="_comboBoxEncoding" IsReadOnly="True" Width="120" HorizontalAlignment="Left" />
+                                </DockPanel>
+                            <TextBlock Margin="3" Text="Resource files or folders (drop a GRF or a data folder) : " />
+                            </StackPanel>
+                            <WPF1:MetaGrfResourcesViewer Grid.Row="1" x:Name="_metaGrfViewer" Height="100" />
+                            <Grid Name="_gridTextFilesSettings" Grid.Row="2" >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                            </Grid>
+                        </Grid>
+                    </TabItem>
+                    <TabItem Style="{DynamicResource TabItemStyledLess}" >
+                        <TabItem.Header>
+                            <WPF:DisplayLabel FontWeight="Bold" DisplayText="Error console" />
+                        </TabItem.Header>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <ListView Foreground="Black" AllowDrop="True" Grid.Row="1" Name="_debugList" SelectionMode="Extended" BorderThickness="0" FocusVisualStyle="{x:Null}"
+                            ListView:WpfUtils.IsGridSortable="True" VirtualizingStackPanel.IsVirtualizing="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            </ListView>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+        </Border>
+    </Grid>
+</Styles:TkWindow>

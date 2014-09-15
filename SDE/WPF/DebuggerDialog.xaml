@@ -1,0 +1,49 @@
+﻿<Window x:Class="SDE.WPF.DebuggerDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Debugger" Height="640" Width="554" SnapsToDevicePixels="True">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <TextBox VerticalAlignment="Center" Grid.Column="1" BorderThickness="1" Margin="3" Name="_tbMessage" IsReadOnly="True" Grid.Row="1" AcceptsReturn="True" />
+            <Grid Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox VerticalAlignment="Center" Grid.Column="0" BorderThickness="1" Margin="3" IsReadOnly="True" Name="_tbTime" Text="Time" Grid.Row="0" TextAlignment="Center" />
+                <Button Name="_buttonCopy" Click="_buttonCopy_Click" Content="Copy exception" Grid.Column="1" HorizontalAlignment="Right" Margin="3" />
+            </Grid>
+            <Label Grid.Row="0" Content="Time stamp" />
+            <Label Grid.Row="1" Content="Exception message" />
+        </Grid>
+        <Border Grid.Row="1"  Background="#F7F9FD">
+            <Grid>
+                <TabControl Name="_tabControlPreview" Style="{DynamicResource TabControlStyled}" Background="White">
+                    <TabItem Header="Advanced view" Style="{DynamicResource TabItemStyled}" >
+                        <Grid>
+                            <ListView Name="_listViewStackTrace" BorderThickness="0" />
+                        </Grid>
+                    </TabItem>
+                    <TabItem Header="Raw exception" Style="{DynamicResource TabItemStyled}">
+                        <Grid>
+                            <TextBox BorderThickness="0" Name="_tbStackTrace" IsReadOnly="True" AcceptsReturn="True" />
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+        </Border>
+        
+    </Grid>
+</Window>
