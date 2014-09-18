@@ -29,6 +29,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 		public string SubPath { get; set; }
 		public ServerDBs DbSource { get; set; }
 		public bool IsRenewal { get; set; }
+		public ServerType DestinationServer { get; set; }
 
 		public bool Load(ServerDBs dbSource) {
 			DbSource = dbSource;
@@ -97,6 +98,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 		public bool Write(string dbPath, string subPath, ServerType serverType, FileType fileType = FileType.Detect) {
 			SubPath = subPath;
 			string filename = DbSource.Filename;
+			DestinationServer = serverType;
 
 			FileType = fileType;
 
@@ -127,14 +129,24 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 
 			IsRenewal = false;
 
-			if (DbSource.UseSubPath) {
-				if (subPath == "re")
-					IsRenewal = true;
-
-				FilePath = GrfPath.Combine(dbPath, subPath, filename + ext);
+			if ((FileType & FileType.Sql) == FileType.Sql) {
+				if (subPath == "re") {
+					FilePath = GrfPath.Combine(dbPath, filename + "_re" + ext);
+				}
+				else {
+					FilePath = GrfPath.Combine(dbPath, filename + ext);
+				}
 			}
 			else {
-				FilePath = GrfPath.Combine(dbPath, filename + ext);
+				if (DbSource.UseSubPath) {
+					if (subPath == "re")
+						IsRenewal = true;
+
+					FilePath = GrfPath.Combine(dbPath, subPath, filename + ext);
+				}
+				else {
+					FilePath = GrfPath.Combine(dbPath, filename + ext);
+				}
 			}
 
 			AllLoaders.LatestFile = FilePath;

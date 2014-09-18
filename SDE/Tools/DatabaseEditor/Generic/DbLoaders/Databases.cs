@@ -102,6 +102,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 			DbSource = ServerDBs.Mobs;
 			AttributeList = ServerMobAttributes.AttributeList;
 			TabGenerator.GDbTabMaker = GTabsMaker.LoadSMobsTab;
+			DbWriterSql = SqlParser.DbSqlMobs;
 			DbWriter = DbWriters.DbIntComma;
 		}
 	}
@@ -312,11 +313,12 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 			AttributeList = ServerMobSkillAttributes.AttributeList;
 			DbLoader = DbLoaders.DbUniqueLoader;
 			DbWriter = DbWriters.DbUniqueWriter;
+			DbWriterSql = SqlParser.DbSqlMobSkills;
 			TabGenerator.OnInitSettings += delegate(GDbTabWrapper<string, ReadableTuple<string>> tab, GTabSettings<string, ReadableTuple<string>> settings, BaseDb gdb) {
 				settings.CanChangeId = false;
 				settings.CustomAddItemMethod = delegate {
 					try {
-						string id = Methods.RandomString(128);
+						string id = Methods.RandomString(32);
 
 						ReadableTuple<string> item = new ReadableTuple<string>(id, settings.AttributeList);
 						item.Added = true;
@@ -340,6 +342,10 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 			TabGenerator.OnSetCustomCommands += GTabsMaker.SelectFromMobDbString;
 			TabGenerator.OnSetCustomCommands += GTabsMaker.SelectFromSkillDbString;
 		}
+	}
+
+	public class DbMobSkills2 : DbMobSkills {
+		public DbMobSkills2() { DbSource = ServerDBs.MobSkills2; ThrowFileNotFoundException = false; }
 	}
 
 	public class DbMobBoss : AbstractDb<int> {
@@ -380,10 +386,10 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 			Table.Clear();
 			AllLoaders.LatestFile = DbSource;
 
-			foreach (ElementRead element in TextFileHelper.GetElements(Holder.Database.MetaGrf.GetData(@"data\idnum2itemresnametable.txt"))) {
+			foreach (string[] elements in TextFileHelper.GetElements(Holder.Database.MetaGrf.GetData(@"data\idnum2itemresnametable.txt"))) {
 				try {
-					int itemId = Int32.Parse(element.Element1);
-					Table.SetRaw(itemId, ClientResourceProperties.ResourceName, element.Element2);
+					int itemId = Int32.Parse(elements[0]);
+					Table.SetRaw(itemId, ClientResourceProperties.ResourceName, elements[1]);
 				}
 				catch { }
 			}

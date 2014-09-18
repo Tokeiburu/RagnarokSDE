@@ -15,7 +15,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders.Writers {
 	public static partial class DbWriters {
 		public static void DbSkillsCommaRange<TKey>(DbDebugItem<TKey> debug, AbstractDb<TKey> db, int from, int length) {
 			try {
-				IntLinesStream lines = new IntLinesStream(debug.OldPath);
+				IntLineStream lines = new IntLineStream(debug.OldPath);
 				lines.Remove(db);
 				ServerType serverType;
 
@@ -53,7 +53,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders.Writers {
 
 		public static void DbSkillsCastCommaRange<TKey>(DbDebugItem<TKey> debug, AbstractDb<TKey> db, int from, int length) {
 			try {
-				IntLinesStream lines = new IntLinesStream(debug.OldPath);
+				IntLineStream lines = new IntLineStream(debug.OldPath);
 				lines.Remove(db);
 				string line;
 
@@ -80,7 +80,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders.Writers {
 
 		public static void DbSkillsNoDexCommaRange<TKey>(DbDebugItem<TKey> debug, AbstractDb<TKey> db, int from, int length) {
 			try {
-				IntLinesStream lines = new IntLinesStream(debug.OldPath);
+				IntLineStream lines = new IntLineStream(debug.OldPath);
 				lines.Remove(db);
 				string line;
 
@@ -117,7 +117,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders.Writers {
 
 		public static void DbItemsCommaRange<TKey>(DbDebugItem<TKey> debug, AbstractDb<TKey> db, int from, int length, string defaultValue) {
 			try {
-				IntLinesStream lines = new IntLinesStream(debug.OldPath);
+				IntLineStream lines = new IntLineStream(debug.OldPath);
 				lines.Remove(db);
 				string line;
 
@@ -144,7 +144,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders.Writers {
 
 		public static void DbItemsNouse<TKey>(DbDebugItem<TKey> debug, AbstractDb<TKey> db) {
 			try {
-				IntLinesStream lines = new IntLinesStream(debug.OldPath);
+				IntLineStream lines = new IntLineStream(debug.OldPath);
 				lines.Remove(db);
 				string line;
 				Nouse nouse = new Nouse();
@@ -174,7 +174,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders.Writers {
 
 		public static void DbItemsTrade<TKey>(DbDebugItem<TKey> debug, AbstractDb<TKey> db) {
 			try {
-				IntLinesStream lines = new IntLinesStream(debug.OldPath);
+				IntLineStream lines = new IntLineStream(debug.OldPath);
 				lines.Remove(db);
 				string line;
 				Trade trade = new Trade();
@@ -203,7 +203,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders.Writers {
 
 		public static void DbItemsStack<TKey>(DbDebugItem<TKey> debug, AbstractDb<TKey> db) {
 			try {
-				IntLinesStream lines = new IntLinesStream(debug.OldPath);
+				IntLineStream lines = new IntLineStream(debug.OldPath);
 				lines.Remove(db);
 				string line;
 
@@ -230,7 +230,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders.Writers {
 
 		public static void DbItemsBuyingStore<TKey>(DbDebugItem<TKey> debug, AbstractDb<TKey> db) {
 			try {
-				IntLinesStream lines = new IntLinesStream(debug.OldPath);
+				IntLineStream lines = new IntLineStream(debug.OldPath);
 				lines.Remove(db);
 				string line;
 
@@ -261,7 +261,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders.Writers {
 
 		public static void DbIntCommaRange<TKey>(DbDebugItem<TKey> debug, AbstractDb<TKey> db, int from, int to) {
 			try {
-				IntLinesStream lines = new IntLinesStream(debug.OldPath);
+				IntLineStream lines = new IntLineStream(debug.OldPath);
 				lines.Remove(db);
 				string line;
 
@@ -313,7 +313,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders.Writers {
 
 		public static void DbConstantsWriter<TKey>(DbDebugItem<TKey> debug, AbstractDb<TKey> db) {
 			try {
-				StringLinesStream lines = new StringLinesStream(debug.OldPath);
+				StringLineStream lines = new StringLineStream(debug.OldPath);
 				lines.Remove(db);
 				string line;
 
@@ -341,7 +341,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders.Writers {
 
 		public static void DbStringCommaWriter<TKey>(DbDebugItem<TKey> debug, AbstractDb<TKey> db) {
 			try {
-				StringLinesStream lines = new StringLinesStream(debug.OldPath, ',');
+				StringLineStream lines = new StringLineStream(debug.OldPath, ',');
 				lines.Remove(db);
 				string line;
 
@@ -365,7 +365,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders.Writers {
 					return;
 				}
 
-				StringLinesStream lines = new StringLinesStream(debug.OldPath);
+				StringLineStream lines = new StringLineStream(debug.OldPath);
 				lines.ClearAfterComments();
 
 				lines.Remove(db);
@@ -385,7 +385,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders.Writers {
 
 		public static void DbSkillsNoCastCommaRange<TKey>(DbDebugItem<TKey> debug, AbstractDb<TKey> db, int from, int length) {
 			try {
-				IntLinesStream lines = new IntLinesStream(debug.OldPath);
+				IntLineStream lines = new IntLineStream(debug.OldPath);
 				lines.Remove(db);
 				string line;
 				
@@ -518,6 +518,9 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders.Writers {
 					DbItemsWriterSub(builder, db, db.Table.FastItems, ServerType.Hercules);
 					builder.AppendLineUnix(")");
 					File.WriteAllText(debug.FilePath, builder.ToString(), Encoding.Default);
+				}
+				else if (debug.FileType == FileType.Sql) {
+					SqlParser.DbSqlItems(debug, db);
 				}
 			}
 			catch (Exception err) {

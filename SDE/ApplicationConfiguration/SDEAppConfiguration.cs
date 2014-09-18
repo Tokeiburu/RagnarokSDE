@@ -188,6 +188,14 @@ namespace SDE.ApplicationConfiguration {
 			get { return ConfigAsker["[Server database editor - Application latest file name]", Configuration.ApplicationPath]; }
 			set { ConfigAsker["[Server database editor - Application latest file name]"] = value; }
 		}
+		public static string AppLastPathSql {
+			get { return ConfigAsker["[Server database editor - Application latest sql]", AppLastPath]; }
+			set { ConfigAsker["[Server database editor - Application latest sql]"] = value; }
+		}
+		public static string AppLastPathDb {
+			get { return ConfigAsker["[Server database editor - Application latest db]", AppLastPath]; }
+			set { ConfigAsker["[Server database editor - Application latest db]"] = value; }
+		}
 		public static bool UseGrfPathToExtract {
 			get { return Boolean.Parse(ConfigAsker["[Server database editor - ExtractingService - Use current GRF path]", false.ToString()]); }
 			set { ConfigAsker["[Server database editor - ExtractingService - Use current GRF path]"] = value.ToString(); }

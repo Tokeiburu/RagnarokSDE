@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using Database;
 using Database.Commands;
 using ErrorManager;
@@ -19,7 +20,7 @@ using Utilities;
 using Extensions = SDE.Others.Extensions;
 
 namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
-	public class CustomQueryViewerMobSkills<TKey, TValue> : ICustomProperty<TKey, TValue> where TValue : Tuple {
+	public class CustomQueryViewerMobSkills<TKey, TValue> : ICustomControl<TKey, TValue> where TValue : Tuple {
 		private readonly int _row;
 		private Table<string, ReadableTuple<string>> _iSkillMobsTable;
 		private Table<int, ReadableTuple<int>> _iSkillsTable;
@@ -62,7 +63,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 			_lv.BorderThickness = new Thickness(1);
 			_lv.PreviewMouseRightButtonUp += _lv_PreviewMouseRightButtonUp;
 
-			ListViewDataTemplateHelper.GenerateListViewTemplateNew(_lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			Extensions.GenerateListViewTemplate(_lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 				new ListViewDataTemplateHelper.GeneralColumnInfo {Header = "Skill", DisplayExpression = "Name", SearchGetAccessor = "Name", ToolTipBinding = "SkillId", FixedWidth = 60, TextWrapping = TextWrapping.Wrap },
 				new ListViewDataTemplateHelper.GeneralColumnInfo {Header = "Condition", DisplayExpression = "Condition", SearchGetAccessor = "Condition", ToolTipBinding = "Condition", IsFill = true, TextAlignment = TextAlignment.Left, TextWrapping = TextWrapping.Wrap }
 			}, new DefaultListViewComparer<MobSkillView>(), new string[] { "Modified", "Green", "Added", "Blue", "Default", "Black" });
@@ -70,9 +71,9 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 			_lv.ContextMenu = new ContextMenu();
 			_lv.MouseDoubleClick += new MouseButtonEventHandler(_lv_MouseDoubleClick);
 
-			MenuItem miSelectSkills = new MenuItem { Header = "Select skill", Icon = new Image { Source = ApplicationManager.GetResourceImage("arrowdown.png") } };
-			MenuItem miSelectMobSkills = new MenuItem { Header = "Select mob skill", Icon = new Image { Source = ApplicationManager.GetResourceImage("arrowdown.png") } };
-			MenuItem miRemoveDrop = new MenuItem { Header = "Remove mob skill", Icon = new Image { Source = ApplicationManager.GetResourceImage("delete.png") } };
+			MenuItem miSelectSkills = new MenuItem { Header = "Select skill", Icon = new Image { Source = (BitmapSource) ApplicationManager.PreloadResourceImage("arrowdown.png") } };
+			MenuItem miSelectMobSkills = new MenuItem { Header = "Select mob skill", Icon = new Image { Source = (BitmapSource) ApplicationManager.PreloadResourceImage("arrowdown.png") } };
+			MenuItem miRemoveDrop = new MenuItem { Header = "Remove mob skill", Icon = new Image { Source = (BitmapSource) ApplicationManager.PreloadResourceImage("delete.png") } };
 
 			_lv.ContextMenu.Items.Add(miSelectSkills);
 			_lv.ContextMenu.Items.Add(miSelectMobSkills);

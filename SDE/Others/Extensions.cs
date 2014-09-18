@@ -2,7 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
 using Database;
+using ErrorManager;
+using SDE.WPF;
 using TokeiLibrary;
 using TokeiLibrary.WPF;
 using TokeiLibrary.WPF.Styles.ListView;
@@ -63,6 +67,77 @@ namespace SDE.Others {
 
 			ival = 0;
 			return false;
+		}
+
+		public static void GenerateListViewTemplate(ListView list, ListViewDataTemplateHelper.GeneralColumnInfo[] columnInfos, ListViewCustomComparer sorter, IList<string> triggers,  params string[] extraCommands) {
+			Gen1(list);
+
+			ListViewDataTemplateHelper.GenerateListViewTemplateNew(list, columnInfos, sorter, triggers, extraCommands);
+			GridView grid = (GridView)list.View;
+
+			if (grid.Columns.Count > 0 && columnInfos.Any(p => p.IsFill)) {
+				Style style = list.ItemContainerStyle;
+				GridViewColumn lastColumn = null;
+
+				for (int i = 0; i < columnInfos.Length; i++) {
+					if (columnInfos[i].IsFill) {
+						lastColumn = grid.Columns[i];
+						break;
+					}
+				}
+
+				if (lastColumn == null) {
+					return;
+				}
+
+				style.Setters.Add(new Setter(
+										FrameworkElement.WidthProperty,
+										new Binding("ActualWidth") {
+											Source = lastColumn,
+											Converter = new ListViewWItemWidthConverter(list.BorderThickness),
+											ConverterParameter = list
+										}));
+			}
+		}
+
+		public static void Gen1(ListView list) {
+			try {
+				Style style = new Style();
+				style.TargetType = typeof(ListViewItem);
+
+				style.Setters.Add(new Setter(
+					FrameworkElement.HorizontalAlignmentProperty,
+					HorizontalAlignment.Left
+					));
+				style.Setters.Add(new Setter(
+					Control.HorizontalContentAlignmentProperty,
+					HorizontalAlignment.Stretch
+					));
+
+				list.ItemContainerStyle = style;
+			}
+			catch (Exception err) {
+				ErrorHandler.HandleException(err);
+			}
+		}
+
+		public static void Gen2(ListView list) {
+			try {
+				Style style = list.ItemContainerStyle;
+				GridView grid = (GridView)list.View;
+				var lastColumn = grid.Columns.Last();
+
+				style.Setters.Add(new Setter(
+					FrameworkElement.WidthProperty,
+					new Binding("ActualWidth") {
+						Source = lastColumn,
+						Converter = new ListViewWItemWidthConverter(),
+						ConverterParameter = list
+					}));
+			}
+			catch (Exception err) {
+				ErrorHandler.HandleException(err);
+			}
 		}
 	}
 }

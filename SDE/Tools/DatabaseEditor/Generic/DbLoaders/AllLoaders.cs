@@ -39,8 +39,8 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 		public static void UpdateBackups() {
 			foreach (var pair in _backups) {
 				if (File.Exists(pair.Key)) {
-					if (GrfPath.Delete(pair.Key)) {
-						File.Copy(pair.Value, pair.Key);
+					if (GrfPath.Delete(pair.Value)) {
+						File.Copy(pair.Key, pair.Value);
 					}
 				}
 			}

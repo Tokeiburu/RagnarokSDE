@@ -7,14 +7,12 @@ using System.Windows.Media;
 using Database;
 using ErrorManager;
 using SDE.Tools.DatabaseEditor.Engines;
-using SDE.Tools.DatabaseEditor.Generic.Lists;
-using SDE.Tools.DatabaseEditor.Generic.Lists.FormatConverter;
 using SDE.Tools.DatabaseEditor.Generic.TabsMakerCore;
 using TokeiLibrary;
 using Utilities;
 using Utilities.Extension;
 
-namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
+namespace SDE.Tools.DatabaseEditor.Generic.Lists.FormatConverters {
 	public class CustomComboIdProperty<TKey> : FormatConverter<TKey, ReadableTuple<TKey>> {
 		private const int _numOfItems = 10;
 		private readonly List<TextBox> _boxes = new List<TextBox>();

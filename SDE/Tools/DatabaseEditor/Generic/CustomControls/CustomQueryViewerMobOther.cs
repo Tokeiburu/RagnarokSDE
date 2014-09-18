@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using Database;
 using Database.Commands;
 using ErrorManager;
@@ -19,20 +20,16 @@ using TokeiLibrary.WPF.Styles.ListView;
 using Extensions = SDE.Others.Extensions;
 
 namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
-	public class CustomQueryViewerMobOther<TKey, TValue> : ICustomProperty<TKey, TValue> where TValue : Tuple {
-		private readonly int _cSpan;
-		private readonly int _col;
+	public class CustomQueryViewerMobOther<TKey, TValue> : ICustomControl<TKey, TValue> where TValue : Tuple {
 		private readonly int _rSpan;
 		private readonly int _row;
 		private RangeListView _lv;
 		private GDbTabWrapper<TKey, TValue> _tab;
 		private Action<TValue> _updateAction;
 
-		public CustomQueryViewerMobOther(int row, int col, int rSpan, int cSpan) {
+		public CustomQueryViewerMobOther(int row, int rSpan) {
 			_row = row;
-			_col = col;
 			_rSpan = rSpan;
-			_cSpan = cSpan;
 		}
 
 		#region ICustomProperty<TKey,TValue> Members
@@ -69,20 +66,25 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 			_lv.BorderThickness = new Thickness(1);
 			_lv.PreviewMouseRightButtonUp += _lv_PreviewMouseRightButtonUp;
 
-			ListViewDataTemplateHelper.GenerateListViewTemplateNew(_lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			//Extensions.Gen1(_lv);
+
+			//_lv.BorderThickness = new Thickness(0);
+			Extensions.GenerateListViewTemplate(_lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 					new ListViewDataTemplateHelper.GeneralColumnInfo {Header = ServerItemAttributes.Id.DisplayName, DisplayExpression = "ID", SearchGetAccessor = "ID", FixedWidth = 45, TextAlignment = TextAlignment.Right, ToolTipBinding = "ID"},
 					new ListViewDataTemplateHelper.RangeColumnInfo {Header = ServerItemAttributes.Name.DisplayName, DisplayExpression = "Name", SearchGetAccessor = "Name", IsFill = true, ToolTipBinding = "Name", TextWrapping = TextWrapping.Wrap, MinWidth = 40 },
 					new ListViewDataTemplateHelper.GeneralColumnInfo {Header = "Drop %", DisplayExpression = "Drop", SearchGetAccessor = "DropOriginal", ToolTipBinding = "DropOriginal", FixedWidth = 60, TextAlignment = TextAlignment.Right},
 				}, new DefaultListViewComparer<MobDropView>(), new string[] { "Deleted", "Red", "Added", "Blue", "Default", "Black", "IsCard", "Green" });
 
+			//Extensions.Gen2(_lv);
+
 			_lv.ContextMenu = new ContextMenu();
 			_lv.MouseDoubleClick += new MouseButtonEventHandler(_lv_MouseDoubleClick);
 
-			MenuItem miSelect = new MenuItem { Header = "Select", Icon = new Image { Source = ApplicationManager.GetResourceImage("arrowdown.png") } };
-			MenuItem miEditDrop = new MenuItem { Header = "Edit", Icon = new Image { Source = ApplicationManager.GetResourceImage("properties.png") } };
-			MenuItem miRemoveDrop = new MenuItem { Header = "Remove", Icon = new Image { Source = ApplicationManager.GetResourceImage("delete.png") } };
-			MenuItem miAddDrop = new MenuItem { Header = "Add normal drop", Icon = new Image { Source = ApplicationManager.GetResourceImage("add.png") } };
-			MenuItem miAddCardDrop = new MenuItem { Header = "Add card", Icon = new Image { Source = ApplicationManager.GetResourceImage("add.png") } };
+			MenuItem miSelect = new MenuItem { Header = "Select", Icon = new Image { Source = (BitmapSource) ApplicationManager.PreloadResourceImage("arrowdown.png") } };
+			MenuItem miEditDrop = new MenuItem { Header = "Edit", Icon = new Image { Source = (BitmapSource) ApplicationManager.PreloadResourceImage("properties.png") } };
+			MenuItem miRemoveDrop = new MenuItem { Header = "Remove", Icon = new Image { Source = (BitmapSource) ApplicationManager.PreloadResourceImage("delete.png") } };
+			MenuItem miAddDrop = new MenuItem { Header = "Add normal drop", Icon = new Image { Source = (BitmapSource) ApplicationManager.PreloadResourceImage("add.png") } };
+			MenuItem miAddCardDrop = new MenuItem { Header = "Add card", Icon = new Image { Source = (BitmapSource) ApplicationManager.PreloadResourceImage("add.png") } };
 
 			_lv.ContextMenu.Items.Add(miSelect);
 			_lv.ContextMenu.Items.Add(miEditDrop);
@@ -150,10 +152,14 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 					int id;
 
 					Int32.TryParse(sid, out id);
-					Int32.TryParse(svalue, out value);
 
 					if (id <= 0)
 						return;
+
+					if (!Extensions.GetValue(svalue, out value)) {
+						ErrorHandler.HandleException("Invalid format (integer or float value only)");
+						return;
+					}
 
 					try {
 						btable.Commands.BeginEdit(new GroupCommand<TKey, TValue>());
@@ -202,10 +208,14 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 					int id;
 
 					Int32.TryParse(sid, out id);
-					Int32.TryParse(svalue, out value);
 
 					if (id <= 0)
 						return;
+
+					if (!Extensions.GetValue(svalue, out value)) {
+						ErrorHandler.HandleException("Invalid format (integer or float value only)");
+						return;
+					}
 
 					TValue item = (TValue)_tab.List.SelectedItem;
 

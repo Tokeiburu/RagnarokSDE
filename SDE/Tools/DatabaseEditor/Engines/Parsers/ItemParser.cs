@@ -30,7 +30,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 		public string OnEquipScript = "";
 		public string OnUnequipScript = "";
 		public string Range = "";
-		public string Refineable = "true";
+		public string Refineable = "false";
 		public string Script = "";
 		public string Sell = "";
 		public string Slots = "";
@@ -58,6 +58,25 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 				switch (id) {
 					case "Id: ":
 						Id = line.Replace("Id: ", "");
+
+						// The .conf is actually not well written
+						// Overriding values are not setup for some reason and the parser
+						// has to guess and fix the issues.
+						int ival;
+						if (Int32.TryParse(Id, out ival)) {
+							// Whips overrides the default property to 0
+							if (ival >= 1950 && ival < 2000)
+								Gender = "0";
+
+							// Bride_Ring, I'm assuming it's hard coded in the client and
+							// people thought it would be wise to ignore setting its gender
+							if (ival == 2635)
+								Gender = "0";
+
+							// Bridegroom_Ring
+							if (ival == 2634)
+								Gender = "1";
+						}
 						break;
 					case "Name: ":
 						Name = line.Replace("Name: ", "").Trim('\"');
@@ -67,6 +86,13 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 						break;
 					case "Type: ":
 						Type = line.Replace("Type: ", "");
+
+						// Refine: Refineable            (boolean, defaults to true)
+						// ^ the most confusing line I've ever read, this is not true.
+						// Defaults to false, default to true for item types 4 and 5
+						if (Type == "4" || Type == "5") {
+							Refineable = "true";
+						}
 						break;
 					case "Sell: ":
 						Sell = line.Replace("Sell: ", "");
@@ -88,6 +114,10 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 						break;
 					case "Def: ":
 						Def = line.Replace("Def: ", "");
+
+						if (Def.Length > 0 && Def[0] == '-')
+							Def = "0";
+
 						break;
 					case "Stack: ":
 						Stack = line.Replace("Stack: ", "");

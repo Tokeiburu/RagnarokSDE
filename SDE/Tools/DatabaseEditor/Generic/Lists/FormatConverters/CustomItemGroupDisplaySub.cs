@@ -10,8 +10,6 @@ using Database;
 using ErrorManager;
 using SDE.Tools.DatabaseEditor.Engines;
 using SDE.Tools.DatabaseEditor.Generic.IndexProviders;
-using SDE.Tools.DatabaseEditor.Generic.Lists;
-using SDE.Tools.DatabaseEditor.Generic.Lists.FormatConverter;
 using SDE.Tools.DatabaseEditor.Generic.TabsMakerCore;
 using TokeiLibrary;
 using TokeiLibrary.WPF;
@@ -19,7 +17,7 @@ using TokeiLibrary.WPF.Styles.ListView;
 using Utilities;
 using Utilities.Extension;
 
-namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
+namespace SDE.Tools.DatabaseEditor.Generic.Lists.FormatConverters {
 	public partial class CustomItemGroupDisplay<TKey> : FormatConverter<TKey, ReadableTuple<TKey>> {
 		#region DicoModifs enum
 
@@ -35,20 +33,20 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 			_tab = tab;
 			_initSettings(tab, dp);
 
-			GenericDatabase gdb = ((GenericDatabase)_tab.Database);
-			_itemGroupsTable.Commands.PreviewCommandUndo		+= _previewCommandChanged;
-			_itemGroupsTable.Commands.PreviewCommandRedo		+= _previewCommandChanged;
-			_itemGroupsTable.Commands.PreviewCommandExecuted	+= _previewCommandChanged;
-			_itemGroupsTable.Commands.CommandUndo				+= _commandChanged;
-			_itemGroupsTable.Commands.CommandRedo				+= _commandChanged;
-			_itemGroupsTable.Commands.CommandExecuted			+= _commandChanged;
+			GenericDatabase gdb = ((GenericDatabase) _tab.Database);
+			_itemGroupsTable.Commands.PreviewCommandUndo += _previewCommandChanged;
+			_itemGroupsTable.Commands.PreviewCommandRedo += _previewCommandChanged;
+			_itemGroupsTable.Commands.PreviewCommandExecuted += _previewCommandChanged;
+			_itemGroupsTable.Commands.CommandUndo += _commandChanged;
+			_itemGroupsTable.Commands.CommandRedo += _commandChanged;
+			_itemGroupsTable.Commands.CommandExecuted += _commandChanged;
 
-			gdb.Commands.PreviewCommandUndo			+= _previewCommandChanged2;
-			gdb.Commands.PreviewCommandRedo			+= _previewCommandChanged2;
-			gdb.Commands.PreviewCommandExecuted		+= _previewCommandChanged2;
-			gdb.Commands.CommandUndo				+= _commandChanged2;
-			gdb.Commands.CommandRedo				+= _commandChanged2;
-			gdb.Commands.CommandExecuted			+= _commandChanged2;
+			gdb.Commands.PreviewCommandUndo += _previewCommandChanged2;
+			gdb.Commands.PreviewCommandRedo += _previewCommandChanged2;
+			gdb.Commands.PreviewCommandExecuted += _previewCommandChanged2;
+			gdb.Commands.CommandUndo += _commandChanged2;
+			gdb.Commands.CommandRedo += _commandChanged2;
+			gdb.Commands.CommandExecuted += _commandChanged2;
 
 			Grid grid = new Grid();
 
@@ -56,7 +54,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 			grid.SetValue(Grid.ColumnProperty, 0);
 			grid.SetValue(Grid.ColumnSpanProperty, 1);
 
-			grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(-1, GridUnitType.Auto) });
+			grid.RowDefinitions.Add(new RowDefinition {Height = new GridLength(-1, GridUnitType.Auto)});
 			grid.RowDefinitions.Add(new RowDefinition());
 			grid.ColumnDefinitions.Add(new ColumnDefinition());
 
@@ -77,20 +75,20 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 			_lv.HorizontalAlignment = HorizontalAlignment.Left;
 			_lv.SelectionChanged += _lv_SelectionChanged;
 
-			ListViewDataTemplateHelper.GenerateListViewTemplateNew(_lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			Others.Extensions.GenerateListViewTemplate(_lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 				new ListViewDataTemplateHelper.GeneralColumnInfo {Header = ServerItemAttributes.Id.DisplayName, DisplayExpression = "ID", SearchGetAccessor = "ID", FixedWidth = 60, TextAlignment = TextAlignment.Right, ToolTipBinding = "ID"},
-				new ListViewDataTemplateHelper.RangeColumnInfo {Header = ServerItemAttributes.Name.DisplayName, DisplayExpression = "Name", SearchGetAccessor = "Name", IsFill = true, ToolTipBinding = "Name", TextWrapping = TextWrapping.Wrap, MinWidth = 70 },
+				new ListViewDataTemplateHelper.RangeColumnInfo {Header = ServerItemAttributes.Name.DisplayName, DisplayExpression = "Name", SearchGetAccessor = "Name", IsFill = true, ToolTipBinding = "Name", TextWrapping = TextWrapping.Wrap, MinWidth = 70},
 				new ListViewDataTemplateHelper.GeneralColumnInfo {Header = "Freq", DisplayExpression = "Drop", SearchGetAccessor = "Rate", ToolTipBinding = "Rate", FixedWidth = 40, TextAlignment = TextAlignment.Right},
 				new ListViewDataTemplateHelper.GeneralColumnInfo {Header = "Drop %", DisplayExpression = "Chance", SearchGetAccessor = "ChanceInt", ToolTipBinding = "Chance", FixedWidth = 60, TextAlignment = TextAlignment.Right}
-			}, new DefaultListViewComparer<ItemView>(), new string[] { "Added", "Blue", "Modified", "Green", "Normal", "Black" });
+			}, new DefaultListViewComparer<ItemView>(), new string[] {"Added", "Blue", "Modified", "Green", "Normal", "Black"});
 
 			_lv.ContextMenu = new ContextMenu();
 			_lv.MouseDoubleClick += new MouseButtonEventHandler(_lv_MouseDoubleClick);
 
-			MenuItem miSelect = new MenuItem { Header = "Select", Icon = new Image { Source = ApplicationManager.GetResourceImage("arrowdown.png") } };
-			MenuItem miEditDrop = new MenuItem { Header = "Edit", Icon = new Image { Source = ApplicationManager.GetResourceImage("properties.png") } };
-			MenuItem miRemoveDrop = new MenuItem { Header = "Remove", Icon = new Image { Source = ApplicationManager.GetResourceImage("delete.png") } };
-			MenuItem miAddDrop = new MenuItem { Header = "Add", Icon = new Image { Source = ApplicationManager.GetResourceImage("add.png") } };
+			MenuItem miSelect = new MenuItem {Header = "Select", Icon = new Image {Source = (BitmapSource) ApplicationManager.PreloadResourceImage("arrowdown.png")}};
+			MenuItem miEditDrop = new MenuItem {Header = "Edit", Icon = new Image {Source = (BitmapSource) ApplicationManager.PreloadResourceImage("properties.png")}};
+			MenuItem miRemoveDrop = new MenuItem {Header = "Remove", Icon = new Image {Source = (BitmapSource) ApplicationManager.PreloadResourceImage("delete.png")}};
+			MenuItem miAddDrop = new MenuItem {Header = "Add", Icon = new Image {Source = (BitmapSource) ApplicationManager.PreloadResourceImage("add.png")}};
 
 			_lv.ContextMenu.Items.Add(miSelect);
 			_lv.ContextMenu.Items.Add(miEditDrop);
@@ -110,7 +108,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 					item.SetRawValue(1, groups);
 				}
 
-				Table<int, ReadableTuple<int>> btable = ((GenericDatabase)tab.Database).GetTable<int>(ServerDBs.Items);
+				Table<int, ReadableTuple<int>> btable = ((GenericDatabase) tab.Database).GetTable<int>(ServerDBs.Items);
 
 				if (groups.Count == 0) {
 					_lv.ItemsSource = null;
@@ -152,8 +150,8 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 			tab.PropertiesGrid.RowDefinitions.Clear();
 			tab.PropertiesGrid.RowDefinitions.Add(new RowDefinition());
 			tab.PropertiesGrid.ColumnDefinitions.Clear();
-			tab.PropertiesGrid.ColumnDefinitions.Add(new ColumnDefinition { MaxWidth = 340 });
-			tab.PropertiesGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(10) });
+			tab.PropertiesGrid.ColumnDefinitions.Add(new ColumnDefinition {MaxWidth = 340});
+			tab.PropertiesGrid.ColumnDefinitions.Add(new ColumnDefinition {Width = new GridLength(10)});
 			tab.PropertiesGrid.ColumnDefinitions.Add(new ColumnDefinition());
 			tab.PropertiesGrid.Children.Add(grid);
 			_dp.Deploy(_tab, null, true);
@@ -161,8 +159,8 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 			foreach (var update in _dp.Updates) {
 				Tuple<DbAttribute, FrameworkElement> x = update;
 
-				if (x.Item1.DataType == typeof(int)) {
-					TextBox element = (TextBox)x.Item2;
+				if (x.Item1.DataType == typeof (int)) {
+					TextBox element = (TextBox) x.Item2;
 					_dp.AddUpdateAction(new Action<ReadableTuple<TKey>>(item => element.Dispatch(
 						delegate {
 							Debug.Ignore(() => element.Text = item.GetValue<int>(x.Item1).ToString(CultureInfo.InvariantCulture));
@@ -183,8 +181,8 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 						}
 					};
 				}
-				else if (x.Item1.DataType == typeof(bool)) {
-					CheckBox element = (CheckBox)x.Item2;
+				else if (x.Item1.DataType == typeof (bool)) {
+					CheckBox element = (CheckBox) x.Item2;
 					_dp.AddUpdateAction(new Action<ReadableTuple<TKey>>(item => element.Dispatch(p => Debug.Ignore(() => p.IsChecked = item.GetValue<bool>(x.Item1)))));
 
 					element.Checked += delegate {
@@ -213,8 +211,8 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 						}
 					};
 				}
-				else if (x.Item1.DataType == typeof(string)) {
-					TextBox element = (TextBox)x.Item2;
+				else if (x.Item1.DataType == typeof (string)) {
+					TextBox element = (TextBox) x.Item2;
 					_dp.AddUpdateAction(new Action<ReadableTuple<TKey>>(item => element.Dispatch(
 						delegate {
 							try {
@@ -227,11 +225,15 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 								element.UndoLimit = 0;
 								element.UndoLimit = int.MaxValue;
 							}
-							catch { }
+							catch {
+							}
 						})));
 
 					element.TextChanged += delegate {
 						_validateUndo(tab, element.Text, x.Item1);
+						if (ReferenceEquals(x.Item1, ServerItemGroupSubAttributes.Rate)) {
+							((RangeObservableCollection<ItemView>) _lv.ItemsSource).ToList().ForEach(p => p.VisualUpdate());
+						}
 					};
 				}
 			}
@@ -246,7 +248,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 			if (attributes.Any(p => p.IsSkippable)) {
 				foreach (var attributeIntern in attributes.Where(p => p.IsSkippable)) {
 					var attribute = attributeIntern;
-					var menuItemSkippable = new MenuItem { Header = attribute.DisplayName + " [" + attribute.AttributeName + ", " + attribute.Index + "]", Icon = new Image { Source = ApplicationManager.GetResourceImage("add.png") } };
+					var menuItemSkippable = new MenuItem { Header = attribute.DisplayName + " [" + attribute.AttributeName + ", " + attribute.Index + "]", Icon = new Image { Source = (BitmapSource) ApplicationManager.PreloadResourceImage("add.png") } };
 					menuItemSkippable.IsEnabled = false;
 					menuItemSkippable.Click += delegate {
 						gdb.Attached["EntireRewrite"] = true;

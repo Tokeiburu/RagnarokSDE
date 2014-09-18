@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using ErrorManager;
 using SDE.Others;
 using TokeiLibrary.WPF.Styles;
 
@@ -17,6 +18,7 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 		private readonly bool _autoFill;
 		private readonly List<TextBox> _boxes = new List<TextBox>();
 		private readonly List<TextBlock> _previews = new List<TextBlock>();
+		private bool _partialFill;
 
 		public LevelEditDialog(string text, object maxLevel, bool showPreview, bool showPreview2, bool autoFill) : base("Level edit", "cde.ico", SizeToContent.Height, ResizeMode.CanResize) {
 			_autoFill = autoFill;
@@ -35,6 +37,12 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 			}
 			else {
 				max = 20;
+			}
+
+			if (max <= 0) {
+				_tkInfo.Visibility = Visibility.Visible;
+				_partialFill = true;
+				max = 30;
 			}
 
 			string[] values = text.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
@@ -173,6 +181,40 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 
 		public string Text {
 			get {
+				if (_boxes.Count == 0) {
+					return "";
+				}
+
+				if (_partialFill) {
+					if (_boxes.Skip(1).All(p => p.Text == "") || _boxes.All(p => p.Text == _boxes[0].Text))
+						return _boxes[0].Text;
+
+					string last = "???";
+					StringBuilder builder = new StringBuilder();
+
+					int count = _boxes.Count;
+
+					for (int i = _boxes.Count - 1; i >= 0; i--) {
+						count = i + 1;
+
+						if (_boxes[i].Text != "") {
+							break;
+						}
+					}
+
+					for (int k = 0; k < count; k++) {
+						if (_boxes[k].Text != "") {
+							last = _boxes[k].Text;
+							builder.Append(last + (k == count - 1 ? "" : ":"));
+						}
+						else {
+							builder.Append(last + (k == count - 1 ? "" : ":"));
+						}
+					}
+
+					return builder.ToString();
+				}
+
 				if (_autoFill) {
 					if (_boxes.Skip(1).All(p => p.Text == "") || _boxes.All(p => p.Text == _boxes[0].Text))
 						return _boxes[0].Text;
@@ -220,7 +262,7 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 		}
 
 		private void _buttonOk_Click(object sender, RoutedEventArgs e) {
-			DialogResult = true;
+			DialogResult = _boxes.Count != 0;
 			Close();
 		}
 	}

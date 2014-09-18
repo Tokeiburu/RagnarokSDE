@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using SDE.Tools.DatabaseEditor.Generic.DbLoaders;
 using Utilities.Services;
 
 namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 	public static class TextFileHelper {
+		public static string LastLineRead;
+		public static bool SaveLastLine { get; set; }
+
 		#region Delegates
 
 		public delegate IEnumerable<string[]> TextFileHelperGetterDelegate(byte[] data);
@@ -21,10 +25,10 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 			while (!reader.EndOfStream) {
 				line = reader.ReadLine();
 
-				if (string.IsNullOrEmpty(line) || line.StartsWith("//", StringComparison.Ordinal) || line.StartsWith("\r\n", StringComparison.Ordinal))
+				if (string.IsNullOrEmpty(line) || (line.Length >= 2 && line[0] == '/' && line[1] == '/'))
 					continue;
 
-				if (line.StartsWith("/*", StringComparison.Ordinal)) {
+				if (line.Length >= 2 && line[0] == '/' && line[1] == '*') {
 					while (!reader.EndOfStream) {
 						line = reader.ReadLine();
 
@@ -34,14 +38,14 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 						if (line.IndexOf("*/", 0, StringComparison.Ordinal) > -1) {
 							line = reader.ReadLine();
 
-							if (!string.IsNullOrEmpty(line) && line.StartsWith("/*"))
+							if (!string.IsNullOrEmpty(line) && line.Length >= 2 && line[0] == '/' && line[1] == '*')
 								continue;
 							break;
 						}
 					}
 				}
 
-				if (string.IsNullOrEmpty(line) || line.StartsWith("//", StringComparison.Ordinal) || line.StartsWith("\r\n", StringComparison.Ordinal))
+				if (string.IsNullOrEmpty(line) || (line.Length >= 2 && line[0] == '/' && line[1] == '/'))
 					continue;
 
 				if (line.IndexOf("//", 0, StringComparison.Ordinal) > -1) {
@@ -51,7 +55,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 				return line;
 			}
 
-			if (string.IsNullOrEmpty(line) || line.StartsWith("//", StringComparison.Ordinal) || line.StartsWith("\r\n", StringComparison.Ordinal))
+			if (string.IsNullOrEmpty(line) || (line.Length >= 2 && line[0] == '/' && line[1] == '/'))
 				return null;
 
 			return line;
@@ -79,32 +83,31 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 			return toReturn == null ? "" : toReturn.ToString();
 		}
 
-		public static ElementRead ReadNextElement(StreamReader reader) {
-			ElementRead element = null;
+		public static string[] ReadNextElement(StreamReader reader) {
+			string[] element = new string[2];
 
 			while (!reader.EndOfStream) {
-				element = new ElementRead();
 				string line = ReadNextLine(reader);
 
 				if (line == null)
 					continue;
 
-				int firstIndexOfSharp = line.IndexOf('#');
+				int firstIndexOfSharp = line.IndexOf('#', 0);
 
 				if (firstIndexOfSharp >= 0) {
-					element.Element1 = line.Substring(0, firstIndexOfSharp);
+					element[0] = line.Substring(0, firstIndexOfSharp);
 
-					if (element.Element1.Length == 0)
+					if (element[0].Length == 0)
 						continue;
 
 					int secondIndexOfSharp = line.IndexOf('#', firstIndexOfSharp + 1);
 
 					if (secondIndexOfSharp >= 0) {
-						element.Element2 = line.Substring(firstIndexOfSharp + 1, secondIndexOfSharp - firstIndexOfSharp - 1);
+						element[1] = line.Substring(firstIndexOfSharp + 1, secondIndexOfSharp - firstIndexOfSharp - 1);
 					}
 					else {
 						// The second element is cut
-						element.Element2 = ReadUntil(reader, "#");
+						element[1] = ReadUntil(reader, "#");
 					}
 
 					return element;
@@ -116,11 +119,11 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 			return element;
 		}
 
-		public static IEnumerable<ElementRead> GetElements(byte[] data) {
+		public static IEnumerable<string[]> GetElements(byte[] data) {
 			if (data != null) {
-				using (StreamReader reader = _setAndLoadReader(new MemoryStream(data), EncodingService.DisplayEncoding)) {
+				using (StreamReader reader = SetAndLoadReader(new MemoryStream(data), EncodingService.DisplayEncoding)) {
 					while (!reader.EndOfStream) {
-						ElementRead element = ReadNextElement(reader);
+						string[] element = ReadNextElement(reader);
 						if (element != null) {
 							yield return element;
 						}
@@ -131,11 +134,14 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 
 		public static IEnumerable<string[]> GetElementsByCommas(byte[] data) {
 			if (data != null) {
-				using (StreamReader reader = _setAndLoadReader(new MemoryStream(data), EncodingService.DisplayEncoding)) {
+				using (StreamReader reader = SetAndLoadReader(new MemoryStream(data), EncodingService.DisplayEncoding)) {
 					while (!reader.EndOfStream) {
 						string line = ReadNextLine(reader);
 
 						if (!String.IsNullOrEmpty(line)) {
+							if (SaveLastLine)
+								LastLineRead = line;
+
 							yield return ExcludeBrackets(line.Trim('\t'));
 						}
 					}
@@ -143,14 +149,20 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 			}
 		}
 
-		private static StreamReader _setAndLoadReader(MemoryStream memoryStream, Encoding @default) {
+		public static StreamReader SetAndLoadReader(string file, Encoding @default) {
+			AllLoaders.LatestFile = file;
+			LastReader = new DebugStreamReader(new FileStream(file, FileMode.Open, FileAccess.Read), @default);
+			return LastReader;
+		}
+
+		public static StreamReader SetAndLoadReader(MemoryStream memoryStream, Encoding @default) {
 			LastReader = new DebugStreamReader(memoryStream, @default);
 			return LastReader;
 		}
 
 		public static IEnumerable<string[]> GetElementsByTabs(byte[] data) {
 			if (data != null) {
-				using (StreamReader reader = _setAndLoadReader(new MemoryStream(data), EncodingService.DisplayEncoding)) {
+				using (StreamReader reader = SetAndLoadReader(new MemoryStream(data), EncodingService.DisplayEncoding)) {
 					while (!reader.EndOfStream) {
 						string line = ReadNextLine(reader);
 
@@ -210,12 +222,13 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 				int level = 0;
 
 				bool startedBracket = false;
-				using (StreamReader reader = _setAndLoadReader(new MemoryStream(data), EncodingService.DisplayEncoding)) {
+				using (StreamReader reader = SetAndLoadReader(new MemoryStream(data), EncodingService.DisplayEncoding)) {
 					while (!reader.EndOfStream) {
 						string line = ReadNextLine(reader);
 						if (!String.IsNullOrEmpty(line)) {
-							line = line.Trim('\t').TrimStart(' ');
-							if (line.StartsWith("{", StringComparison.Ordinal) && startedBracket == false && level == 0) {
+							line = line.Trim('\t', ' ');
+
+							if (line.Length > 0 && line[0] == '{' && startedBracket == false && level == 0) {
 								level = 1;
 								currentGroup = new StringBuilder();
 								string val = line.Substring(1);
@@ -240,7 +253,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 								}
 								else {
 									currentGroup.Append(line);
-									currentGroup.Append("¤");
+									currentGroup.Append('¤');
 									continue;
 								}
 							}
@@ -259,7 +272,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 				int level = 0;
 
 				bool startedBracket = false;
-				using (StreamReader reader = _setAndLoadReader(new MemoryStream(data), EncodingService.DisplayEncoding)) {
+				using (StreamReader reader = SetAndLoadReader(new MemoryStream(data), EncodingService.DisplayEncoding)) {
 					while (!reader.EndOfStream) {
 						string line = ReadNextLine(reader);
 						int smallIndex;

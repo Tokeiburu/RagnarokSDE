@@ -22,7 +22,7 @@ namespace SDE.WPF {
 		public MetaGrfResourcesViewer() {
 			InitializeComponent();
 
-			ListViewDataTemplateHelper.GenerateListViewTemplateNew(_itemsResources, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			Extensions.GenerateListViewTemplate(_itemsResources, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 				new ListViewDataTemplateHelper.ImageColumnInfo { Header = "", DisplayExpression = "DataImage", FixedWidth = 30, MaxHeight = 60 },
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = "TK Path", DisplayExpression = "DisplayFileName", FixedWidth = 100, ToolTipBinding="DisplayFileName", TextAlignment = TextAlignment.Left, IsFill = true }
 			}, null, new string[] { "FileNotFound", "Red" });

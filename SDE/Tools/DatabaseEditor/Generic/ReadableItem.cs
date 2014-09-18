@@ -45,7 +45,11 @@ namespace SDE.Tools.DatabaseEditor.Generic {
 		}
 
 		public void Copy(ReadableTuple<TKey> tuple) {
-			_elements = new List<object>(tuple._elements);
+			_elements = new object[tuple._elements.Length];
+
+			for (int i = 0; i < tuple._elements.Length; i++) {
+				_elements[i] = tuple._elements[i];
+			}
 		}
 	}
 }

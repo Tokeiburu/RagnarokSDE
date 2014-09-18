@@ -10,6 +10,7 @@ using SDE.Tools.DatabaseEditor.Generic.IndexProviders;
 using SDE.Tools.DatabaseEditor.Generic.TabsMakerCore;
 using TokeiLibrary;
 using TokeiLibrary.Shortcuts;
+using Utilities.CommandLine;
 
 namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 	public class TabGenerator<TKey> {
@@ -50,6 +51,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 		public GenerateGridDelegate OnPreviewGenerateGrid { get; set; }
 		public GenerateGridDelegate GenerateGrid { get; set; }
 		public GenerateGridDelegate OnGenerateGrid { get; set; }
+		public TabGeneratorDelegate OnPreviewTabVisualUpdate { get; set; }
 		public TabGeneratorDelegate OnTabVisualUpdate { get; set; }
 		public TabGeneratorDelegate OnDatabaseReloaded { get; set; }
 
@@ -161,11 +163,15 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 
 				if (gdb.DbSource.AlternativeName != null) {
 					if (WpfUtilities.IsTab(item, gdb.DbSource.Filename) || WpfUtilities.IsTab(item, gdb.DbSource.AlternativeName)) {
+						if (generalProperties.OnTabVisible != null) generalProperties.OnTabVisible(this);
+						if (OnPreviewTabVisualUpdate != null) OnPreviewTabVisualUpdate(tab, settings, gdb);
 						if (OnTabVisualUpdate != null) OnTabVisualUpdate(tab, settings, gdb);
 					}
 				}
 				else {
 					if (WpfUtilities.IsTab(item, gdb.DbSource)) {
+						if (generalProperties.OnTabVisible != null) generalProperties.OnTabVisible(this);
+						if (OnPreviewTabVisualUpdate != null) OnPreviewTabVisualUpdate(tab, settings, gdb);
 						if (OnTabVisualUpdate != null) OnTabVisualUpdate(tab, settings, gdb);
 					}
 				}
@@ -272,7 +278,14 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 		}
 
 		public GDbTab GenerateTab(GenericDatabase database, TabControl control, BaseDb baseDb) {
+#if SDE_DEBUG
+			CLHelper.WA = "_CPTAB loading " + baseDb.DbSource.Filename;
+			var tab = GDbTabMaker(database, control, baseDb);
+			CLHelper.WL = ", generating time : _CS_CDms";
+			return tab;
+#else
 			return GDbTabMaker(database, control, baseDb);
+#endif
 		}
 	}
 }

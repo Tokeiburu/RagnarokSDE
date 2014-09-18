@@ -13,10 +13,15 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 		public string Noselltonpc = "false";
 		public string Nostorage = "false";
 		public string Notrade = "false";
-		public string Override = "100";
 		public string Partneroverride = "false";
+		private string _override = "100";
 
 		#region ISettable Members
+
+		public string Override {
+			get { return _override; }
+			set { _override = value; }
+		}
 
 		public void Set(object obj) {
 			string el1 = obj.ToString();
@@ -28,7 +33,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 			Noselltonpc = Parser.GetVal(el1, "noselltonpc", "false");
 			Nostorage = Parser.GetVal(el1, "nostorage", "false");
 			Notrade = Parser.GetVal(el1, "notrade", "false");
-			Override = Parser.GetVal(el1, "override", "100");
+			Override = Parser.GetVal(el1, "\noverride", "100");
 			Partneroverride = Parser.GetVal(el1, "partneroverride", "false");
 		}
 

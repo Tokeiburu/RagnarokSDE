@@ -186,7 +186,7 @@ namespace SDE.Tools.DatabaseEditor {
 			string path;
 
 			try {
-				path = PathRequest.FolderExtract();
+				path = fileType == FileType.Sql ? PathRequest.FolderExtractSql() : PathRequest.FolderExtractDb();
 
 				if (path != null) {
 					_asyncOperation.SetAndRunOperation(new GrfThread(() => _internalExport(mode, path, subPath, fileType), this, 200, null, false, true));

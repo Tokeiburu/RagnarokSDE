@@ -26,7 +26,7 @@
                     <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
                 <TextBox TabIndex="0" Name="_tbId"     Margin="3 6 3 6" VerticalAlignment="Center" />
-                <Button Name="_buttonQuerry" Grid.Column="1" Margin="0 3 3 3" Width="22" Height="22" Content="..." />
+                <Button Name="_buttonQuery" Grid.Column="1" Margin="0 3 3 3" Width="22" Height="22" Content="..." />
             </Grid>
             <TextBox TabIndex="1" Name="_tbChance" Grid.Column="1" Grid.Row="1" Margin="3 6 3 6" VerticalAlignment="Center" />
         </Grid>

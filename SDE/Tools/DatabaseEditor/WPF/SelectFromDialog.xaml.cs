@@ -29,7 +29,7 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 			DbAttribute attId = table.AttributeList.PrimaryAttribute;
 			DbAttribute attDisplay = table.AttributeList.Attributes.FirstOrDefault(p => p.IsDisplayAttribute) ?? table.AttributeList.Attributes[1];
 
-			ListViewDataTemplateHelper.GenerateListViewTemplateNew(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			Extensions.GenerateListViewTemplate(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 					new ListViewDataTemplateHelper.GeneralColumnInfo {Header = attId.DisplayName, DisplayExpression = "[" + attId.Index + "]", SearchGetAccessor = attId.AttributeName, FixedWidth = 60, TextAlignment = TextAlignment.Right, ToolTipBinding = "[" + attId.Index + "]"},
 					new ListViewDataTemplateHelper.RangeColumnInfo {Header = attDisplay.DisplayName, DisplayExpression = "[" + attDisplay.Index + "]", SearchGetAccessor = attDisplay.AttributeName, IsFill = true, ToolTipBinding = "[" + attDisplay.Index + "]", MinWidth = 100, TextWrapping = TextWrapping.Wrap }
 				}, new DatabaseItemSorter(table.AttributeList), new string[] { "Deleted", "Red", "Modified", "Green", "Added", "Blue", "Normal", "Black" });

@@ -13,7 +13,7 @@ using SDE.Tools.DatabaseEditor.Generic.TabsMakerCore;
 using Utilities.Services;
 
 namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
-	public class CustomLinkedImage<TKey, TValue> : ICustomProperty<TKey, TValue> where TValue : Tuple {
+	public class CustomLinkedImage<TKey, TValue> : ICustomControl<TKey, TValue> where TValue : Tuple {
 		private readonly DbAttribute _attribute;
 		private readonly string _ext;
 		private readonly string _grfPath;

@@ -4,10 +4,10 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using Database;
-using SDE.Tools.DatabaseEditor.Engines;
 using SDE.Tools.DatabaseEditor.Engines.Parsers;
 using SDE.Tools.DatabaseEditor.Generic.Lists;
 using Utilities;
+using Utilities.CommandLine;
 
 namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 	public static partial class DbLoaders {
@@ -23,6 +23,9 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 			}
 			else if (debug.FileType == FileType.Conf) {
 				DbCommaLoader(debug, ServerItemAttributes.AttributeList, DbItemsFunction, TextFileHelper.GetElementsByBrackets);
+#if SDE_DEBUG
+				CLHelper.WA = ", internal parser : " + CLHelper.CD(-3);
+#endif
 			}
 		}
 
@@ -53,14 +56,31 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 		public static void DbCommaLoader<T>(DbDebugItem<T> debug, AttributeList list, DbCommaFunctionDelegate<T> function, TextFileHelper.TextFileHelperGetterDelegate getter) {
 			var table = debug.AbsractDb.Table;
 
+#if SDE_DEBUG
+			Z.StopAndRemoveWithoutDisplay(-1);
+			Z.StopAndRemoveWithoutDisplay(-2);
+			CLHelper.CR(-2);
+#endif
 			foreach (string[] elements in getter(File.ReadAllBytes(debug.FilePath))) {
+#if SDE_DEBUG
+				CLHelper.CS(-2);
+				CLHelper.CR(-1);
+#endif
 				try {
 					function(debug, list, elements, table);
 				}
 				catch (Exception err) {
 					if (!debug.ReportException(err)) return;
 				}
+#if SDE_DEBUG
+				CLHelper.CS(-1);
+				CLHelper.CR(-2);
+#endif
 			}
+#if SDE_DEBUG
+			CLHelper.CS(-2);
+			CLHelper.WA = ", method core : " + CLHelper.CD(-1) + "ms, loop getter : " + CLHelper.CD(-2) + "ms";
+#endif
 		}
 
 		public static void DbItemsNouseFunction<T>(DbDebugItem<T> debug, AttributeList list, string[] elements, Table<T, ReadableTuple<T>> table) {
@@ -74,39 +94,47 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 		}
 
 		public static void DbItemsFunction<TKey>(DbDebugItem<TKey> debug, AttributeList list, string[] elements, Table<TKey, ReadableTuple<TKey>> table) {
+#if SDE_DEBUG
+				CLHelper.CR(-3);
+#endif
 			ItemParser itemHelper = new ItemParser(elements[0]);
-			TKey itemId = (TKey)TypeDescriptor.GetConverter(typeof(TKey)).ConvertFrom(itemHelper.Id);
+#if SDE_DEBUG
+			CLHelper.CS(-3);
+#endif
+			TKey itemId = (TKey) (object) Int32.Parse(itemHelper.Id);
+			ReadableTuple<TKey> tuple = new ReadableTuple<TKey>(itemId, ServerItemAttributes.AttributeList);
+			table.Add(itemId, tuple);
 
-			table.SetRaw(itemId, ServerItemAttributes.AegisName, itemHelper.AegisName);
-			table.SetRaw(itemId, ServerItemAttributes.Name, itemHelper.Name);
-			table.SetRaw(itemId, ServerItemAttributes.Type, itemHelper.Type);
-			table.SetRaw(itemId, ServerItemAttributes.Buy, itemHelper.Buy);
-			table.SetRaw(itemId, ServerItemAttributes.Sell, itemHelper.Sell);
-			table.SetRaw(itemId, ServerItemAttributes.Weight, itemHelper.Weight);
-			table.SetRaw(itemId, ServerItemAttributes.Attack, itemHelper.Atk);
-			table.SetRaw(itemId, ServerItemAttributes.Defense, itemHelper.Def);
-			table.SetRaw(itemId, ServerItemAttributes.Range, itemHelper.Range);
-			table.SetRaw(itemId, ServerItemAttributes.NumberOfSlots, itemHelper.Slots);
-			table.SetRaw(itemId, ServerItemAttributes.ApplicableJob, itemHelper.Job);
-			table.SetRaw(itemId, ServerItemAttributes.Upper, itemHelper.Upper);
-			table.SetRaw(itemId, ServerItemAttributes.Gender, itemHelper.Gender);
-			table.SetRaw(itemId, ServerItemAttributes.Location, itemHelper.Loc);
-			table.SetRaw(itemId, ServerItemAttributes.WeaponLevel, itemHelper.WeaponLv);
-			table.SetRaw(itemId, ServerItemAttributes.EquipLevel, itemHelper.EquipLv);
-			table.SetRaw(itemId, ServerItemAttributes.Refineable, itemHelper.Refineable);
-			table.SetRaw(itemId, ServerItemAttributes.ClassNumber, itemHelper.View);
-			table.SetRaw(itemId, ServerItemAttributes.Script, itemHelper.Script);
-			table.SetRaw(itemId, ServerItemAttributes.OnEquipScript, itemHelper.OnEquipScript);
-			table.SetRaw(itemId, ServerItemAttributes.OnUnequipScript, itemHelper.OnUnequipScript);
-			
-			table.SetRaw(itemId, ServerItemAttributes.Matk, itemHelper.Matk);
-			table.SetRaw(itemId, ServerItemAttributes.BindOnEquip, itemHelper.BindOnEquip);
-			table.SetRaw(itemId, ServerItemAttributes.BuyingStore, itemHelper.BuyingStore);
-			table.SetRaw(itemId, ServerItemAttributes.Delay, itemHelper.Delay);
-			table.SetRaw(itemId, ServerItemAttributes.Stack, itemHelper.Stack);
-			table.SetRaw(itemId, ServerItemAttributes.Sprite, itemHelper.Sprite);
-			table.SetRaw(itemId, ServerItemAttributes.Trade, itemHelper.Trade);
-			table.SetRaw(itemId, ServerItemAttributes.Nouse, itemHelper.Nouse);
+			tuple.SetRawValue(ServerItemAttributes.AegisName, itemHelper.AegisName);
+			tuple.SetRawValue(ServerItemAttributes.Name, itemHelper.Name);
+			tuple.SetRawValue(ServerItemAttributes.Type, itemHelper.Type);
+			tuple.SetRawValue(ServerItemAttributes.Buy, itemHelper.Buy);
+			tuple.SetRawValue(ServerItemAttributes.Sell, itemHelper.Sell);
+			tuple.SetRawValue(ServerItemAttributes.Weight, itemHelper.Weight);
+			tuple.SetRawValue(ServerItemAttributes.Attack, itemHelper.Atk);
+			tuple.SetRawValue(ServerItemAttributes.Defense, itemHelper.Def);
+			tuple.SetRawValue(ServerItemAttributes.Range, itemHelper.Range);
+			tuple.SetRawValue(ServerItemAttributes.NumberOfSlots, itemHelper.Slots);
+			tuple.SetRawValue(ServerItemAttributes.ApplicableJob, itemHelper.Job);
+			tuple.SetRawValue(ServerItemAttributes.Upper, itemHelper.Upper);
+			tuple.SetRawValue(ServerItemAttributes.Gender, itemHelper.Gender);
+			tuple.SetRawValue(ServerItemAttributes.Location, itemHelper.Loc);
+			tuple.SetRawValue(ServerItemAttributes.WeaponLevel, itemHelper.WeaponLv);
+			tuple.SetRawValue(ServerItemAttributes.EquipLevel, itemHelper.EquipLv);
+			tuple.SetRawValue(ServerItemAttributes.Refineable, itemHelper.Refineable);
+			tuple.SetRawValue(ServerItemAttributes.ClassNumber, itemHelper.View);
+			tuple.SetRawValue(ServerItemAttributes.Script, itemHelper.Script);
+			tuple.SetRawValue(ServerItemAttributes.OnEquipScript, itemHelper.OnEquipScript);
+			tuple.SetRawValue(ServerItemAttributes.OnUnequipScript, itemHelper.OnUnequipScript);
+
+			tuple.SetRawValue(ServerItemAttributes.Matk, itemHelper.Matk);
+			tuple.SetRawValue(ServerItemAttributes.BindOnEquip, itemHelper.BindOnEquip);
+			tuple.SetRawValue(ServerItemAttributes.BuyingStore, itemHelper.BuyingStore);
+			tuple.SetRawValue(ServerItemAttributes.Delay, itemHelper.Delay);
+			tuple.SetRawValue(ServerItemAttributes.Stack, itemHelper.Stack);
+			tuple.SetRawValue(ServerItemAttributes.Sprite, itemHelper.Sprite);
+			tuple.SetRawValue(ServerItemAttributes.Trade, itemHelper.Trade);
+			tuple.SetRawValue(ServerItemAttributes.Nouse, itemHelper.Nouse);
 		}
 		public static void DbItemsTradeFunction<T>(DbDebugItem<T> debug, AttributeList list, string[] elements, Table<T, ReadableTuple<T>> table) {
 			T itemId = (T)TypeDescriptor.GetConverter(typeof(T)).ConvertFrom(elements[0]);
@@ -155,7 +183,20 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 			int indexOffset = uniqueKey ? 1 : 0;
 			int attributesOffset = uniqueKey ? 0 : 1;
 
+			if (!uniqueKey) {
+				TextFileHelper.SaveLastLine = true;
+			}
+
+#if SDE_DEBUG
+			Z.StopAndRemoveWithoutDisplay(-1);
+			Z.StopAndRemoveWithoutDisplay(-2);
+			CLHelper.CR(-2);
+#endif
 			foreach (string[] elements in getter(File.ReadAllBytes(debug.FilePath))) {
+#if SDE_DEBUG
+				CLHelper.CS(-2);
+				CLHelper.CR(-1);
+#endif
 				try {
 					_guessAttributes(elements, attributes, -1, db);
 
@@ -165,7 +206,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 						id = (TKey) TypeDescriptor.GetConverter(typeof (TKey)).ConvertFrom(elements[0]);
 					}
 					else {
-						id = (TKey)(object)Methods.RandomString(128);
+						id = (TKey)(object)TextFileHelper.LastLineRead;
 					}
 
 					for (int index = indexOffset; index < elements.Length; index++) {
@@ -176,6 +217,17 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 				catch {
 					if (!debug.ReportIdException(elements[0])) return;
 				}
+#if SDE_DEBUG
+				CLHelper.CS(-1);
+				CLHelper.CR(-2);
+#endif
+			}
+#if SDE_DEBUG
+			CLHelper.CS(-2);
+			CLHelper.WA = ", method core : " + CLHelper.CD(-1) + "ms, loop getter : " + CLHelper.CD(-2) + "ms";
+#endif
+			if (!uniqueKey) {
+				TextFileHelper.SaveLastLine = false;
 			}
 		}
 

@@ -6,6 +6,8 @@ using Database;
 using ErrorManager;
 using SDE.Tools.DatabaseEditor.Engines.Parsers;
 using SDE.Tools.DatabaseEditor.Generic.Lists;
+using Utilities;
+using Utilities.CommandLine;
 using Utilities.Extension;
 
 namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
@@ -42,11 +44,35 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 				int index = ServerItemAttributes.AegisName.Index;
 				var table = db.Table;
 
+				var items = itemsDb.FastItems;
+
+				// The reverse table is used for an optimization (~3 seconds to ~50 ms)
+				// All the items are stored in a dictionary by their name instead of their ID
+				TkDictionary<string, int> reverseTable = new TkDictionary<string, int>();
+
+				foreach (var item in items) {
+					reverseTable[item.GetStringValue(index).ToLowerInvariant()] = item.GetKey<int>();
+				}
+
+#if SDE_DEBUG
+				Z.StopAndRemoveWithoutDisplay(-1);
+				Z.StopAndRemoveWithoutDisplay(-2);
+				Z.StopAndRemoveWithoutDisplay(-3);
+				CLHelper.CR(-2);
+#endif
 				foreach (string elements in TextFileHelper.GetElementsByParenthesis(File.ReadAllBytes(debug.FilePath))) {
+#if SDE_DEBUG
+					CLHelper.CS(-2);
+					CLHelper.CR(-1);
+					CLHelper.CR(-3);
+#endif
 					itemHelper = new ItemGroupParser(elements);
+#if SDE_DEBUG
+					CLHelper.CS(-3);
+#endif
 
 					try {
-						Tuple tupleItem = itemsDb.FastItems.FirstOrDefault(p => String.Compare(p.GetStringValue(index), itemHelper.Id, StringComparison.OrdinalIgnoreCase) == 0);
+						Tuple tupleItem = itemsDb.TryGetTuple(reverseTable[itemHelper.Id.ToLowerInvariant()]);
 
 						if (tupleItem == null) {
 							debug.ReportIdException("Item ID '" + itemHelper.Id + "' couldn't be found.", itemHelper.Id);
@@ -67,7 +93,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 
 							int rate;
 
-							tupleItem = itemsDb.FastItems.FirstOrDefault(p => String.Compare(p.GetStringValue(index), onameId, StringComparison.OrdinalIgnoreCase) == 0);
+							tupleItem = itemsDb.TryGetTuple(reverseTable[onameId.ToLowerInvariant()]);
 
 							if (tupleItem == null) {
 								debug.ReportIdException("Item ID '" + itemHelper.Quantities[i].Item1 + "' couldn't be found in group '" + itemHelper.Id + "'.", itemHelper.Id);
@@ -87,7 +113,16 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 					catch {
 						if (!debug.ReportIdException(itemHelper.Id)) return;
 					}
+#if SDE_DEBUG
+					CLHelper.CS(-1);
+					CLHelper.CR(-2);
+#endif
 				}
+#if SDE_DEBUG
+				CLHelper.CS(-2);
+				CLHelper.CS(-3);
+				CLHelper.WA = ", method core : " + CLHelper.CD(-1) + "ms, loop getter : " + CLHelper.CD(-2) + "ms, internal parser : " + CLHelper.CD(-3);
+#endif
 			}
 		}
 		private static void _loadItemsGroupdDb<TKey>(AbstractDb<TKey> db, string file) {

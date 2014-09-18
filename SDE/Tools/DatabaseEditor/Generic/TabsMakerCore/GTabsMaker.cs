@@ -199,7 +199,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 		public static void SInit<TKey>(GDbTabWrapper<TKey, ReadableTuple<TKey>> tab, GTabSettings<TKey, ReadableTuple<TKey>> settings, BaseDb gdb) {
 			settings.Style = "TabItemStyledLess";
 			settings.ContextMenu = new ContextMenu();
-			var menuItem = new MenuItem { Header = "Select '" + settings.DbData.Filename.Replace("_", "__") + "' in explorer", Icon = new Image { Source = ApplicationManager.GetResourceImage("arrowdown.png") } };
+			var menuItem = new MenuItem { Header = "Select '" + settings.DbData.Filename.Replace("_", "__") + "' in explorer", Icon = new Image { Source = (BitmapSource) ApplicationManager.PreloadResourceImage("arrowdown.png") } };
 
 			menuItem.Click += delegate {
 				if (settings.DbData != null) {
@@ -226,7 +226,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			if (gdb.AttributeList.Attributes.Any(p => p.IsSkippable)) {
 				foreach (var attributeIntern in gdb.AttributeList.Attributes.Where(p => p.IsSkippable)) {
 					var attribute = attributeIntern;
-					var menuItemSkippable = new MenuItem {Header = attribute.DisplayName + " [" + attribute.AttributeName + ", " + attribute.Index + "]", Icon = new Image {Source = ApplicationManager.GetResourceImage("add.png")}};
+					var menuItemSkippable = new MenuItem {Header = attribute.DisplayName + " [" + attribute.AttributeName + ", " + attribute.Index + "]", Icon = new Image {Source = (BitmapSource) ApplicationManager.PreloadResourceImage("add.png")}};
 					menuItemSkippable.IsEnabled = false;
 					menuItemSkippable.Click += delegate {
 						gdb.Attached["EntireRewrite"] = true;
@@ -263,7 +263,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			Action<bool> setConfig = v => SDEConfiguration.ConfigAsker[property] = v.ToString();
 			Func<string> getHeader = () => getConfig() ? "Disable" : "Enable";
 			Func<string> getFullHeader = () => String.Format("{0} '{1}'", getHeader(), settings.DbData.Filename.Replace("_", "__"));
-			Func<Image> getIcon = () => getConfig() ? new Image {Source = ApplicationManager.GetResourceImage("error16.png")} : new Image {Source = ApplicationManager.GetResourceImage("validity.png")};
+			Func<Image> getIcon = () => getConfig() ? new Image {Source = (BitmapSource) ApplicationManager.PreloadResourceImage("error16.png")} : new Image {Source = (BitmapSource) ApplicationManager.PreloadResourceImage("validity.png")};
 
 			var menuItem = new MenuItem {Header = getFullHeader(), Icon = getIcon()};
 			menuItem.IsEnabled = false;
@@ -310,7 +310,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 		}
 
 		public static GDbTab LoadSItemsTab<TKey>(GenericDatabase database, TabControl control, BaseDb gdb) {
-			AbstractDb<TKey> db = (AbstractDb<TKey>) gdb;
+			AbstractDb<TKey> db = gdb.To<TKey>();
 			AttributeList list = ServerItemProperties.AttributeList;
 
 			GDbTabWrapper<TKey, ReadableTuple<TKey>> tab = new GDbTabWrapper<TKey, ReadableTuple<TKey>>();
@@ -471,7 +471,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 			generalProperties.AddCustomProperty(new CustomLinkedImage<int, ReadableTuple<int>>(generalProperties.GetComponent<TextBox>(2, 1), @"data\sprite\¸ó½ºÅÍ\", ".spr", 0, 3, 8, 2));
 			generalProperties.SetRow(line, new GridLength(1, GridUnitType.Star));
-			generalProperties.AddCustomProperty(new CustomQueryViewerMobOther<int, ReadableTuple<int>>(line, 0, 1, 2));
+			generalProperties.AddCustomProperty(new CustomQueryViewerMobOther<int, ReadableTuple<int>>(line, 1));
 			generalProperties.AddCustomProperty(new CustomQueryViewerMobMvp<int, ReadableTuple<int>>(line, 3, 1, 2));
 			generalProperties.AddCustomProperty(new CustomQueryViewerMobSkills<int, ReadableTuple<int>>(line));
 

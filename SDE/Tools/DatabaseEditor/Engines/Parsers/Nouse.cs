@@ -4,10 +4,15 @@ using Utilities.Extension;
 
 namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 	public class Nouse : ISettable {
-		public string Override = "100";
 		public string Sitting = "false";
+		private string _override = "100";
 
 		#region ISettable Members
+
+		public string Override {
+			get { return _override; }
+			set { _override = value; }
+		}
 
 		public void Set(object value) {
 			string el1 = value.ToString();
@@ -49,6 +54,12 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 			if (Override != "100") return true;
 			if (Sitting != "false") return true;
 			return false;
+		}
+
+		public int GetInt() {
+			int val = 0;
+			if (Sitting == "true") val |= (1 << 0);
+			return val;
 		}
 	}
 }

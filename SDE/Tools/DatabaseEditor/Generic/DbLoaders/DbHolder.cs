@@ -23,6 +23,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 			_dbs.Add(new DbMobs());
 			_dbs.Add(new DbMobs2());
 			_dbs.Add(new DbMobSkills());
+			_dbs.Add(new DbMobSkills2());
 			_dbs.Add(new DbMobBoss());
 			_dbs.Add(new DbMobBranch());
 			_dbs.Add(new DbMobPoring());

@@ -5,11 +5,10 @@ using System.Windows;
 using System.Windows.Controls;
 using Database.Commands;
 using ErrorManager;
-using SDE.Tools.DatabaseEditor.Engines;
 using SDE.Tools.DatabaseEditor.Generic.TabsMakerCore;
 using TokeiLibrary;
 
-namespace SDE.Tools.DatabaseEditor.Generic.Lists.FormatConverter {
+namespace SDE.Tools.DatabaseEditor.Generic.Lists.FormatConverters {
 	public class ElementalFormat : FormatConverter<int, ReadableTuple<int>> {
 		private ComboBox _comboBoxElement;
 		private ComboBox _comboBoxLevel;

@@ -29,7 +29,7 @@ namespace SDE.WPF {
 		public DebuggerDialog(bool isMain = true) {
 			InitializeComponent();
 
-			ListViewDataTemplateHelper.GenerateListViewTemplateNew(_listViewStackTrace, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			Others.Extensions.GenerateListViewTemplate(_listViewStackTrace, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = "File name", DisplayExpression = "FileName", ToolTipBinding="FileName", TextAlignment = TextAlignment.Right, FixedWidth = 180 },
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = "Line", DisplayExpression = "Line", ToolTipBinding="Line", TextAlignment = TextAlignment.Left, FixedWidth = 60 },
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = "Method", DisplayExpression = "Method", ToolTipBinding="Method", TextAlignment = TextAlignment.Left, IsFill = true}

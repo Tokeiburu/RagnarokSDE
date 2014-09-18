@@ -14,6 +14,9 @@ namespace SDE.ApplicationConfiguration {
 		public static string SaveFileCde(params string[] extra) {
 			return TkPathRequest.SaveFile(new Setting(null, typeof(SDEAppConfiguration).GetProperty("AppLastPath")), extra);
 		}
+		public static string SaveFileSql(params string[] extra) {
+			return TkPathRequest.SaveFile(new Setting(null, typeof(SDEAppConfiguration).GetProperty("AppLastPathSql")), extra);
+		}
 		public static string SaveFileExtract(params string[] extra) {
 			return TkPathRequest.SaveFile(ExtractSetting, extra);
 		}
@@ -31,6 +34,12 @@ namespace SDE.ApplicationConfiguration {
 		}
 		public static string FolderExtract(params string[] extra) {
 			return TkPathRequest.Folder(ExtractSetting);
+		}
+		public static string FolderExtractSql(params string[] extra) {
+			return TkPathRequest.Folder(new Setting(null, typeof(SDEAppConfiguration).GetProperty("AppLastPathSql")), extra);
+		}
+		public static string FolderExtractDb(params string[] extra) {
+			return TkPathRequest.Folder(new Setting(null, typeof(SDEAppConfiguration).GetProperty("AppLastPathDb")), extra);
 		}
 	}
 }

@@ -140,7 +140,6 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders.Writers {
 				}
 				else if (debug.FileType == FileType.Conf) {
 					StringBuilder builder = new StringBuilder();
-
 					var dbItems = db.Get<int>(ServerDBs.Items);
 
 					List<string> aegisNames = dbItems.FastItems.Select(p => p.GetStringValue(ServerItemAttributes.AegisName.Index)).ToList();

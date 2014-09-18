@@ -13,14 +13,12 @@ using ErrorManager;
 using GRF.Threading;
 using SDE.Tools.DatabaseEditor.Engines;
 using SDE.Tools.DatabaseEditor.Engines.Commands;
-using SDE.Tools.DatabaseEditor.Generic.Lists;
-using SDE.Tools.DatabaseEditor.Generic.Lists.FormatConverter;
 using SDE.Tools.DatabaseEditor.Generic.TabsMakerCore;
 using SDE.Tools.DatabaseEditor.WPF;
 using TokeiLibrary;
 using TokeiLibrary.WPF;
 
-namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
+namespace SDE.Tools.DatabaseEditor.Generic.Lists.FormatConverters {
 	public partial class CustomItemGroupDisplay<TKey> : FormatConverter<TKey, ReadableTuple<TKey>> {
 		private Table<int, ReadableTuple<int>> __itemGroupsTable;
 		protected Button _button;
@@ -218,9 +216,8 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 
 				selectedItem.VisualUpdate();
 			}
-			else if (modif == DicoModifs.Delete) {
-				
-			}
+
+			((RangeObservableCollection<ItemView>) _lv.ItemsSource).ToList().ForEach(p => p.VisualUpdate());
 		}
 		private void _setSelectedItem(DbAttribute attribute, object value) {
 			var item = (ItemView)_lv.SelectedItem;
@@ -307,6 +304,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 			}
 
 			btable.Commands.EndEdit();
+			((RangeObservableCollection<ItemView>)_lv.ItemsSource).ToList().ForEach(p => p.VisualUpdate());
 		}
 
 		public void Select(List<ItemView> items) {

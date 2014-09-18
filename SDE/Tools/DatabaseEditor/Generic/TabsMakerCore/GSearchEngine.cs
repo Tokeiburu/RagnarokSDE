@@ -277,7 +277,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				searchGrid.Children.Add(grid);
 			}
 			else {
-				_addSearchAttributeSub(searchGrid, attribute.DisplayName, row, column);
+				_addSearchAttributeSub(searchGrid, attribute.AttributeName, row, column);
 			}
 		}
 
@@ -298,38 +298,38 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 		}
 
 		public void SetRange(List<int> indexes) {
-			_tbItemsRange.Text = _getQuerry(indexes);
+			_tbItemsRange.Text = _getQuery(indexes);
 		}
 
-		public static List<Func<TValue, bool>> GetRangePredicates(string querry) {
+		public static List<Func<TValue, bool>> GetRangePredicates(string query) {
 			try {
-				List<string> rangeQuerries = querry.Split(';').Select(p => p.Trim()).ToList();
+				List<string> rangeQueries = query.Split(';').Select(p => p.Trim()).ToList();
 				List<Func<TValue, bool>> predicates = new List<Func<TValue, bool>>();
 
-				foreach (string rangeQuerry in rangeQuerries) {
+				foreach (string rangeQuery in rangeQueries) {
 					try {
-						if (rangeQuerry.StartsWith("-")) {
-							string querryPredicate = rangeQuerry;
-							int high = Int32.Parse(querryPredicate.Substring(1));
+						if (rangeQuery.StartsWith("-")) {
+							string queryPredicate = rangeQuery;
+							int high = Int32.Parse(queryPredicate.Substring(1));
 
 							predicates.Add(new Func<TValue, bool>(p => p.GetKey<int>() <= high));
 						}
-						else if (rangeQuerry.Contains("-")) {
-							string querryPredicate = rangeQuerry;
-							int low = Int32.Parse(querryPredicate.Split('-')[0]);
-							int high = Int32.Parse(querryPredicate.Split('-')[1]);
+						else if (rangeQuery.Contains("-")) {
+							string queryPredicate = rangeQuery;
+							int low = Int32.Parse(queryPredicate.Split('-')[0]);
+							int high = Int32.Parse(queryPredicate.Split('-')[1]);
 
 							predicates.Add(new Func<TValue, bool>(p => low <= p.GetKey<int>() && p.GetKey<int>() <= high));
 						}
-						else if (rangeQuerry.EndsWith("+")) {
-							string querryPredicate = rangeQuerry;
-							int low = Int32.Parse(querryPredicate.Substring(0, rangeQuerry.Length - 1));
+						else if (rangeQuery.EndsWith("+")) {
+							string queryPredicate = rangeQuery;
+							int low = Int32.Parse(queryPredicate.Substring(0, rangeQuery.Length - 1));
 
 							predicates.Add(new Func<TValue, bool>(p => p.GetKey<int>() >= low));
 						}
 						else {
-							string querryPredicate = rangeQuerry;
-							int middle = Int32.Parse(querryPredicate);
+							string queryPredicate = rangeQuery;
+							int middle = Int32.Parse(queryPredicate);
 
 							predicates.Add(new Func<TValue, bool>(p => p.GetKey<int>() == middle));
 						}
@@ -345,10 +345,10 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			}
 		}
 
-		private string _getQuerry(List<int> tupleIndexes) {
+		private string _getQuery(List<int> tupleIndexes) {
 			tupleIndexes.Add(-1);
 
-			string searchQuerry = "";
+			string searchQuery = "";
 
 			int oldIndex = -1;
 			int endIndex = -1;
@@ -368,7 +368,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				}
 
 				if (endIndex != -1 && startIndex != endIndex) {
-					searchQuerry += startIndex + "-" + endIndex + ";";
+					searchQuery += startIndex + "-" + endIndex + ";";
 					startIndex = tupleIndex;
 					oldIndex = tupleIndex;
 					endIndex = -1;
@@ -376,7 +376,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				}
 
 				if (startIndex != endIndex) {
-					searchQuerry += oldIndex + ";";
+					searchQuery += oldIndex + ";";
 					startIndex = tupleIndex;
 					oldIndex = tupleIndex;
 					endIndex = -1;
@@ -384,7 +384,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				}
 			}
 
-			return searchQuerry;
+			return searchQuery;
 		}
 
 		public void AddTuple(TValue tuple) {

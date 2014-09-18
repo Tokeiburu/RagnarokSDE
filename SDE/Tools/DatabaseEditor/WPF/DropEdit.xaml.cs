@@ -31,14 +31,14 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 			};
 
 			if (db != null) {
-				_buttonQuerry.Click += new RoutedEventHandler(_buttonQuerry_Click);
+				_buttonQuery.Click += new RoutedEventHandler(_buttonQuery_Click);
 			}
 			else {
-				_buttonQuerry.Visibility = Visibility.Collapsed;
+				_buttonQuery.Visibility = Visibility.Collapsed;
 			}
 		}
 
-		private void _buttonQuerry_Click(object sender, RoutedEventArgs e) {
+		private void _buttonQuery_Click(object sender, RoutedEventArgs e) {
 			var db = _db.To<int>();
 			var dialog = new SelectFromDialog(db.Table, db.DbSource, _tbId.Text);
 			dialog.Owner = this;

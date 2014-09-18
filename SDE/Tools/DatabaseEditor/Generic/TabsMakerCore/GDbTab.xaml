@@ -71,7 +71,7 @@
                         </MenuItem>
                     </ContextMenu>
                     </WPF:RangeListView.ContextMenu>
-                    </WPF:RangeListView>
+            </WPF:RangeListView>
         </Grid>
         <GridSplitter Width="2" Grid.Column="1" HorizontalAlignment="Left" Background="{x:Static TokeiLibrary:Configuration.UIGridBackground}" />
         <Grid Grid.Column="2" Name="_displayGrid">

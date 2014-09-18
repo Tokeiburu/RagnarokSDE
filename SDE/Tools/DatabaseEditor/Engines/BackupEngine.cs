@@ -49,6 +49,8 @@ namespace SDE.Tools.DatabaseEditor.Engines {
 			_grf.Close();
 		}
 
+		private bool _isStarted = false;
+
 		public void Start(string dbPath) {
 			if (!SDEAppConfiguration.BackupsManagerState) return;
 
@@ -71,6 +73,8 @@ namespace SDE.Tools.DatabaseEditor.Engines {
 				RemoveBackupDelayed(paths[0]);
 				paths.RemoveAt(0);
 			}
+
+			_isStarted = true;
 		}
 
 		private void _validateOpened() {
@@ -123,10 +127,11 @@ namespace SDE.Tools.DatabaseEditor.Engines {
 
 			_grf.SyncQuickMerge(null);
 			_grf.Close();
+			_isStarted = false;
 		}
 
 		public void Backup(string file) {
-			if (!SDEAppConfiguration.BackupsManagerState) return;
+			if (!SDEAppConfiguration.BackupsManagerState || !_isStarted) return;
 
 			try {
 				string relativePath = file.ReplaceFirst(GrfPath.GetDirectoryName(SdeFiles.ServerDbPath) + "\\", "");

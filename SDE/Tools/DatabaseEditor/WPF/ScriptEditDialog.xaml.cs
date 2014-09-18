@@ -44,7 +44,7 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 			lv.SelectionMode = SelectionMode.Single;
 
 			//Image
-			ListViewDataTemplateHelper.GenerateListViewTemplateNew(lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			Extensions.GenerateListViewTemplate(lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 				new ListViewDataTemplateHelper.ImageColumnInfo { Header = "", DisplayExpression = "Image", TextAlignment = TextAlignment.Center, FixedWidth = 22, MaxHeight = 22, SearchGetAccessor = "Commands"},
 				new ListViewDataTemplateHelper.GeneralColumnInfo {Header = "Commands", DisplayExpression = "Text", TextAlignment = TextAlignment.Left, IsFill = true, ToolTipBinding = "Description"}
 			}, null, new string[] { }, "generateHeader", "false");

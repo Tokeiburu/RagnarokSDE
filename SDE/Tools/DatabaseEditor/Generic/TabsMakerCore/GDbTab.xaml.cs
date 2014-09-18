@@ -26,6 +26,9 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			return (GDbTabWrapper<TKey, ReadableTuple<TKey>>)this;
 		}
 
+		public virtual void TabSelected() {
+		}
+
 		public virtual void Update() {
 		}
 

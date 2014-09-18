@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using Database;
-using SDE.Tools.DatabaseEditor.Engines;
 using SDE.Tools.DatabaseEditor.Generic.CustomControls;
 using SDE.Tools.DatabaseEditor.Generic.Lists.DbAttributeHelpers;
-using SDE.Tools.DatabaseEditor.Generic.Lists.FormatConverter;
+using SDE.Tools.DatabaseEditor.Generic.Lists.FormatConverters;
 
 namespace SDE.Tools.DatabaseEditor.Generic.Lists {
 	public sealed class ServerMobAttributes : DbAttribute {

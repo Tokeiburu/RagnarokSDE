@@ -12,16 +12,21 @@ using ICSharpCode.AvalonEdit;
 using SDE.Tools.DatabaseEditor.Engines;
 using SDE.Tools.DatabaseEditor.Engines.Commands;
 using SDE.Tools.DatabaseEditor.Generic.CustomControls;
-using SDE.Tools.DatabaseEditor.Generic.Lists.FormatConverter;
+using SDE.Tools.DatabaseEditor.Generic.Lists.FormatConverters;
 using SDE.Tools.DatabaseEditor.Services;
 using TokeiLibrary;
 using TokeiLibrary.Shortcuts;
 using Utilities;
+using Utilities.CommandLine;
 using Utilities.Extension;
 
 namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 	public class DisplayableProperty<TKey, TValue> where TValue : Tuple {
-		private readonly List<ICustomProperty<TKey, TValue>> _customProperties = new List<ICustomProperty<TKey, TValue>>();
+		public delegate void DisplayableDelegate(object sender);
+
+		public DisplayableDelegate OnTabVisible;
+
+		private readonly List<ICustomControl<TKey, TValue>> _customProperties = new List<ICustomControl<TKey, TValue>>();
 
 		// These are actions to take upon placing the UI elements
 		private readonly List<Action<Grid>> _deployCommands = new List<Action<Grid>>();
@@ -201,7 +206,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 					RemoveUndoAndRedoEvents(fElement, tab);
 				}
 
-				int gridRow = (int)fElement.GetValue(Grid.RowProperty);
+				int gridRow = (int) fElement.GetValue(Grid.RowProperty);
 
 				while (grid.RowDefinitions.Count <= gridRow) {
 					grid.RowDefinitions.Add(new RowDefinition {Height = new GridLength(-1, GridUnitType.Auto)});
@@ -221,8 +226,8 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			foreach (Tuple<DbAttribute, FrameworkElement> v in _update) {
 				Tuple<DbAttribute, FrameworkElement> x = v;
 
-				if (x.Item1.DataType == typeof(int)) {
-					TextBox element = (TextBox)x.Item2;
+				if (x.Item1.DataType == typeof (int)) {
+					TextBox element = (TextBox) x.Item2;
 					_updateActions.Add(new Action<TValue>(item => element.Dispatch(
 						delegate {
 							Debug.Ignore(() => element.Text = item.GetValue<int>(x.Item1).ToString(CultureInfo.InvariantCulture));
@@ -235,7 +240,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 						try {
 							if (tab.List.SelectedItem != null) {
-								tab.Table.Commands.StoreAndExecute(new ChangeTupleProperty<TKey, TValue>((TValue)tab.List.SelectedItem, x.Item1, element.Text));
+								tab.Table.Commands.StoreAndExecute(new ChangeTupleProperty<TKey, TValue>((TValue) tab.List.SelectedItem, x.Item1, element.Text));
 							}
 						}
 						catch (Exception err) {
@@ -243,8 +248,8 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 						}
 					};
 				}
-				else if (x.Item1.DataType == typeof(bool)) {
-					CheckBox element = (CheckBox)x.Item2;
+				else if (x.Item1.DataType == typeof (bool)) {
+					CheckBox element = (CheckBox) x.Item2;
 					_updateActions.Add(new Action<TValue>(item => element.Dispatch(p => Debug.Ignore(() => p.IsChecked = item.GetValue<bool>(x.Item1)))));
 
 					element.Checked += delegate {
@@ -252,7 +257,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 						try {
 							if (tab.List.SelectedItem != null)
-								tab.Table.Commands.StoreAndExecute(new ChangeTupleProperty<TKey, TValue>((TValue)tab.List.SelectedItem, x.Item1, true));
+								tab.Table.Commands.StoreAndExecute(new ChangeTupleProperty<TKey, TValue>((TValue) tab.List.SelectedItem, x.Item1, true));
 						}
 						catch (Exception err) {
 							ErrorHandler.HandleException(err);
@@ -264,7 +269,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 						try {
 							if (tab.List.SelectedItem != null) {
-								tab.Table.Commands.StoreAndExecute(new ChangeTupleProperty<TKey, TValue>((TValue)tab.List.SelectedItem, x.Item1, false));
+								tab.Table.Commands.StoreAndExecute(new ChangeTupleProperty<TKey, TValue>((TValue) tab.List.SelectedItem, x.Item1, false));
 							}
 						}
 						catch (Exception err) {
@@ -272,7 +277,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 						}
 					};
 				}
-				else if (x.Item1.DataType == typeof(string)) {
+				else if (x.Item1.DataType == typeof (string)) {
 					TextBox element = (TextBox) x.Item2;
 					_updateActions.Add(new Action<TValue>(item => element.Dispatch(
 						delegate {
@@ -286,15 +291,16 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 								element.UndoLimit = 0;
 								element.UndoLimit = int.MaxValue;
 							}
-							catch { }
+							catch {
+							}
 						})));
 
 					element.TextChanged += delegate {
 						ValidateUndo(tab, element.Text, x.Item1);
 					};
 				}
-				else if (x.Item1.DataType.BaseType == typeof(Enum)) {
-					ComboBox element = (ComboBox)x.Item2;
+				else if (x.Item1.DataType.BaseType == typeof (Enum)) {
+					ComboBox element = (ComboBox) x.Item2;
 					List<int> values = Enum.GetValues(x.Item1.DataType).Cast<int>().ToList();
 
 					_updateActions.Add(new Action<TValue>(item => element.Dispatch(delegate {
@@ -311,7 +317,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 						try {
 							if (tab.List.SelectedItem != null) {
-								tab.Table.Commands.StoreAndExecute(new ChangeTupleProperty<TKey, TValue>((TValue)tab.List.SelectedItem, x.Item1, values[element.SelectedIndex]));
+								tab.Table.Commands.StoreAndExecute(new ChangeTupleProperty<TKey, TValue>((TValue) tab.List.SelectedItem, x.Item1, values[element.SelectedIndex]));
 							}
 						}
 						catch (Exception err) {
@@ -321,7 +327,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				}
 			}
 
-			foreach (ICustomProperty<TKey, TValue> property in _customProperties) {
+			foreach (ICustomControl<TKey, TValue> property in _customProperties) {
 				property.Init(tab, this);
 			}
 
@@ -429,7 +435,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			return false;
 		}
 
-		public void AddCustomProperty(ICustomProperty<TKey, TValue> property) {
+		public void AddCustomProperty(ICustomControl<TKey, TValue> property) {
 			_customProperties.Add(property);
 		}
 

@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Database;
 using Database.Commands;
 using ErrorManager;
@@ -19,6 +20,7 @@ using TokeiLibrary.Shortcuts;
 using TokeiLibrary.WPF;
 using TokeiLibrary.WPF.Styles.ListView;
 using Utilities;
+using Utilities.CommandLine;
 using Utilities.Extension;
 
 namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
@@ -51,6 +53,8 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 		public Table<TKey, TValue> Table { get; set; }
 
 		public void Initialize(GTabSettings<TKey, TValue> settings) {
+			var res = WpfUtilities.FindDirectParentControl<TabControl>(this);
+			Z.F(res);
 			Settings = settings;
 			_unclickableBorder.Init(_cbSubMenu);
 			Database = settings.ClientDatabase;
@@ -60,25 +64,30 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			SearchEngine = settings.SearchEngine;
 			SearchEngine.Init(_gridSearchContent, _searchTextBox, this);
 
-			if (settings.SearchEngine.SetupImageDataGetter != null) {
-				ListViewDataTemplateHelper.GenerateListViewTemplateNew(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
-					new ListViewDataTemplateHelper.GeneralColumnInfo {Header = Settings.AttId.DisplayName, DisplayExpression = "[" + Settings.AttId.Index + "]", SearchGetAccessor = Settings.AttId.AttributeName, FixedWidth = settings.AttIdWidth, TextAlignment = TextAlignment.Right, ToolTipBinding = "[" + Settings.AttId.Index + "]"},
-					new ListViewDataTemplateHelper.ImageColumnInfo {Header = "", DisplayExpression = "DataImage", SearchGetAccessor = Settings.AttId.AttributeName, FixedWidth = 26, MaxHeight = 24},
-					new ListViewDataTemplateHelper.RangeColumnInfo {Header = Settings.AttDisplay.DisplayName, DisplayExpression = "[" + Settings.AttDisplay.Index + "]", SearchGetAccessor = Settings.AttDisplay.AttributeName, IsFill = true, ToolTipBinding = "[" + Settings.AttDisplay.Index + "]", MinWidth = 100, TextWrapping = TextWrapping.Wrap }
-				}, new DatabaseItemSorter(settings.AttributeList), new string[] { "Deleted", "Red", "Modified", "Green", "Added", "Blue", "Normal", "Black" });
+			if (Settings.SearchEngine.SetupImageDataGetter != null) {
+				Others.Extensions.GenerateListViewTemplate(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			        new ListViewDataTemplateHelper.GeneralColumnInfo {Header = Settings.AttId.DisplayName, DisplayExpression = "[" + Settings.AttId.Index + "]", SearchGetAccessor = Settings.AttId.AttributeName, FixedWidth = Settings.AttIdWidth, TextAlignment = TextAlignment.Right, ToolTipBinding = "[" + Settings.AttId.Index + "]"},
+			        new ListViewDataTemplateHelper.ImageColumnInfo {Header = "", DisplayExpression = "DataImage", SearchGetAccessor = Settings.AttId.AttributeName, FixedWidth = 26, MaxHeight = 24},
+			        new ListViewDataTemplateHelper.RangeColumnInfo {Header = Settings.AttDisplay.DisplayName, DisplayExpression = "[" + Settings.AttDisplay.Index + "]", SearchGetAccessor = Settings.AttDisplay.AttributeName, IsFill = true, ToolTipBinding = "[" + Settings.AttDisplay.Index + "]", MinWidth = 100, TextWrapping = TextWrapping.Wrap }
+			    }, new DatabaseItemSorter(Settings.AttributeList), new string[] { "Deleted", "Red", "Modified", "Green", "Added", "Blue", "Normal", "Black" }, "generateStyle", "false");
 			}
 			else {
-				ListViewDataTemplateHelper.GenerateListViewTemplateNew(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
-					new ListViewDataTemplateHelper.GeneralColumnInfo {Header = Settings.AttId.DisplayName, DisplayExpression = "[" + Settings.AttId.Index + "]", SearchGetAccessor = Settings.AttId.AttributeName, FixedWidth = settings.AttIdWidth, TextAlignment = TextAlignment.Right, ToolTipBinding = "[" + Settings.AttId.Index + "]"},
-					new ListViewDataTemplateHelper.RangeColumnInfo {Header = Settings.AttDisplay.DisplayName, DisplayExpression = "[" + Settings.AttDisplay.Index + "]", SearchGetAccessor = Settings.AttDisplay.AttributeName, IsFill = true, ToolTipBinding = "[" + Settings.AttDisplay.Index + "]", MinWidth = 100, TextWrapping = TextWrapping.Wrap }
-				}, new DatabaseItemSorter(settings.AttributeList), new string[] { "Deleted", "Red", "Modified", "Green", "Added", "Blue", "Normal", "Black" });
+				Others.Extensions.GenerateListViewTemplate(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			        new ListViewDataTemplateHelper.GeneralColumnInfo {Header = Settings.AttId.DisplayName, DisplayExpression = "[" + Settings.AttId.Index + "]", SearchGetAccessor = Settings.AttId.AttributeName, FixedWidth = Settings.AttIdWidth, TextAlignment = TextAlignment.Right, ToolTipBinding = "[" + Settings.AttId.Index + "]"},
+			        new ListViewDataTemplateHelper.RangeColumnInfo {Header = Settings.AttDisplay.DisplayName, DisplayExpression = "[" + Settings.AttDisplay.Index + "]", SearchGetAccessor = Settings.AttDisplay.AttributeName, IsFill = true, ToolTipBinding = "[" + Settings.AttDisplay.Index + "]", MinWidth = 100, TextWrapping = TextWrapping.Wrap }
+			    }, new DatabaseItemSorter(Settings.AttributeList), new string[] { "Deleted", "Red", "Modified", "Green", "Added", "Blue", "Normal", "Black" }, "generateStyle", "false");
 			}
 
+#if SDE_DEBUG
+			CLHelper.WA = CLHelper.CP(-10);
+#endif
 			Settings.DisplayablePropertyMaker.Deploy(this, Settings);
-
+#if SDE_DEBUG
+			CLHelper.WA = ", deploy time : " + CLHelper.CS(-10) + CLHelper.CD(-10) + "ms";
+#endif
 			_initTableEvents();
 			_initMenus();
-			
+
 			_searchTextBox.GotFocus += new RoutedEventHandler(_searchTextBox_GotFocus);
 			_searchTextBox.LostFocus += new RoutedEventHandler(_searchTextBox_LostFocus);
 			_listView.PreviewMouseRightButtonUp += new MouseButtonEventHandler(_listView_PreviewMouseRightButtonUp);
@@ -94,12 +103,17 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 			if (Settings.ContextMenu != null) {
 				if (Header is Control)
-					((Control) Header).ContextMenu = Settings.ContextMenu;
+					((Control)Header).ContextMenu = Settings.ContextMenu;
 			}
 
 			if (Settings.Loaded != null) {
-				Settings.Loaded((GDbTabWrapper<TKey, ReadableTuple<TKey>>)(object)this, (GTabSettings<TKey, ReadableTuple<TKey>>) (object)Settings, ((GenericDatabase)Database).GetDb<TKey>(settings.DbData));
+				Settings.Loaded((GDbTabWrapper<TKey, ReadableTuple<TKey>>)(object)this, (GTabSettings<TKey, ReadableTuple<TKey>>)(object)Settings, ((GenericDatabase)Database).GetDb<TKey>(Settings.DbData));
 			}
+
+			if (Settings.DisplayablePropertyMaker.OnTabVisible != null) {
+				Settings.DisplayablePropertyMaker.OnTabVisible(this);
+			}
+
 		}
 
 		public Table<T, ReadableTuple<T>> GetTable<T>(ServerDBs db) {
@@ -115,7 +129,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				item.Click += (e, a) => _menuItem_Click(command);
 
 				Image image = new Image();
-				image.Source = ApplicationManager.GetResourceImage(command.ImagePath);
+				image.Source = (BitmapSource) ApplicationManager.PreloadResourceImage(command.ImagePath);
 				item.Icon = image;
 
 				if (command.Shortcut != null) {
@@ -412,6 +426,10 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 				InputDialog dialog = new InputDialog("Paste the database lines here.", "Add new raw items", defaultValue, false, false);
 				dialog.Owner = WpfUtilities.TopWindow;
+				dialog.TextBoxInput.Loaded += delegate {
+					dialog.TextBoxInput.SelectAll();
+					dialog.TextBoxInput.Focus();
+				};
 				dialog.TextBoxInput.AcceptsReturn = true;
 				dialog.TextBoxInput.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
 				dialog.TextBoxInput.TextWrapping = TextWrapping.NoWrap;
@@ -505,7 +523,22 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			}
 
 			try {
-				TKey id = _getNewItemId(item.GetKey<TKey>());
+				TKey id = _getNewItemId(item.GetKey<TKey>(), true);
+
+				if (Table.ContainsKey(id)) {
+					if (WindowProvider.ShowDialog("An item with this ID already exists. Would you like to replace it?", "ID already exists", MessageBoxButton.YesNoCancel) == MessageBoxResult.Yes) {
+						try {
+							//Table.Commands.BeginEdit(new GroupCommand<TKey, TValue>());
+							Table.Commands.StoreAndExecute(new ChangeTupleKey<TKey, TValue>(item.GetValue<TKey>(Settings.AttributeList.PrimaryAttribute), id, _changeKeyCallback));
+							_listView.ScrollToCenterOfView(_listView.SelectedItem);
+						}
+						finally {
+							//Table.Commands.EndEdit();
+						}
+					}
+
+					return;
+				}
 
 				Table.Commands.StoreAndExecute(new ChangeTupleKey<TKey, TValue>(item.GetValue<TKey>(Settings.AttributeList.PrimaryAttribute), id, _changeKeyCallback));
 				_listView.ScrollToCenterOfView(_listView.SelectedItem);
@@ -562,6 +595,10 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 		private TKey _getNewItemId(TKey oldId, bool ignoreAlreadyExists = false) {
 			InputDialog dialog = new InputDialog("Enter the new ID for this item.", "New ID", oldId == null ? "" : oldId.ToString(), false);
 			dialog.Owner = WpfUtilities.TopWindow;
+			dialog.TextBoxInput.Loaded += delegate {
+				dialog.TextBoxInput.SelectAll();
+				dialog.TextBoxInput.Focus();
+			};
 			dialog.ShowDialog();
 
 			if (dialog.Result == MessageBoxResult.OK) {

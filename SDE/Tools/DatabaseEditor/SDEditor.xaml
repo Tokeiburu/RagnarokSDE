@@ -41,7 +41,7 @@
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator />
-                <MenuItem Header="Export" >
+                <MenuItem Header="Export to db" >
                     <MenuItem.Icon>
                         <Image Source="..\..\Resources\export.png" Height="16" Width="16" />
                     </MenuItem.Icon>
@@ -54,7 +54,7 @@
                         <MenuItem Name="_menuItemExportHercPreRenewal" Click="_menuItemExportHercPreRenewal_Click" Header="Export project - Pre-Renewal" />
                     </MenuItem>
                 </MenuItem>
-                <MenuItem Header="Sql Export (disabled)" IsEnabled="False" >
+                <MenuItem Header="Export to SQL" IsEnabled="True" >
                     <MenuItem.Icon>
                         <Image Source="..\..\Resources\dbBlack.png" Height="16" Width="16" />
                     </MenuItem.Icon>
@@ -174,9 +174,9 @@
                             </Grid.RowDefinitions>
                             <StackPanel>
                             <!--<CheckBox Margin="3" Name="_cbEntirelyRewriteTxt" Content="Entirely rewrite the txt files (will remove comments)" />-->
-                                <CheckBox Margin="3" Name="_cbAssociate" Content="Associates .sde file extension with this tool" Checked="_cbAssociate_Checked" Unchecked="_cbAssociate_Unchecked" />
-                                <CheckBox Margin="3" Name="_cbStackTrace" Content="Enable debugger stack trace viewer" />
-                                <CheckBox Margin="3" Name="_cbEnableBackups" Content="Enable backups manager" />
+                                <CheckBox Margin="3" Name="_cbAssociate" Content="Associates .sde file extension with this tool" Checked="_cbAssociate_Checked" Unchecked="_cbAssociate_Unchecked" HorizontalAlignment="Left" />
+                                <CheckBox Margin="3" Name="_cbStackTrace" Content="Enable debugger stack trace viewer" HorizontalAlignment="Left" />
+                                <CheckBox Margin="3" Name="_cbEnableBackups" Content="Enable backups manager" HorizontalAlignment="Left" />
                                 <DockPanel>
                                     <Label Content="Display encoding" Padding="0" Margin="3" VerticalAlignment="Center" />
                                     <ComboBox Grid.Column="1" Margin="3" Name="_comboBoxEncoding" IsReadOnly="True" Width="120" HorizontalAlignment="Left" />

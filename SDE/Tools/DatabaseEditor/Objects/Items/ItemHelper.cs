@@ -11,6 +11,8 @@ namespace SDE.Tools.DatabaseEditor.Objects.Items {
 			"Every Job Except Novice",
 			"Every Rebirth Job except High Novice",
 			"Every Rebirth Job or above",
+			"Every 2nd Class or above",
+			"Rebirth 2nd Class or above",
 			" ",
 			"--- 1st Job Class ---",
 			"Acolyte Class",

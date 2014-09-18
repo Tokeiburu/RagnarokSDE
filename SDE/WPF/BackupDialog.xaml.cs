@@ -30,7 +30,7 @@ namespace SDE.WPF {
 			WindowStartupLocation = WindowStartupLocation.CenterOwner;
 			ShowInTaskbar = true;
 
-			ListViewDataTemplateHelper.GenerateListViewTemplateNew(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			Extensions.GenerateListViewTemplate(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 					new ListViewDataTemplateHelper.GeneralColumnInfo {Header = "Date", DisplayExpression = "Date", SearchGetAccessor = "DateInt", ToolTipBinding = "Date", TextWrapping = TextWrapping.Wrap, TextAlignment = TextAlignment.Center, FixedWidth = 140 },
 					new ListViewDataTemplateHelper.RangeColumnInfo {Header = "Database path", DisplayExpression = "DbPath", SearchGetAccessor = "DbPath", IsFill = true, ToolTipBinding = "DbPath", MinWidth = 100, TextWrapping = TextWrapping.Wrap }
 				}, new DefaultListViewComparer<BackupView>(), new string[] { "Normal", "Black" });

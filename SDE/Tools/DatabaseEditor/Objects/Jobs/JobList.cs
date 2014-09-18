@@ -96,6 +96,8 @@ namespace SDE.Tools.DatabaseEditor.Objects.Jobs {
 				jobs.AddRange(AllJobs.Where(job => (job.Id & hexValue) == job.Id));
 			}
 
+			//if (AllJobs.Where(p => p.Parents.Count == 2).All())
+
 			// We start off by making groups with classes
 			int archerClass = Archer.Id | Hunter.Id | BardDancer.Id;
 			int swordman = Swordman.Id | Crusader.Id | Knight.Id;
@@ -265,6 +267,17 @@ namespace SDE.Tools.DatabaseEditor.Objects.Jobs {
 				}
 				else if (_isClassRestricted(stringJob)) {
 					jobs.Add(GetJob(stringJob.Replace(" Only", "").Replace("2nd ", "").Replace("3rd ", "").Replace("Trans ", "")));
+				}
+				else if (
+					_compare(stringJob, "Every 2nd Class") ||
+					_compare(stringJob, "Rebirth 2nd Class") ||
+					_compare(stringJob, "Trans 2nd Class") ||
+					_compare(stringJob, "Every 2nd Class or above") ||
+					_compare(stringJob, "Rebirth 2nd Class or above") ||
+					_compare(stringJob, "Trans 2nd Class or above")
+					) {
+					jobs.AddRange(AllJobs.Where(p => p.Parents.Count == 2));
+					previousJob = null;
 				}
 				else if (
 					_compare(stringJob, "Every 2nd Job or above") ||

@@ -3,21 +3,14 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using ErrorManager;
-using SDE.Tools.DatabaseEditor.Engines;
-using SDE.Tools.DatabaseEditor.Generic.Lists;
-using SDE.Tools.DatabaseEditor.Generic.Lists.FormatConverter;
 using SDE.Tools.DatabaseEditor.Generic.TabsMakerCore;
 using TokeiLibrary;
 
-namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
-	public abstract class CustomOnTextBoxPreview : FormatConverter<int, ReadableTuple<int>> {
-		protected GDbTabWrapper<int, ReadableTuple<int>> _tab;
+namespace SDE.Tools.DatabaseEditor.Generic.Lists.FormatConverters {
+	public abstract class CustomPreviewProperty : FormatConverter<int, ReadableTuple<int>> {
 		protected TextBox _textBox;
 		protected TextBlock _textPreview;
-
-		public TextBox TextBox {
-			get { return _textBox; }
-		}
+		protected GDbTabWrapper<int, ReadableTuple<int>> _tab;
 
 		public override void Init(GDbTabWrapper<int, ReadableTuple<int>> tab, DisplayableProperty<int, ReadableTuple<int>> dp) {
 			_parent = _parent ?? tab.PropertiesGrid;
@@ -36,7 +29,6 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 			grid.SetValue(Grid.RowProperty, _row);
 			grid.SetValue(Grid.ColumnProperty, _column);
 			grid.ColumnDefinitions.Add(new ColumnDefinition());
-			//grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(-1, GridUnitType.Auto) });
 
 			_textBox.SetValue(Grid.ColumnProperty, 0);
 
@@ -53,7 +45,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 			grid.Children.Add(_textBox);
 			grid.Children.Add(_textPreview);
 
-			(_parent).Children.Add(grid);
+			_parent.Children.Add(grid);
 
 			dp.AddUpdateAction(new Action<ReadableTuple<int>>(item => _textBox.Dispatch(delegate {
 				try {
@@ -93,7 +85,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 		}
 	}
 
-	public class CustomSellProperty : CustomOnTextBoxPreview {
+	public class CustomSellProperty : CustomPreviewProperty {
 		public override void OnUpdate() {
 			try {
 				int value;
@@ -117,7 +109,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 		}
 	}
 
-	public class CustomAttackProperty : CustomOnTextBoxPreview {
+	public class CustomAttackProperty : CustomPreviewProperty {
 		public override void OnUpdate() {
 			try {
 				int value;

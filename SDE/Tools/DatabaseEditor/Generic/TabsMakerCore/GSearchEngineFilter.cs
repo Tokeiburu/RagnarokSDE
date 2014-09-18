@@ -85,8 +85,38 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 						 where attribute != null 
 						 let attributeCopy = attribute 
 						 where _itemsSearchSettings[attributeCopy] 
-						 where attribute.DataType.BaseType != typeof (Enum) 
-						 select new Func<TValue, string, bool>((p, s) => p.GetValue<string>(attributeCopy).IndexOf(s, StringComparison.InvariantCultureIgnoreCase) != -1)).ToList();
+						 where attribute.DataType.BaseType != typeof (Enum)
+						 select new Func<TValue, string, bool>((p, s) => p.GetValue<string>(attributeCopy).IndexOf(s, StringComparison.OrdinalIgnoreCase) != -1)).ToList();
+
+					if (search.Any(p => p.StartsWith("[", StringComparison.Ordinal) && p.EndsWith("]", StringComparison.Ordinal))) {
+						generalPredicates.Clear();
+
+						for (int index = 0; index < search.Count; index++) {
+							string se = search[index];
+							int ival;
+
+							if (se.StartsWith("[", StringComparison.Ordinal) && se.EndsWith("]", StringComparison.Ordinal)) {
+								se = se.Substring(1, se.Length - 2);
+
+								if (Int32.TryParse(se, out ival)) {
+									if (ival < _settings.AttributeList.Attributes.Count) {
+										DbAttribute attribute = _settings.AttributeList.Attributes[ival];
+										generalPredicates.Add(new Func<TValue, string, bool>((p, s) => p.GetValue<string>(attribute).IndexOf(s, StringComparison.OrdinalIgnoreCase) != -1));
+									}
+									search.RemoveAt(index);
+									index--;
+								}
+
+								se = se.Replace("_", " ");
+								var att = _settings.AttributeList.Attributes.FirstOrDefault(p => p.DisplayName.IndexOf(se, 0, StringComparison.OrdinalIgnoreCase) > -1);
+								if (att != null) {
+									generalPredicates.Add(new Func<TValue, string, bool>((p, s) => p.GetValue<string>(att).IndexOf(s, StringComparison.OrdinalIgnoreCase) != -1));
+									search.RemoveAt(index);
+									index--;
+								}
+							}
+						}
+					}
 
 					List<DbAttribute> enumAttributes = _attributes.Where(p => p.DataType.BaseType == typeof (Enum) && _itemsSearchSettings[p]).ToList();
 

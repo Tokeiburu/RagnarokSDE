@@ -62,14 +62,14 @@ namespace SDE.Tools.DatabaseEditor.Engines {
 				List<TKey> result = id.ToList();
 
 				if (result.Count == 0) {
-					ErrorHandler.HandleException("No items match the querry in [" + db.DisplayName + "].", ErrorLevel.NotSpecified);
+					ErrorHandler.HandleException("No items match the query in [" + db.DisplayName + "].", ErrorLevel.NotSpecified);
 					return;
 				}
 
 				Instance.Select2(db, result);
 			}
 			catch (Exception err) {
-				ErrorHandler.HandleException("Failed to parse the search querry.\r\n\r\n" + err.Message);
+				ErrorHandler.HandleException("Failed to parse the search query.\r\n\r\n" + err.Message);
 			}
 		}
 

@@ -6,6 +6,7 @@ using SDE.Tools.DatabaseEditor.Engines;
 using SDE.Tools.DatabaseEditor.Generic.DbLoaders.Writers;
 using SDE.Tools.DatabaseEditor.Generic.TabsMakerCore;
 using TokeiLibrary.WPF;
+using Utilities.CommandLine;
 
 namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 	public abstract class AbstractDb<TKey> : BaseDb {
@@ -27,6 +28,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 		public GenericDatabase Database { get; set; }
 		public DatabaseLoaderMethod DbLoader { get; set; }
 		public DatabaseWriterMethod DbWriter { get; set; }
+		public DatabaseWriterMethod DbWriterSql { get; set; }
 		public TabGenerator<TKey> TabGenerator { get; set; }
 		public DatabaseDirectCopyMethod DbDirectCopy { get; set; }
 		public Table<TKey, ReadableTuple<TKey>> Table { get; set; }
@@ -58,6 +60,9 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 		}
 
 		public sealed override void LoadDb() {
+#if SDE_DEBUG
+			CLHelper.WA = "_CPLoading " + DbSource.Filename;
+#endif
 			IsLoaded = false;
 			Table.EnableEvents = false;
 			Table.EnableRawEvents = false;
@@ -66,6 +71,9 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 			
 			IsLoaded = true;
 			Table.EnableEvents = true;
+#if SDE_DEBUG
+			CLHelper.WL = ", took _CS_CDms";
+#endif
 		}
 
 		protected virtual void _loadDb() {
@@ -94,10 +102,17 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 			return tuples;
 		}
 
+		//protected virtual void _writeDb(string dbPath, string subPath, ServerType serverType, FileType fileType = FileType.Detect) {
+		//}
+
 		public override void WriteDb(string dbPath, string subPath, ServerType serverType, FileType fileType = FileType.Detect) {
 			DbDebugItem<TKey> debug = new DbDebugItem<TKey>(this);
 
 			if (!debug.Write(dbPath, subPath, serverType, fileType)) return;
+			if ((fileType & FileType.Sql) == FileType.Sql && DbWriterSql != null) {
+				DbWriterSql(debug, this);
+				return;
+			}
 			DbWriter(debug, this);
 		}
 

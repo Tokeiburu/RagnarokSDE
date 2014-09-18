@@ -6,28 +6,22 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Database;
 using Database.Commands;
 using ErrorManager;
 using SDE.Tools.DatabaseEditor.Engines;
-using SDE.Tools.DatabaseEditor.Generic.Lists;
-using SDE.Tools.DatabaseEditor.Generic.Lists.FormatConverter;
 using SDE.Tools.DatabaseEditor.Generic.TabsMakerCore;
 using SDE.Tools.DatabaseEditor.WPF;
 using TokeiLibrary;
 
-namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
+namespace SDE.Tools.DatabaseEditor.Generic.Lists.FormatConverters {
 	public abstract class CustomProperty<TKey> : FormatConverter<TKey, ReadableTuple<TKey>> {
 		protected Button _button;
 		protected bool _enableEvents = true;
 		protected Grid _grid;
 		protected GDbTabWrapper<TKey, ReadableTuple<TKey>> _tab;
 		protected TextBox _textBox;
-
-		public TextBox TextBox {
-			get { return _textBox; }
-			set { _textBox = value; }
-		}
 
 		public override void Init(GDbTabWrapper<TKey, ReadableTuple<TKey>> tab, DisplayableProperty<TKey, ReadableTuple<TKey>> dp) {
 			if (_textBox == null)
@@ -53,7 +47,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 			_button.Height = 22;
 			_button.Margin = new Thickness(0, 3, 3, 3);
 			_button.Content = "...";
-			_button.Click += new RoutedEventHandler(_button_Click);
+			_button.Click += _button_Click;
 			_button.SetValue(Grid.ColumnProperty, 1);
 			_textBox.SetValue(Grid.ColumnProperty, 0);
 			_textBox.VerticalAlignment = VerticalAlignment.Center;
@@ -63,8 +57,13 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 
 			_parent = _parent ?? tab.PropertiesGrid;
 			_parent.Children.Add(_grid);
-			
-			dp.AddUpdateAction(new Action<ReadableTuple<TKey>>(item => _textBox.Dispatch(delegate {
+
+			dp.AddUpdateAction(new Action<ReadableTuple<TKey>>(_updateAction));
+			_onInitalized();
+		}
+
+		private void _updateAction(ReadableTuple<TKey> item) {
+			_textBox.Dispatch(delegate {
 				try {
 					string sval = item.GetValue<string>(_attribute);
 
@@ -75,10 +74,9 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 					_textBox.UndoLimit = 0;
 					_textBox.UndoLimit = int.MaxValue;
 				}
-				catch { }
-			})));
-
-			_onInitalized();
+				catch {
+				}
+			});
 		}
 
 		protected virtual void _onInitalized() { }
@@ -445,9 +443,14 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 	}
 
 	public class SelectTupleProperty<TKey> : CustomProperty<TKey> {
+		private bool _isLoaded;
 		private MenuItem _select;
 
 		protected override void _onInitalized() {
+			_button.Content = new Image { Source = (BitmapSource)ApplicationManager.PreloadResourceImage("arrowdown.png"), Stretch = Stretch.None };
+		}
+
+		private void _init() {
 			_button.ContextMenu = new ContextMenu();
 			_button.ContextMenu.Placement = PlacementMode.Bottom;
 			_button.ContextMenu.PlacementTarget = _button;
@@ -455,18 +458,18 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 
 			_select = new MenuItem();
 			_select.Header = "Select ''";
-			_select.Icon = new Image { Source = ApplicationManager.GetResourceImage("find.png"), Stretch = Stretch.Uniform, Width = 16, Height = 16 };
-			_select.Click += new RoutedEventHandler(_select_Click);
+			_select.Icon = new Image { Source = (BitmapSource)ApplicationManager.PreloadResourceImage("find.png"), Stretch = Stretch.Uniform, Width = 16, Height = 16 };
+			_select.Click += _select_Click;
 
 			MenuItem selectFromList = new MenuItem();
 			selectFromList.Header = "Select...";
-			selectFromList.Icon = new Image { Source = ApplicationManager.GetResourceImage("treeList.png"), Stretch = Stretch.None };
-			selectFromList.Click += new RoutedEventHandler(_selectFromList_Click);
+			selectFromList.Icon = new Image { Source = (BitmapSource)ApplicationManager.PreloadResourceImage("treeList.png"), Stretch = Stretch.None };
+			selectFromList.Click += _selectFromList_Click;
 
 			_button.ContextMenu.Items.Add(_select);
 			_button.ContextMenu.Items.Add(selectFromList);
 
-			_button.Content = new Image { Source = ApplicationManager.GetResourceImage("arrowdown.png"), Stretch = Stretch.None };
+			_isLoaded = true;
 		}
 
 		private void _selectFromList_Click(object sender, RoutedEventArgs e) {
@@ -500,6 +503,10 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 		}
 
 		public override void ButtonClicked() {
+			if (!_isLoaded) {
+				_init();
+			}
+
 			int value;
 
 			((MenuItem)_button.ContextMenu.Items[0]).IsEnabled = Int32.TryParse(_textBox.Text, out value) && value > 0;
@@ -527,7 +534,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 
 	public class AutoDisplayMobSkillProperty<TKey> : CustomProperty<TKey> {
 		protected override void _onInitalized() {
-			_button.Content = new Image { Source = ApplicationManager.GetResourceImage("refresh.png"), Stretch = Stretch.None };
+			_button.Content = new Image { Source = (BitmapSource)ApplicationManager.PreloadResourceImage("refresh.png"), Stretch = Stretch.None };
 		}
 
 		public override void ButtonClicked() {
@@ -564,7 +571,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 
 	public class AutoDisplayMobBossProperty<TKey> : CustomProperty<TKey> {
 		protected override void _onInitalized() {
-			_button.Content = new Image { Source = ApplicationManager.GetResourceImage("refresh.png"), Stretch = Stretch.None };
+			_button.Content = new Image { Source = (BitmapSource)ApplicationManager.PreloadResourceImage("refresh.png"), Stretch = Stretch.None };
 		}
 
 		public override void ButtonClicked() {
@@ -594,7 +601,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 
 	public class AutoSpritePetProperty<TKey> : CustomProperty<TKey> {
 		protected override void _onInitalized() {
-			_button.Content = new Image { Source = ApplicationManager.GetResourceImage("refresh.png"), Stretch = Stretch.None };
+			_button.Content = new Image { Source = (BitmapSource) ApplicationManager.PreloadResourceImage("refresh.png"), Stretch = Stretch.None };
 		}
 
 		public override void ButtonClicked() {
@@ -624,7 +631,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 
 	public class AutoNamePetProperty<TKey> : CustomProperty<TKey> {
 		protected override void _onInitalized() {
-			_button.Content = new Image { Source = ApplicationManager.GetResourceImage("refresh.png"), Stretch = Stretch.None };
+			_button.Content = new Image { Source = (BitmapSource) ApplicationManager.PreloadResourceImage("refresh.png"), Stretch = Stretch.None };
 		}
 
 		public override void ButtonClicked() {
@@ -695,14 +702,14 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 
 	public class IdProperty<TKey> : CustomProperty<TKey> {
 		public override void OnInitialized() {
-			TextBox = new TextBox();
-			TextBox.IsReadOnly = true;
+			_textBox = new TextBox();
+			_textBox.IsReadOnly = true;
 			_enableEvents = false;
 		}
 
 		protected override void _onInitalized() {
-			_tab.Settings.TextBoxId = TextBox;
-			_button.Content = new Image { Source = ApplicationManager.GetResourceImage("properties.png"), Width = 16, Height = 16, Stretch = Stretch.None };
+			_tab.Settings.TextBoxId = _textBox;
+			_button.Content = new Image { Source = (BitmapSource) ApplicationManager.PreloadResourceImage("properties.png"), Width = 16, Height = 16, Stretch = Stretch.None };
 		}
 
 		public override void ButtonClicked() {
@@ -768,6 +775,17 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 	public class CustomSkillDamageProperty : CustomProperty<int> {
 		public override void ButtonClicked() {
 			SkillDamageDialog dialog = new SkillDamageDialog(_textBox.Text);
+			dialog.Owner = WpfUtilities.FindParentControl<Window>(_button);
+
+			if (dialog.ShowDialog() == true) {
+				_textBox.Text = dialog.Text;
+			}
+		}
+	}
+
+	public class CustomScriptProperty<TKey> : CustomProperty<TKey> {
+		public override void ButtonClicked() {
+			ScriptEditDialog dialog = new ScriptEditDialog(_textBox.Text);
 			dialog.Owner = WpfUtilities.FindParentControl<Window>(_button);
 
 			if (dialog.ShowDialog() == true) {

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using Database;
 using Database.Commands;
 using ErrorManager;
@@ -18,7 +19,7 @@ using TokeiLibrary.WPF.Styles.ListView;
 using Extensions = SDE.Others.Extensions;
 
 namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
-	public class CustomQueryViewerMobDroppedBy<TKey, TValue> : ICustomProperty<TKey, TValue> where TValue : Tuple {
+	public class CustomQueryViewerMobDroppedBy<TKey, TValue> : ICustomControl<TKey, TValue> where TValue : Tuple {
 		private readonly int _cSpan;
 		private readonly int _col;
 		private readonly int _rSpan;
@@ -63,7 +64,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 			_lv.BorderThickness = new Thickness(1);
 			_lv.PreviewMouseRightButtonUp += _lv_PreviewMouseRightButtonUp;
 
-			ListViewDataTemplateHelper.GenerateListViewTemplateNew(_lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			Extensions.GenerateListViewTemplate(_lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 					new ListViewDataTemplateHelper.GeneralColumnInfo {Header = ServerMobAttributes.Id.DisplayName, DisplayExpression = "ID", SearchGetAccessor = "ID", FixedWidth = 60, TextAlignment = TextAlignment.Right, ToolTipBinding = "ID"},
 					new ListViewDataTemplateHelper.RangeColumnInfo {Header = ServerMobAttributes.KRoName.DisplayName, DisplayExpression = "Name", SearchGetAccessor = "Name", IsFill = true, ToolTipBinding = "Name", TextWrapping = TextWrapping.Wrap, MinWidth = 40 },
 					new ListViewDataTemplateHelper.GeneralColumnInfo {Header = "Drop %", DisplayExpression = "Drop", SearchGetAccessor = "DropOriginal", ToolTipBinding = "DropOriginal", FixedWidth = 60, TextAlignment = TextAlignment.Right},
@@ -73,9 +74,9 @@ namespace SDE.Tools.DatabaseEditor.Generic.CustomControls {
 			_lv.ContextMenu = new ContextMenu();
 			_lv.MouseDoubleClick += new MouseButtonEventHandler(_lv_MouseDoubleClick);
 
-			MenuItem miSelect = new MenuItem { Header = "Select", Icon = new Image { Source = ApplicationManager.GetResourceImage("arrowdown.png") } };
-			MenuItem miEditDrop = new MenuItem { Header = "Edit drop chance", Icon = new Image { Source = ApplicationManager.GetResourceImage("properties.png") } };
-			MenuItem miRemoveDrop = new MenuItem { Header = "Remove", Icon = new Image { Source = ApplicationManager.GetResourceImage("delete.png") } };
+			MenuItem miSelect = new MenuItem { Header = "Select", Icon = new Image { Source = (BitmapSource) ApplicationManager.PreloadResourceImage("arrowdown.png") } };
+			MenuItem miEditDrop = new MenuItem { Header = "Edit drop chance", Icon = new Image { Source = (BitmapSource) ApplicationManager.PreloadResourceImage("properties.png") } };
+			MenuItem miRemoveDrop = new MenuItem { Header = "Remove", Icon = new Image { Source = (BitmapSource) ApplicationManager.PreloadResourceImage("delete.png") } };
 
 			_lv.ContextMenu.Items.Add(miSelect);
 			_lv.ContextMenu.Items.Add(miEditDrop);

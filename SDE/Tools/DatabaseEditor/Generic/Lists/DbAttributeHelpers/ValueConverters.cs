@@ -153,6 +153,15 @@ namespace SDE.Tools.DatabaseEditor.Generic.Lists.DbAttributeHelpers {
 					return (T)value;
 				}
 
+				if (typeof(T) == typeof(int)) {
+					string sval = ConvertFrom<string>(source, value);
+
+					if (String.CompareOrdinal(sval, _false) == 0) {
+						return (T)(object)0;
+					}
+					return (T)(object)1;
+				}
+
 				return (T)value;
 			}
 
@@ -620,36 +629,49 @@ namespace SDE.Tools.DatabaseEditor.Generic.Lists.DbAttributeHelpers {
 			}
 
 			public T ConvertFrom<T>(Tuple source, object value) {
-				if (value == null)
-					return (T) (object) true;
+				int itemType = source.GetValue<int>(ServerItemAttributes.Type);
 
-				string val = (string)value;
+				if (itemType == 4 || itemType == 5) {
+					if (value == null)
+						return (T)(object)true;
 
-				if (typeof(T) == typeof(bool)) {
-					if (val == "true" || val == "" || val == "1")
-						return (T) (object) true;
-					if (val == "false" || val == "0")
-						return (T) (object) false;
+					string val = (string)value;
 
-					return (T) (object) (val != "");
+					if (typeof(T) == typeof(bool)) {
+						if (val == "true" || val == "" || val == "1")
+							return (T)(object)true;
+						if (val == "false" || val == "0")
+							return (T)(object)false;
+
+						return (T)(object)(val != "");
+					}
+
+					if (typeof(T) == typeof(string)) {
+						if (val == "true" || val == "" || val == "1")
+							return (T)(object)"true";
+						if (val == "false" || val == "0")
+							return (T)(object)"false";
+
+						return (T)(object)((val != "") ? "true" : "false");
+					}
+
+					if (typeof(T) == typeof(int)) {
+						if (val == "true" || val == "1" || val == "")
+							return (T)(object)1;
+						if (val == "false" || val == "0")
+							return (T)(object)0;
+
+						return (T)(object)(val != "");
+					}
 				}
-
-				if (typeof(T) == typeof(string)) {
-					if (val == "true" || val == "" || val == "1")
-						return (T)(object)"true";
-					if (val == "false" || val == "0")
+				else {
+					if (typeof(T) == typeof(bool))
+						return (T)(object)false;
+					if (typeof(T) == typeof(string))
 						return (T)(object)"false";
-
-					return (T)(object)((val != "") ? "true" : "false");
-				}
-
-				if (typeof(T) == typeof(int)) {
-					if (val == "true" || val == "1" || val == "")
-						return (T)(object)1;
-					if (val == "false" || val == "0")
+					if (typeof(T) == typeof(int))
 						return (T)(object)0;
-
-					return (T)(object)(val != "");
+					return (T)value;
 				}
 
 				return (T)value;
@@ -792,6 +814,8 @@ namespace SDE.Tools.DatabaseEditor.Generic.Lists.DbAttributeHelpers {
 	}
 
 	public interface ISettable {
+		string Override { get; set; }
 		void Set(object value);
+		int GetInt();
 	}
 }

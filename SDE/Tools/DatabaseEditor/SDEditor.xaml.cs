@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Database;
@@ -104,7 +105,7 @@ namespace SDE.Tools.DatabaseEditor {
 			_tmbUndo.SetUndo(_clientDatabase.Commands);
 			_tmbRedo.SetRedo(_clientDatabase.Commands);
 
-			ListViewDataTemplateHelper.GenerateListViewTemplateNew(_debugList, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			Others.Extensions.GenerateListViewTemplate(_debugList, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = "#", DisplayExpression = "ErrorNumber", SearchGetAccessor = "ErrorNumber", FixedWidth = 35, ToolTipBinding = "ErrorNumber", TextAlignment = TextAlignment.Right },
 				new ListViewDataTemplateHelper.ImageColumnInfo { Header = "", DisplayExpression = "DataImage", SearchGetAccessor = "Exception", FixedWidth = 20, MaxHeight = 24 },
 				new ListViewDataTemplateHelper.RangeColumnInfo { Header = "Exception", DisplayExpression = "Exception", SearchGetAccessor = "Exception", IsFill = true, TextAlignment = TextAlignment.Left, ToolTipBinding="OriginalException", TextWrapping = TextWrapping.Wrap, MinWidth = 120 },
@@ -120,6 +121,10 @@ namespace SDE.Tools.DatabaseEditor {
 
 			DbLoaderErrorHandler.ClearListeners();
 			DbLoaderErrorHandler.AddListener(this);
+
+			_clientDatabase.Reloaded += delegate {
+				_mainTabControl.Dispatch(p => p.RaiseEvent(new SelectionChangedEventArgs(Selector.SelectionChangedEvent, new List<object>(), _mainTabControl.SelectedItem == null ? new List<object>() : new List<object> { _mainTabControl.SelectedItem })));
+			};
 		}
 
 		public AsyncOperation AsyncOperation {
@@ -251,6 +256,15 @@ namespace SDE.Tools.DatabaseEditor {
 		}
 
 		private void _mainTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+			if (e != null && (e.AddedItems.Count > 0 && e.AddedItems[0] as TabItem != null)) {
+				var tabItem = (TabItem) e.AddedItems[0];
+
+				GDbTab tab = tabItem as GDbTab;
+				if (tab != null) {
+					tab.TabSelected();
+				}
+			}
+
 			if (e == null || e.RemovedItems.Count <= 0 || e.RemovedItems[0] as TabItem == null || (e.AddedItems.Count > 0 && e.AddedItems[0] as TabItem == null))
 				return;
 
