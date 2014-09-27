@@ -5,10 +5,9 @@ using System.Linq;
 using ErrorManager;
 using GRF.ContainerFormat.Commands;
 using GRF.Core;
-using SDE.Others.ViewItems;
 using Utilities;
 
-namespace SDE.Others {
+namespace SDE.Core {
 	/// <summary>
 	/// Merges multiple GRFs in one
 	/// </summary>

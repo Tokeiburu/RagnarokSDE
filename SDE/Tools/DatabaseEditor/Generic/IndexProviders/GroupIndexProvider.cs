@@ -10,14 +10,20 @@ namespace SDE.Tools.DatabaseEditor.Generic.IndexProviders {
 			_indexes = indexes;
 		}
 
-		public override List<int> GetIndexes() {
-			return null;
-		}
-
 		public IEnumerable<IEnumerable<int>> Groups {
 			get {
 				return _indexes;
 			}
+		}
+
+		public override IEnumerable<IIndexProvider> Providers {
+			get {
+				return Groups.Select(_detect);
+			}
+		}
+
+		public override List<int> GetIndexes() {
+			return null;
 		}
 
 		public override object Next() {
@@ -29,12 +35,6 @@ namespace SDE.Tools.DatabaseEditor.Generic.IndexProviders {
 				return null;
 
 			return _bufferedIndexes[_position];
-		}
-
-		public override IEnumerable<IIndexProvider> Providers {
-			get {
-				return Groups.Select(_detect);
-			}
 		}
 
 		private IIndexProvider _detect(IEnumerable<int> @group) {

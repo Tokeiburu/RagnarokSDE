@@ -8,7 +8,6 @@ using System.Windows.Controls;
 using Database;
 using Database.Commands;
 using ErrorManager;
-using SDE.Tools.DatabaseEditor.Engines.Parsers;
 using SDE.Tools.DatabaseEditor.Engines.TabNavigationEngine;
 using SDE.Tools.DatabaseEditor.Generic;
 using SDE.Tools.DatabaseEditor.Generic.Core;
@@ -22,7 +21,6 @@ using SDE.Tools.DatabaseEditor.Writers;
 using TokeiLibrary;
 using TokeiLibrary.WPF;
 using Utilities;
-using Utilities.Extension;
 
 namespace SDE.Tools.DatabaseEditor.Engines {
 	/// <summary>
@@ -400,23 +398,6 @@ namespace SDE.Tools.DatabaseEditor.Engines {
 			return builder.ToString().Replace('_', ' ').Trim(' ', '\t');
 		}
 
-		public class CustomAttribute : DbAttribute {
-			public CustomAttribute(DbAttribute attribute) : base(attribute) {
-			}
-
-			public CustomAttribute(string name, Type type, object @default) : base(name, type, @default) {
-			}
-
-			public CustomAttribute(string name, Type type, object @default, string displayName, string comment) : base(name, type, @default, displayName) {
-				Description = comment;
-				DataConverter = ValueConverters.GetSetZeroString;
-			}
-
-			public void SetDataType(Type type) {
-				DataType = type;
-			}
-		}
-
 		private string _toDisplay(string value) {
 			StringBuilder builder = new StringBuilder();
 			char c;
@@ -443,7 +424,7 @@ namespace SDE.Tools.DatabaseEditor.Engines {
 			return builder.ToString().Trim(' ', '\t');
 		}
 
-		public void Add(TabControl mainTabControl, DbHolder holder, TabNavigation tabEngine, SDEditor editor) {
+		public void Add(TabControl mainTabControl, DbHolder holder, TabNavigation tabEngine, SdeEditor editor) {
 			holder.AddTable(_adb);
 			GDbTab copy = holder.GetTab(_adb, mainTabControl);
 
@@ -468,9 +449,9 @@ namespace SDE.Tools.DatabaseEditor.Engines {
 				holder.RemoveTable(_adb);
 				mainTabControl.Items.Remove(copy);
 
-				List<string> tabs = SDEConfiguration.CustomTabs;
+				List<string> tabs = ProjectConfiguration.CustomTabs;
 				tabs.Remove(_file);
-				SDEConfiguration.CustomTabs = tabs.Distinct().ToList();
+				ProjectConfiguration.CustomTabs = tabs.Distinct().ToList();
 			};
 
 			((DisplayLabel) copy.Header).ContextMenu.Items.Add(mitem);
@@ -483,7 +464,28 @@ namespace SDE.Tools.DatabaseEditor.Engines {
 			else if (_adb is AbstractDb<string>)
 				copy.To<string>().SearchEngine.Filter(this);
 
-			editor.GDTabs.Add(copy);
+			editor.GdTabs.Add(copy);
 		}
+
+		#region Nested type: CustomAttribute
+
+		public class CustomAttribute : DbAttribute {
+			public CustomAttribute(DbAttribute attribute) : base(attribute) {
+			}
+
+			public CustomAttribute(string name, Type type, object @default) : base(name, type, @default) {
+			}
+
+			public CustomAttribute(string name, Type type, object @default, string displayName, string comment) : base(name, type, @default, displayName) {
+				Description = comment;
+				DataConverter = ValueConverters.GetSetZeroString;
+			}
+
+			public void SetDataType(Type type) {
+				DataType = type;
+			}
+		}
+
+		#endregion
 	}
 }

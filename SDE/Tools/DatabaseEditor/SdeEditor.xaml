@@ -1,4 +1,4 @@
-﻿<Styles:TkWindow x:Class="SDE.Tools.DatabaseEditor.SDEditor"
+﻿<Styles:TkWindow x:Class="SDE.Tools.DatabaseEditor.SdeEditor"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary" SnapsToDevicePixels="True"

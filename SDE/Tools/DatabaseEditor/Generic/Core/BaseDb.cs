@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Windows.Controls;
 using Database;
 using SDE.Tools.DatabaseEditor.Engines.DatabaseEngine;
@@ -14,16 +12,16 @@ namespace SDE.Tools.DatabaseEditor.Generic.Core {
 	/// to write it and how to display its attributes.
 	/// </summary>
 	public abstract class BaseDb {
-		public object LayoutIndexes { get; set; }
-		public object GridIndexes { get; protected set; }
-		public DbAttribute[] LayoutSearch { get; protected set; }
-
 		protected BaseDb() {
 			CanBeLoaded = true;
 			IsGenerateTab = true;
 			ThrowFileNotFoundException = true;
 			Attached = new ObservableDictionary<string, object>();
 		}
+
+		public object LayoutIndexes { get; set; }
+		public object GridIndexes { get; protected set; }
+		public DbAttribute[] LayoutSearch { get; protected set; }
 
 		public DbHolder Holder { get; set; }
 		public ServerDbs DbSource { get; set; }

@@ -18,19 +18,17 @@ namespace SDE {
 	/// </summary>
 	public partial class App : Application {
 		public App() {
-			Configuration.ConfigAsker = SDEAppConfiguration.ConfigAsker;
-			SDEConfiguration.ConfigAsker = SDEAppConfiguration.ConfigAsker;
-			Settings.TempPath = GrfPath.Combine(SDEAppConfiguration.ProgramDataPath, "~tmp");
-			ErrorHandler.SetErrorHandler(new SDEErrorHandler());
+			Configuration.ConfigAsker = SdeAppConfiguration.ConfigAsker;
+			ProjectConfiguration.ConfigAsker = SdeAppConfiguration.ConfigAsker;
+			Settings.TempPath = GrfPath.Combine(SdeAppConfiguration.ProgramDataPath, "~tmp");
+			ErrorHandler.SetErrorHandler(new SdeErrorHandler());
 			TemporaryFilesManager.ClearTemporaryFiles();
 		}
 
 		protected override void OnStartup(StartupEventArgs e) {
 			ApplicationManager.CrashReportEnabled = true;
 			ImageConverterManager.AddConverter(new DefaultImageConverter());
-
 			Configuration.SetImageRendering(Resources);
-
 
 			Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/" + Assembly.GetEntryAssembly().GetName().Name.Replace(" ", "%20") + ";component/WPF/Styles/GRFEditorStyles.xaml", UriKind.RelativeOrAbsolute) });
 			

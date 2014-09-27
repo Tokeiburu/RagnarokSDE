@@ -18,7 +18,6 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 		public Action CustomAddItemMethod;
 		public TabGenerator<TKey>.TabGeneratorDelegate Loaded;
 		public string Style = "TabItemStyled";
-		public TabControl Control { get; set; }
 
 		public GTabSettings(ServerDbs serverDb, BaseDb gdb) {
 			DbData = serverDb;
@@ -32,6 +31,8 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 		public GTabSettings(BaseDb db) : this(db.DbSource, db) {
 		}
+
+		public TabControl Control { get; set; }
 
 		public bool CanBeDelayed { get; set; }
 

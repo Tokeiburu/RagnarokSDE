@@ -4,9 +4,9 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using SDE.Others;
+using SDE.Core;
+using SDE.Tools.DatabaseEditor.Engines;
 using SDE.Tools.DatabaseEditor.Engines.Parsers;
-using SDE.Tools.DatabaseEditor.Services;
 using TokeiLibrary.WPF.Styles;
 
 namespace SDE.Tools.DatabaseEditor.WPF {

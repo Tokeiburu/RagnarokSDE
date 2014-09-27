@@ -8,7 +8,7 @@ using ErrorManager;
 using GRF.IO;
 using GRF.Threading;
 using SDE.ApplicationConfiguration;
-using SDE.Others;
+using SDE.Core;
 using SDE.Tools.DatabaseEditor.Engines;
 using SDE.Tools.DatabaseEditor.Generic.DbLoaders;
 using SDE.Tools.DatabaseEditor.Generic.TabsMakerCore;
@@ -20,7 +20,7 @@ using Utilities;
 using Utilities.Services;
 
 namespace SDE.Tools.DatabaseEditor {
-	public partial class SDEditor : TkWindow {
+	public partial class SdeEditor : TkWindow {
 		private readonly MetaGrfHolder _metaGrf = new MetaGrfHolder();
 		private bool _delayedReloadDatabase;
 		private TextViewItem _tviItemDb;
@@ -43,15 +43,15 @@ namespace SDE.Tools.DatabaseEditor {
 				if (ShouldCancelDbReload()) return;
 
 				if (fileNameSettings != null) {
-					if (fileNameSettings == SDEConfiguration.DefaultFileName) {
-						GrfPath.Delete(SDEConfiguration.DefaultFileName);
+					if (fileNameSettings == ProjectConfiguration.DefaultFileName) {
+						GrfPath.Delete(ProjectConfiguration.DefaultFileName);
 					}
 
-					SDEConfiguration.ConfigAsker = new ConfigAsker(fileNameSettings);
+					ProjectConfiguration.ConfigAsker = new ConfigAsker(fileNameSettings);
 					_recentFilesManager.AddRecentFile(fileNameSettings);
 				}
 
-				Title = "Server database editor - " + Methods.CutFileName(SDEConfiguration.ConfigAsker.ConfigFile);
+				Title = "Server database editor - " + Methods.CutFileName(ProjectConfiguration.ConfigAsker.ConfigFile);
 
 				_loadDatabaseFiles();
 				_metaGrfViewer.LoadResourcesInfo();
@@ -65,11 +65,11 @@ namespace SDE.Tools.DatabaseEditor {
 			try {
 				if (ShouldCancelDbReload()) return false;
 
-				for (int i = 0; i < GDTabs.Count; i++) {
-					if (GDTabs[i].DbComponent.IsCustom) {
-						GDbTab tab = GDTabs[i];
+				for (int i = 0; i < GdTabs.Count; i++) {
+					if (GdTabs[i].DbComponent.IsCustom) {
+						GDbTab tab = GdTabs[i];
 						_mainTabControl.Dispatch(p => p.Items.Remove(tab));
-						GDTabs.RemoveAt(i);
+						GdTabs.RemoveAt(i);
 						_holder.RemoveTable(tab.DbComponent);
 						i--;
 					}
@@ -91,13 +91,13 @@ namespace SDE.Tools.DatabaseEditor {
 
 		private void _loadSettingsTab() {
 			_metaGrfViewer.SaveResourceMethod = delegate(string resources) {
-				SDEConfiguration.SDEditorResources = resources;
+				ProjectConfiguration.SdeEditorResources = resources;
 				ReloadSettings();
 			};
 
-			SDEAppConfiguration.Bind(_cbEnableBackups, () => SDEAppConfiguration.BackupsManagerState, v => SDEAppConfiguration.BackupsManagerState = v);
+			SdeAppConfiguration.Bind(_cbEnableBackups, () => SdeAppConfiguration.BackupsManagerState, v => SdeAppConfiguration.BackupsManagerState = v);
 
-			_metaGrfViewer.LoadResourceMethod = () => Methods.StringToList(SDEConfiguration.SDEditorResources);
+			_metaGrfViewer.LoadResourceMethod = () => Methods.StringToList(ProjectConfiguration.SdeEditorResources);
 			_metaGrfViewer.LoadResourcesInfo();
 
 			_loadEncoding();
@@ -110,7 +110,7 @@ namespace SDE.Tools.DatabaseEditor {
 			_comboBoxEncoding.Items.Add("Korean (codepage 949 - ANSI/OEM Korean [Unified Hangul Code])");
 			_comboBoxEncoding.Items.Add("Other...");
 
-			switch (SDEAppConfiguration.EncodingCodepage) {
+			switch (SdeAppConfiguration.EncodingCodepage) {
 				case 1252:
 					_comboBoxEncoding.SelectedIndex = 0;
 					break;
@@ -118,7 +118,7 @@ namespace SDE.Tools.DatabaseEditor {
 					_comboBoxEncoding.SelectedIndex = 1;
 					break;
 				default:
-					_comboBoxEncoding.Items[2] = SDEAppConfiguration.EncodingCodepage + "...";
+					_comboBoxEncoding.Items[2] = SdeAppConfiguration.EncodingCodepage + "...";
 					_comboBoxEncoding.SelectedIndex = 2;
 					break;
 			}
@@ -129,7 +129,7 @@ namespace SDE.Tools.DatabaseEditor {
 		public bool SetEncoding(int encoding) {
 			try {
 				EncodingService.SetDisplayEncoding(encoding);
-				SDEAppConfiguration.EncodingCodepage = encoding;
+				SdeAppConfiguration.EncodingCodepage = encoding;
 				return true;
 			}
 			catch (Exception err) {
@@ -197,7 +197,7 @@ namespace SDE.Tools.DatabaseEditor {
 		}
 
 		private void _loadTxtFiles() {
-			_tviItemDb = new TextViewItem(null, SDEConfiguration.DatabasePath, _metaGrf, SdeFiles.ServerDbPath) { Description = "Server DB path" };
+			_tviItemDb = new TextViewItem(null, ProjectConfiguration.DatabasePath, _metaGrf, SdeFiles.ServerDbPath) { Description = "Server DB path" };
 			_tviItemDb.Browser.BrowseMode = PathBrowser.BrowseModeType.Folder;
 			_tviItemDb.HorizontalAlignment = HorizontalAlignment.Left;
 			_tviItemDb.Margin = new Thickness(4, 0, 0, 0);
@@ -214,7 +214,7 @@ namespace SDE.Tools.DatabaseEditor {
 		private void _loadDatabaseFiles() {
 			try {
 				_tviItemDb.TextBoxItem.TextChanged -= _tviItemDb_TextChanged;
-				_tviItemDb.TextBoxItem.Text = SDEConfiguration.DatabasePath;
+				_tviItemDb.TextBoxItem.Text = ProjectConfiguration.DatabasePath;
 				_tviItemDb.TextBoxItem.TextChanged += _tviItemDb_TextChanged;
 			}
 			catch (Exception err) {
@@ -229,7 +229,7 @@ namespace SDE.Tools.DatabaseEditor {
 				TextViewItem item = WpfUtilities.FindParentControl<TextViewItem>(sender as TextBox);
 
 				if (item != null) {
-					SDEConfiguration.DatabasePath = _tviItemDb.TextBoxItem.Text;
+					ProjectConfiguration.DatabasePath = _tviItemDb.TextBoxItem.Text;
 					item.CheckValid();
 				}
 			}
@@ -302,7 +302,7 @@ namespace SDE.Tools.DatabaseEditor {
 		}
 
 		private void _addCustomTables() {
-			foreach (string file in SDEConfiguration.CustomTabs) {
+			foreach (string file in ProjectConfiguration.CustomTabs) {
 				if (File.Exists(file)) {
 					DbMaker maker = new DbMaker(file);
 

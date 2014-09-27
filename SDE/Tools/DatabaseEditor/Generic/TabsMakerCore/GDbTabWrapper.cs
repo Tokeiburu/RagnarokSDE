@@ -23,7 +23,7 @@ using TokeiLibrary.Shortcuts;
 using TokeiLibrary.WPF;
 using TokeiLibrary.WPF.Styles.ListView;
 using Utilities.Extension;
-using Extensions = SDE.Others.Extensions;
+using Extensions = SDE.Core.Extensions;
 
 namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 	public class GDbTabWrapper<TKey, TValue> : GDbTab where TValue : Tuple {

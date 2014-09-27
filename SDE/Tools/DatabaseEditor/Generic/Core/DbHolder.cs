@@ -14,6 +14,10 @@ namespace SDE.Tools.DatabaseEditor.Generic.Core {
 
 		public GenericDatabase Database { get; private set; }
 
+		public List<BaseDb> DBs {
+			get { return _dbs; }
+		}
+
 		public virtual void Instantiate(GenericDatabase database) {
 			Database = database;
 
@@ -41,10 +45,6 @@ namespace SDE.Tools.DatabaseEditor.Generic.Core {
 
 			_dbs.ForEach(p => p.Holder = this);
 			_dbs.ForEach(p => p.Init(database));
-		}
-
-		public List<BaseDb> DBs {
-			get { return _dbs; }
 		}
 
 		public void AddTable(BaseDb db) {

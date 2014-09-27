@@ -12,7 +12,7 @@ namespace SDE.ApplicationConfiguration {
 	/// <summary>
 	/// Program's configuration (stored in config.txt)
 	/// </summary>
-	public static class SDEAppConfiguration {
+	public static class SdeAppConfiguration {
 		private static ConfigAsker _configAsker;
 
 		public static ConfigAsker ConfigAsker {

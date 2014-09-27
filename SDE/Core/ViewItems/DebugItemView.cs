@@ -5,7 +5,7 @@ using System.Windows.Media.Imaging;
 using ErrorManager;
 using TokeiLibrary;
 
-namespace SDE.Others.ViewItems {
+namespace SDE.Core.ViewItems {
 	/// <summary>
 	/// Item to be showed in the error console
 	/// </summary>

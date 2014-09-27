@@ -35,9 +35,9 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 		private DbAttribute[] _attributes;
 		private ComboBox _cbSearchItemsMode;
 		private DatabaseItemSorter<TValue> _entryComparer;
+		private bool _isLoaded;
 		private ListView _items;
 		private Grid _searchDrop;
-		private bool _isLoaded;
 		private bool _searchFirstTimeSet;
 		private string _searchItemsFilter = "";
 		private Table<TKey, TValue> _table;
@@ -46,7 +46,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 		public GSearchEngine(string tabName, GTabSettings<TKey, TValue> settings) {
 			_settings = settings;
-			_itemsSearchSettings = new GSearchSettings(SDEConfiguration.ConfigAsker, tabName);
+			_itemsSearchSettings = new GSearchSettings(ProjectConfiguration.ConfigAsker, tabName);
 		}
 
 		public bool IsFiltering { get; private set; }

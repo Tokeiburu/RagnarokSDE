@@ -1,8 +1,7 @@
 using System;
-using System.IO;
 using SDE.Tools.DatabaseEditor.Engines.BackupsEngine;
 
-namespace SDE.Others.ViewItems {
+namespace SDE.Core.ViewItems {
 	/// <summary>
 	/// Backup view for list views
 	/// </summary>

@@ -17,7 +17,7 @@ using TokeiLibrary.WPF;
 using TokeiLibrary.WPF.Styles.ListView;
 using Utilities;
 using Utilities.Extension;
-using Extensions = SDE.Others.Extensions;
+using Extensions = SDE.Core.Extensions;
 
 namespace SDE.Tools.DatabaseEditor.Generic.UI.FormatConverters {
 	public partial class CustomItemGroupDisplay<TKey> : FormatConverter<TKey, ReadableTuple<TKey>> {

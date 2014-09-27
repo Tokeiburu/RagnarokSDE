@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using SDE.Tools.DatabaseEditor.Generic.Core;
+﻿using SDE.Tools.DatabaseEditor.Generic.Core;
 
 namespace SDE.Tools.DatabaseEditor.Generic.Lists {
 	public sealed class ServerDbs {

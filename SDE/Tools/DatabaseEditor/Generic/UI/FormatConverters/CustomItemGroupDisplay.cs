@@ -16,7 +16,7 @@ using SDE.Tools.DatabaseEditor.Generic.TabsMakerCore;
 using SDE.Tools.DatabaseEditor.WPF;
 using TokeiLibrary;
 using TokeiLibrary.WPF;
-using Extensions = SDE.Others.Extensions;
+using Extensions = SDE.Core.Extensions;
 
 namespace SDE.Tools.DatabaseEditor.Generic.UI.FormatConverters {
 	public partial class CustomItemGroupDisplay<TKey> : FormatConverter<TKey, ReadableTuple<TKey>> {

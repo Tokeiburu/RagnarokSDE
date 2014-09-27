@@ -8,7 +8,7 @@ using TokeiLibrary;
 using TokeiLibrary.WPF;
 using TokeiLibrary.WPF.Styles.ListView;
 
-namespace SDE.Others {
+namespace SDE.Core {
 	public static class Extensions {
 		private static readonly Dictionary<RangeListView, object> _defaultSearches = new Dictionary<RangeListView, object>();
 

@@ -8,7 +8,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Database;
-using Database.Commands;
 using ErrorManager;
 using SDE.Tools.DatabaseEditor.Engines.DatabaseEngine;
 using SDE.Tools.DatabaseEditor.Engines.TabNavigationEngine;

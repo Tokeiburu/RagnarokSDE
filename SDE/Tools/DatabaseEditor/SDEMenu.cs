@@ -9,8 +9,8 @@ using GRF.FileFormats;
 using GRF.IO;
 using GRF.Threading;
 using SDE.ApplicationConfiguration;
-using SDE.Others;
-using SDE.Others.ViewItems;
+using SDE.Core;
+using SDE.Core.ViewItems;
 using SDE.Tools.DatabaseEditor.Engines.TabNavigationEngine;
 using SDE.Tools.DatabaseEditor.Generic.Core;
 using SDE.Tools.DatabaseEditor.Generic.DbLoaders;
@@ -18,10 +18,10 @@ using SDE.Tools.DatabaseEditor.Generic.TabsMakerCore;
 using TokeiLibrary;
 using TokeiLibrary.WPF;
 using TokeiLibrary.WPF.Styles;
-using Configuration = SDE.ApplicationConfiguration.SDEAppConfiguration;
+using Configuration = SDE.ApplicationConfiguration.SdeAppConfiguration;
 
 namespace SDE.Tools.DatabaseEditor {
-	public partial class SDEditor : TkWindow {
+	public partial class SdeEditor : TkWindow {
 		private SdeRecentFiles _recentFilesManager;
 
 		private void _loadMenu() {
@@ -69,7 +69,7 @@ namespace SDE.Tools.DatabaseEditor {
 			}
 		}
 		private void _menuItemNewProject_Click(object sender, RoutedEventArgs e) {
-			ReloadSettings(SDEConfiguration.DefaultFileName);
+			ReloadSettings(ProjectConfiguration.DefaultFileName);
 		}
 		private void _menuItemDatabaseSave_Click(object sender, RoutedEventArgs e) {
 			try {
@@ -91,14 +91,14 @@ namespace SDE.Tools.DatabaseEditor {
 			try {
 				string file = PathRequest.SaveFileCde(
 					"filter", FileFormat.MergeFilters(Format.Sde),
-					"fileName", Path.GetFileName(SDEConfiguration.ConfigAsker.ConfigFile));
+					"fileName", Path.GetFileName(ProjectConfiguration.ConfigAsker.ConfigFile));
 
 				if (file != null) {
-					if (file == SDEConfiguration.ConfigAsker.ConfigFile) { }
+					if (file == ProjectConfiguration.ConfigAsker.ConfigFile) { }
 					else {
 						try {
 							GrfPath.Delete(file);
-							File.Copy(SDEConfiguration.ConfigAsker.ConfigFile, file);
+							File.Copy(ProjectConfiguration.ConfigAsker.ConfigFile, file);
 						}
 						catch (Exception err) {
 							ErrorHandler.HandleException(err);
@@ -130,7 +130,7 @@ namespace SDE.Tools.DatabaseEditor {
 			}
 		}
 		private void _menuItemAbout_Click(object sender, RoutedEventArgs e) {
-			WindowProvider.ShowWindow(new AboutDialog(Configuration.PublicVersion, Configuration.RealVersion, Configuration.Author, SDEAppConfiguration.ProgramName, "sdeAboutBackground.jpg"), this);
+			WindowProvider.ShowWindow(new AboutDialog(Configuration.PublicVersion, Configuration.RealVersion, Configuration.Author, SdeAppConfiguration.ProgramName, "sdeAboutBackground.jpg"), this);
 		}
 		private void _menuItemClose_Click(object sender, RoutedEventArgs e) {
 			Close();

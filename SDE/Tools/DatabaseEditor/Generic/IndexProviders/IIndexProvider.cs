@@ -12,24 +12,6 @@ namespace SDE.Tools.DatabaseEditor.Generic.IndexProviders {
 
 		public Type GroupAs { get; set; }
 
-		#region IIndexProvider Members
-
-		public abstract List<int> GetIndexes();
-		public T Next<T>() {
-			return (T) (Next() ?? default(T));
-		}
-
-		public virtual object Next() {
-			if (_position < 0) {
-				_indexes = GetIndexes();
-			}
-
-			if (++_position >= _indexes.Count)
-				return null;
-
-			return _indexes[_position];
-		}
-
 		public virtual IEnumerable<IIndexProvider> Providers {
 			get {
 				yield return this;
@@ -45,7 +27,26 @@ namespace SDE.Tools.DatabaseEditor.Generic.IndexProviders {
 			}
 		}
 
+		#region IIndexProvider Members
+
+		public abstract List<int> GetIndexes();
+
 		#endregion
+
+		public T Next<T>() {
+			return (T) (Next() ?? default(T));
+		}
+
+		public virtual object Next() {
+			if (_position < 0) {
+				_indexes = GetIndexes();
+			}
+
+			if (++_position >= _indexes.Count)
+				return null;
+
+			return _indexes[_position];
+		}
 
 		public static AbstractProvider GetProvider(object input) {
 			if (input == null)

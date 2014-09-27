@@ -32,7 +32,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.BackupsEngine {
 		}
 
 		private string _grfPath {
-			get { return GrfPath.Combine(SDEAppConfiguration.ProgramDataPath, "_backups.grf"); }
+			get { return GrfPath.Combine(SdeAppConfiguration.ProgramDataPath, "_backups.grf"); }
 		}
 
 		public GrfHolder Grf {
@@ -52,7 +52,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.BackupsEngine {
 		}
 
 		public void Start(string dbPath) {
-			if (!SDEAppConfiguration.BackupsManagerState || _isCrashed) return;
+			if (!SdeAppConfiguration.BackupsManagerState || _isCrashed) return;
 			if (dbPath == null) throw new ArgumentNullException("dbPath");
 
 			_currentId++;
@@ -130,7 +130,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.BackupsEngine {
 		}
 
 		public void Stop() {
-			if (!SDEAppConfiguration.BackupsManagerState || _isCrashed) return;
+			if (!SdeAppConfiguration.BackupsManagerState || _isCrashed) return;
 
 			_grf.SyncQuickMerge(null);
 
@@ -144,7 +144,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.BackupsEngine {
 		}
 
 		public void Backup(string file) {
-			if (!SDEAppConfiguration.BackupsManagerState || !_isStarted || _isCrashed) return;
+			if (!SdeAppConfiguration.BackupsManagerState || !_isStarted || _isCrashed) return;
 			if (file == null) throw new ArgumentNullException("file");
 
 			try {

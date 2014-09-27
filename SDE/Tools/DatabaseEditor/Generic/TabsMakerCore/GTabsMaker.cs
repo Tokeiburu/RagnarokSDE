@@ -14,6 +14,7 @@ using SDE.Tools.DatabaseEditor.Engines.DatabaseEngine;
 using SDE.Tools.DatabaseEditor.Engines.TabNavigationEngine;
 using SDE.Tools.DatabaseEditor.Generic.Core;
 using SDE.Tools.DatabaseEditor.Generic.DbLoaders;
+using SDE.Tools.DatabaseEditor.Generic.DbWriters;
 using SDE.Tools.DatabaseEditor.Generic.IndexProviders;
 using SDE.Tools.DatabaseEditor.Generic.Lists;
 using SDE.Tools.DatabaseEditor.Generic.UI.CustomControls;
@@ -288,8 +289,8 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 		private static void _loaded<TKey>(GDbTabWrapper<TKey, ReadableTuple<TKey>> tab, GTabSettings<TKey, ReadableTuple<TKey>> settings, BaseDb gdb) {
 			string property = "[Server database editor - Enabled state - " + settings.DbData.DisplayName + "]";
 
-			Func<bool> getConfig = () => Boolean.Parse(SDEConfiguration.ConfigAsker[property, true.ToString()]);
-			Action<bool> setConfig = v => SDEConfiguration.ConfigAsker[property] = v.ToString();
+			Func<bool> getConfig = () => Boolean.Parse(ProjectConfiguration.ConfigAsker[property, true.ToString()]);
+			Action<bool> setConfig = v => ProjectConfiguration.ConfigAsker[property] = v.ToString();
 			Func<string> getHeader = () => getConfig() ? "Disable" : "Enable";
 			Func<string> getFullHeader = () => String.Format("{0} '{1}'", getHeader(), settings.DbData.Filename.Replace("_", "__"));
 			Func<Image> getIcon = () => getConfig() ? new Image {Source = (BitmapSource) ApplicationManager.PreloadResourceImage("error16.png")} : new Image {Source = (BitmapSource) ApplicationManager.PreloadResourceImage("validity.png")};
@@ -428,7 +429,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				AddToCommandsStack = false,
 				GenericCommand = delegate(List<ReadableTuple<TKey>> items) {
 					StringBuilder builder = new StringBuilder();
-					DbWriters.DbWriterMethods.DbItemsWriterSub(builder, db, items.OrderBy(p => p.GetKey<TKey>()), ServerType.RAthena);
+					DbWriterMethods.DbItemsWriterSub(builder, db, items.OrderBy(p => p.GetKey<TKey>()), ServerType.RAthena);
 					Clipboard.SetText(builder.ToString());
 				}
 			});
@@ -442,7 +443,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				AddToCommandsStack = false,
 				GenericCommand = delegate(List<ReadableTuple<TKey>> items) {
 					StringBuilder builder = new StringBuilder();
-					DbWriters.DbWriterMethods.DbItemsWriterSub(builder, db, items, ServerType.Hercules);
+					DbWriterMethods.DbItemsWriterSub(builder, db, items, ServerType.Hercules);
 					Clipboard.SetText(builder.ToString(), TextDataFormat.UnicodeText);
 				}
 			});
@@ -453,7 +454,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			return tab;
 		}
 		public static void ItemGroupCopyEntries(List<ReadableTuple<int>> items, BaseDb gdb, TabControl control, ServerType serverType) {
-			var parent = WpfUtilities.FindDirectParentControl<SDEditor>(control);
+			var parent = WpfUtilities.FindDirectParentControl<SdeEditor>(control);
 			parent.AsyncOperation.SetAndRunOperation(new GrfThread(delegate {
 				items = items.OrderBy(p => p.GetKey<int>()).ToList();
 
@@ -470,7 +471,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 					for (int i = 0; i < items.Count; i++) {
 						AProgress.IsCancelling(parent);
-						DbWriters.DbWriterMethods.DbItemGroupWriter2(items[i], serverType, builder, gdb, aegisNames, names);
+						DbWriterMethods.DbItemGroupWriter2(items[i], serverType, builder, gdb, aegisNames, names);
 						parent.Progress = (i + 1f) / items.Count * 100f;
 					}
 				}

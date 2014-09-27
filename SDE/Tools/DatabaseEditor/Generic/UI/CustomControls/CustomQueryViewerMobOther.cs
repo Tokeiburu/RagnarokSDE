@@ -18,7 +18,7 @@ using SDE.Tools.DatabaseEditor.WPF;
 using TokeiLibrary;
 using TokeiLibrary.WPF;
 using TokeiLibrary.WPF.Styles.ListView;
-using Extensions = SDE.Others.Extensions;
+using Extensions = SDE.Core.Extensions;
 
 namespace SDE.Tools.DatabaseEditor.Generic.UI.CustomControls {
 	public class CustomQueryViewerMobOther<TKey, TValue> : ICustomControl<TKey, TValue> where TValue : Tuple {

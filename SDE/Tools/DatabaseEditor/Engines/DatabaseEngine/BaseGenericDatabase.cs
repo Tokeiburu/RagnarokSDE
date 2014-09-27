@@ -1,4 +1,4 @@
-﻿using SDE.Others;
+﻿using SDE.Core;
 
 namespace SDE.Tools.DatabaseEditor.Engines.DatabaseEngine {
 	/// <summary>

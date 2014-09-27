@@ -8,7 +8,7 @@
         <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Right" >
             <DockPanel>
                 <Label Content="Version " FontWeight="Bold" Foreground="White" Padding="0" VerticalAlignment="Center" Margin="5 5 0 5" />
-                <Label Content="{x:Static ApplicationConfiguration:SDEAppConfiguration.PublicVersion}" VerticalAlignment="Center" FontWeight="Bold" Foreground="White" Padding="0" Margin="0 5 5 5" />
+                <Label Content="{x:Static ApplicationConfiguration:SdeAppConfiguration.PublicVersion}" VerticalAlignment="Center" FontWeight="Bold" Foreground="White" Padding="0" Margin="0 5 5 5" />
             </DockPanel>
         </StackPanel>
     </Grid>

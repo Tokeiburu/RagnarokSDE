@@ -3,7 +3,7 @@ using System.Windows.Controls;
 using TokeiLibrary;
 using Utilities;
 
-namespace SDE.Others {
+namespace SDE.Core {
 	/// <summary>
 	/// Recent files menu item
 	/// </summary>

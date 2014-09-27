@@ -64,7 +64,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				return false;
 			}
 
-			if (!Boolean.Parse(SDEConfiguration.ConfigAsker["[Server database editor - Enabled state - " + settings.DbData.DisplayName + "]", true.ToString()])) {
+			if (!Boolean.Parse(ProjectConfiguration.ConfigAsker["[Server database editor - Enabled state - " + settings.DbData.DisplayName + "]", true.ToString()])) {
 				return false;
 			}
 

@@ -21,11 +21,11 @@ namespace SDE.ApplicationConfiguration {
 	/// - System.Windows.MessageBox's dialog window
 	/// - If all the above fails, the exception is stored in crash.log or debug.log
 	/// </summary>
-	public class SDEErrorHandler : IErrorHandler {
+	public class SdeErrorHandler : IErrorHandler {
 		private static DebuggerDialog _debugDialog;
 		private string _latestException;
 
-		static SDEErrorHandler() {
+		static SdeErrorHandler() {
 			if (Configuration.EnableDebuggerTrace) {
 				if (_debugDialog == null)
 					_debugDialog = new DebuggerDialog();
@@ -49,7 +49,7 @@ namespace SDE.ApplicationConfiguration {
 			else
 				_reportAnyManagedExceptions(exception.Message, exception, errorLevel);
 
-			if (errorLevel < SDEAppConfiguration.WarningLevel) return;
+			if (errorLevel < SdeAppConfiguration.WarningLevel) return;
 
 			if (_exceptionAlreadyShown(exception.Message)) return;
 
@@ -73,7 +73,7 @@ namespace SDE.ApplicationConfiguration {
 		public void Handle(string exception, ErrorLevel errorLevel) {
 			_reportAnyManagedExceptions(exception, null, errorLevel);
 
-			if (errorLevel < SDEAppConfiguration.WarningLevel) return;
+			if (errorLevel < SdeAppConfiguration.WarningLevel) return;
 			if (_exceptionAlreadyShown(exception)) return;
 
 			if (Application.Current != null) {
@@ -102,7 +102,7 @@ namespace SDE.ApplicationConfiguration {
 		// Never used
 		public void Handle(object caller, string exception, ErrorLevel errorLevel) {
 			_reportAnyManagedExceptions(exception, null, errorLevel);
-			if (errorLevel < SDEAppConfiguration.WarningLevel) return;
+			if (errorLevel < SdeAppConfiguration.WarningLevel) return;
 			if (Application.Current != null) {
 				if (!Application.Current.Dispatch(() => Application.Current.MainWindow != null && Application.Current.MainWindow.IsLoaded)) {
 					_showBasicError(_getHeader(errorLevel) + exception, "Service report - " + Path.GetExtension(caller.GetType().ToString()).Remove(0, 1));
@@ -219,7 +219,7 @@ namespace SDE.ApplicationConfiguration {
 							crash += "\r\n" + ApplicationManager.PrettyLine("Inner exception") + "\r\n" + exception.InnerException;
 					}
 					catch { }
-					File.AppendAllText(Path.Combine(SDEAppConfiguration.ProgramDataPath, "debug.log"), crash);
+					File.AppendAllText(Path.Combine(SdeAppConfiguration.ProgramDataPath, "debug.log"), crash);
 				}
 				catch { }
 			}

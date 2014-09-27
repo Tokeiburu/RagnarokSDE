@@ -57,20 +57,20 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 		}
 
 		public static void Focus() {
-			if (_listeners.Count > 0 && _listeners[0] is SDEditor) {
-				((SDEditor) _listeners[0]).Dispatch(p => p._mainTabControl.SelectedIndex = 1);
+			if (_listeners.Count > 0 && _listeners[0] is SdeEditor) {
+				((SdeEditor) _listeners[0]).Dispatch(p => p._mainTabControl.SelectedIndex = 1);
 			}
 		}
 
 		public static void Start() {
-			if (_listeners.Count > 0 && _listeners[0] is SDEditor) {
-				_start = ((SDEditor)_listeners[0]).Dispatch(p => p._debugList.Items.Count);
+			if (_listeners.Count > 0 && _listeners[0] is SdeEditor) {
+				_start = ((SdeEditor)_listeners[0]).Dispatch(p => p._debugList.Items.Count);
 			}
 		}
 
 		public static void Stop() {
-			if (_listeners.Count > 0 && _listeners[0] is SDEditor) {
-				if (((SDEditor)_listeners[0]).Dispatch(p => p._debugList.Items.Count) != _start) {
+			if (_listeners.Count > 0 && _listeners[0] is SdeEditor) {
+				if (((SdeEditor)_listeners[0]).Dispatch(p => p._debugList.Items.Count) != _start) {
 					Focus();
 				}
 			}

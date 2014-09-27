@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
-using Database.Commands;
 using ErrorManager;
 using SDE.Tools.DatabaseEditor.Generic.Lists;
 using SDE.Tools.DatabaseEditor.Generic.TabsMakerCore;

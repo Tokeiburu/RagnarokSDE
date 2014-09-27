@@ -9,14 +9,13 @@ using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
+using SDE.Core;
 using SDE.Core.Avalon;
-using SDE.Others;
 using SDE.Tools.DatabaseEditor.Engines.Parsers;
 using TokeiLibrary;
 using TokeiLibrary.WPF.Styles;
 using TokeiLibrary.WPF.Styles.ListView;
 using Utilities;
-using Extensions = TokeiLibrary.WPF.Extensions;
 
 namespace SDE.Tools.DatabaseEditor.WPF {
 	/// <summary>
@@ -28,7 +27,7 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 
 		public ScriptEditDialog(string text) : base("Script edit", "cde.ico", SizeToContent.Manual, ResizeMode.CanResize) {
 			InitializeComponent();
-			Others.Extensions.SetMinimalSize(this);
+			Extensions.SetMinimalSize(this);
 
 			AvalonLoader.Load(_textEditor);
 			AvalonLoader.SetSyntax(_textEditor, "Script");
@@ -44,7 +43,7 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 			lv.SelectionMode = SelectionMode.Single;
 
 			//Image
-			Others.Extensions.GenerateListViewTemplate(lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			Extensions.GenerateListViewTemplate(lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 				new ListViewDataTemplateHelper.ImageColumnInfo { Header = "", DisplayExpression = "Image", TextAlignment = TextAlignment.Center, FixedWidth = 22, MaxHeight = 22, SearchGetAccessor = "Commands"},
 				new ListViewDataTemplateHelper.GeneralColumnInfo {Header = "Commands", DisplayExpression = "Text", TextAlignment = TextAlignment.Left, IsFill = true, ToolTipBinding = "Description"}
 			}, null, new string[] { }, "generateHeader", "false");
@@ -113,7 +112,7 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 
 			_completionWindow.Show();
 			_completionWindow.CompletionList.SelectedItem = _completionWindow.CompletionList.CompletionData.FirstOrDefault(p => String.Compare(p.Text, word, StringComparison.OrdinalIgnoreCase) >= 0);
-			Extensions.ScrollToCenterOfView(_completionWindow.CompletionList.ListBox, _completionWindow.CompletionList.SelectedItem);
+			TokeiLibrary.WPF.Extensions.ScrollToCenterOfView(_completionWindow.CompletionList.ListBox, _completionWindow.CompletionList.SelectedItem);
 		}
 
 		protected override void GRFEditorWindowKeyDown(object sender, KeyEventArgs e) {

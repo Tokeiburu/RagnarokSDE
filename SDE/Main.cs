@@ -73,7 +73,7 @@ namespace SDE {
 			Directory.SetCurrentDirectory(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName));
 
 			var app = new App();
-			app.StartupUri = new Uri("Tools\\DatabaseEditor\\SDEditor.xaml", UriKind.Relative);
+			app.StartupUri = new Uri("Tools\\DatabaseEditor\\SdeEditor.xaml", UriKind.Relative);
 			app.Run();
 		}
 

@@ -2,6 +2,8 @@ using System.IO;
 using System.Windows.Controls;
 using Database;
 using SDE.Tools.DatabaseEditor.Engines.DatabaseEngine;
+using SDE.Tools.DatabaseEditor.Generic.DbLoaders;
+using SDE.Tools.DatabaseEditor.Generic.DbWriters;
 using SDE.Tools.DatabaseEditor.Generic.TabsMakerCore;
 using Utilities.Extension;
 
@@ -17,9 +19,9 @@ namespace SDE.Tools.DatabaseEditor.Generic.Core {
 
 		protected AbstractDb() {
 			TabGenerator = new TabGenerator<TKey>();
-			DbLoader = DbLoaders.DbLoaderMethods.DbCommaLoader;
-			DbWriter = DbWriters.DbWriterMethods.DbCommaWriter;
-			DbDirectCopy = DbWriters.DbWriterMethods.DbDirectCopyWriter;
+			DbLoader = DbLoaderMethods.DbCommaLoader;
+			DbWriter = DbWriterMethods.DbCommaWriter;
+			DbDirectCopy = DbWriterMethods.DbDirectCopyWriter;
 		}
 
 		public GenericDatabase Database { get; private set; }

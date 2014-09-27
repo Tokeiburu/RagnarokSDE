@@ -5,7 +5,7 @@ using TokeiLibrary;
 using Utilities;
 using Utilities.Extension;
 
-namespace SDE.Others.ViewItems {
+namespace SDE.Core.ViewItems {
 	/// <summary>
 	/// The view object of a TkPath (used in lists)
 	/// </summary>

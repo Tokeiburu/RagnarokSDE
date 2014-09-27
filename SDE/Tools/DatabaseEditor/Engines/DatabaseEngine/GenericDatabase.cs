@@ -5,7 +5,7 @@ using System.Linq;
 using Database;
 using ErrorManager;
 using GRF.Threading;
-using SDE.Others;
+using SDE.Core;
 using SDE.Tools.DatabaseEditor.Engines.BackupsEngine;
 using SDE.Tools.DatabaseEditor.Generic;
 using SDE.Tools.DatabaseEditor.Generic.Core;
@@ -124,8 +124,8 @@ namespace SDE.Tools.DatabaseEditor.Engines.DatabaseEngine {
 		/// <param name="progress">The progress object.</param>
 		/// <param name="eraseCommands">if set to <c>true</c> [erase commands].</param>
 		public virtual void Save(IProgress progress, bool eraseCommands) {
-			string dbPath = Path.GetDirectoryName(SDEConfiguration.DatabasePath);
-			string subPath = SDEConfiguration.DatabasePath.Replace(dbPath + "\\", "");
+			string dbPath = Path.GetDirectoryName(ProjectConfiguration.DatabasePath);
+			string subPath = ProjectConfiguration.DatabasePath.Replace(dbPath + "\\", "");
 			ServerType serverType = AllLoaders.GetServerType();
 
 			try {

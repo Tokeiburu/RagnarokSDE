@@ -6,7 +6,7 @@ using System.Windows.Input;
 using ErrorManager;
 using GRF.Threading;
 using SDE.ApplicationConfiguration;
-using SDE.Others.ViewItems;
+using SDE.Core.ViewItems;
 using SDE.Tools.DatabaseEditor.Engines.BackupsEngine;
 using SDE.Tools.DatabaseEditor.WPF;
 using TokeiLibrary;
@@ -14,7 +14,7 @@ using TokeiLibrary.WPF;
 using TokeiLibrary.WPF.Styles;
 using TokeiLibrary.WPF.Styles.ListView;
 using Utilities.Services;
-using Extensions = SDE.Others.Extensions;
+using Extensions = SDE.Core.Extensions;
 
 namespace SDE.WPF {
 	/// <summary>

@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Database;
 
-namespace SDE.Tools.DatabaseEditor.Services {
+namespace SDE.Tools.DatabaseEditor.Engines {
 	public static class ToolTipsBuilder {
 		private static readonly Dictionary<Window, string[]> _referencedToolTips = new Dictionary<Window, string[]>();
 		private static readonly Dictionary<Window, int> _referencedToolTipsIndexes = new Dictionary<Window, int>();

@@ -17,14 +17,13 @@ using GRF.System;
 using GRF.Threading;
 using GrfToWpfBridge.Application;
 using SDE.ApplicationConfiguration;
-using SDE.Others.ViewItems;
+using SDE.Core.ViewItems;
 using SDE.Tools.DatabaseEditor.Engines;
 using SDE.Tools.DatabaseEditor.Engines.DatabaseEngine;
 using SDE.Tools.DatabaseEditor.Engines.TabNavigationEngine;
 using SDE.Tools.DatabaseEditor.Generic;
 using SDE.Tools.DatabaseEditor.Generic.Core;
 using SDE.Tools.DatabaseEditor.Generic.DbLoaders;
-using SDE.Tools.DatabaseEditor.Generic.Lists;
 using SDE.Tools.DatabaseEditor.Generic.TabsMakerCore;
 using SDE.Tools.DatabaseEditor.WPF;
 using SDE.WPF;
@@ -35,21 +34,21 @@ using TokeiLibrary.WPF.Styles;
 using TokeiLibrary.WPF.Styles.ListView;
 using Utilities;
 using Utilities.CommandLine;
-using Extensions = SDE.Others.Extensions;
+using Extensions = SDE.Core.Extensions;
 
 namespace SDE.Tools.DatabaseEditor {
 	/// <summary>
 	/// Interaction logic for CDEditor.xaml
 	/// </summary>
-	public partial class SDEditor : TkWindow, IProgress, IErrorListener {
+	public partial class SdeEditor : TkWindow, IProgress, IErrorListener {
+		public readonly List<GDbTab> GdTabs = new List<GDbTab>();
 		private readonly AsyncOperation _asyncOperation;
 		private readonly GenericDatabase _clientDatabase;
 		private readonly ObservableCollection<DebugItemView> _debugItems;
-		public readonly List<GDbTab> GDTabs = new List<GDbTab>();
 		private DbHolder _holder;
 		private TabNavigation _tabEngine;
 
-		public SDEditor() : base("Server database editor", "cde.ico", SizeToContent.Manual, ResizeMode.CanResize) {
+		public SdeEditor() : base("Server database editor", "cde.ico", SizeToContent.Manual, ResizeMode.CanResize) {
 			SplashDialog loading = new SplashDialog();
 			loading.Show();
 			Loaded += delegate {
@@ -58,13 +57,13 @@ namespace SDE.Tools.DatabaseEditor {
 
 			string configFile = _parseCommandLineArguments();
 
-			GrfPath.Delete(SDEConfiguration.DefaultFileName);
+			GrfPath.Delete(ProjectConfiguration.DefaultFileName);
 
 			if (configFile == null) {
-				SDEConfiguration.ConfigAsker = new ConfigAsker(SDEConfiguration.DefaultFileName);
+				ProjectConfiguration.ConfigAsker = new ConfigAsker(ProjectConfiguration.DefaultFileName);
 			}
 			else if (File.Exists(configFile)) {
-				SDEConfiguration.ConfigAsker = new ConfigAsker(configFile);
+				ProjectConfiguration.ConfigAsker = new ConfigAsker(configFile);
 			}
 
 			InitializeComponent();
@@ -81,7 +80,7 @@ namespace SDE.Tools.DatabaseEditor {
 			_clientDatabase.Modified += new BaseGenericDatabase.ClientDatabaseEventHandler(_clientDatabase_Modified);
 
 			_cbAssociate.Checked -= new RoutedEventHandler(_cbAssociate_Checked);
-			_cbAssociate.IsChecked = (SDEAppConfiguration.FileShellAssociated & FileAssociation.Sde) == FileAssociation.Sde;
+			_cbAssociate.IsChecked = (SdeAppConfiguration.FileShellAssociated & FileAssociation.Sde) == FileAssociation.Sde;
 			_cbAssociate.Checked += new RoutedEventHandler(_cbAssociate_Checked);
 
 			ApplicationShortcut.Link(ApplicationShortcut.Undo, () => _clientDatabase.Commands.Undo(), this);
@@ -101,9 +100,9 @@ namespace SDE.Tools.DatabaseEditor {
 			ApplicationShortcut.Link(ApplicationShortcut.Save, () => _menuItemDatabaseSave_Click(this, null), this);
 			ApplicationShortcut.Link(ApplicationShortcut.SaveAll, () => _menuItemDatabaseSaveAll_Click(this, null), this);
 			
-			SDEAppConfiguration.Bind(_cbStackTrace, () => Configuration.EnableDebuggerTrace, v => {
+			SdeAppConfiguration.Bind(_cbStackTrace, () => Configuration.EnableDebuggerTrace, v => {
 				Configuration.EnableDebuggerTrace = v;
-				SDEErrorHandler.ShowStackTraceViewer();
+				SdeErrorHandler.ShowStackTraceViewer();
 			});
 
 			_tnbUndo.SetUndo(_tabEngine);
@@ -164,7 +163,7 @@ namespace SDE.Tools.DatabaseEditor {
 		}
 
 		public List<GDbTab> Tabs {
-			get { return GDTabs; }
+			get { return GdTabs; }
 		}
 
 		#region IErrorListener Members
@@ -214,12 +213,12 @@ namespace SDE.Tools.DatabaseEditor {
 		}
 
 		private void _clientDatabase_Modified(object sender) {
-			Dispatcher.BeginInvoke(new Action(() => Title = "Server database editor - " + Methods.CutFileName(SDEConfiguration.ConfigAsker.ConfigFile) + (_clientDatabase.IsModified ? " *" : "")));
+			Dispatcher.BeginInvoke(new Action(() => Title = "Server database editor - " + Methods.CutFileName(ProjectConfiguration.ConfigAsker.ConfigFile) + (_clientDatabase.IsModified ? " *" : "")));
 		}
 
 		private void _loadGenericTab() {
 			try {
-				SDEConfiguration.ConfigAsker.IsAutomaticSaveEnabled = false;
+				ProjectConfiguration.ConfigAsker.IsAutomaticSaveEnabled = false;
 
 				_holder = new DbHolder();
 #if SDE_DEBUG
@@ -229,7 +228,7 @@ namespace SDE.Tools.DatabaseEditor {
 #if SDE_DEBUG
 				CLHelper.WL = " : _CS_CDms";
 #endif
-				GDTabs.AddRange(_holder.GetTabs(_mainTabControl));
+				GdTabs.AddRange(_holder.GetTabs(_mainTabControl));
 
 				foreach (var tab in _clientDatabase.AllTables) {
 					var copy = tab.Value;
@@ -244,7 +243,7 @@ namespace SDE.Tools.DatabaseEditor {
 					}
 				}
 
-				foreach (var tab in GDTabs) {
+				foreach (var tab in GdTabs) {
 					var copy = tab;
 					copy._listView.SelectionChanged += delegate(object sender, SelectionChangedEventArgs args) {
 						if (sender is ListView) {
@@ -254,13 +253,13 @@ namespace SDE.Tools.DatabaseEditor {
 					};
 				}
 
-				foreach (GDbTab tab in GDTabs) {
+				foreach (GDbTab tab in GdTabs) {
 					GDbTab tabCopy = tab;
 					_mainTabControl.Items.Insert(_mainTabControl.Items.Count, tabCopy);
 				}
 			}
 			finally {
-				SDEConfiguration.ConfigAsker.IsAutomaticSaveEnabled = true;
+				ProjectConfiguration.ConfigAsker.IsAutomaticSaveEnabled = true;
 			}
 		}
 
@@ -359,12 +358,12 @@ namespace SDE.Tools.DatabaseEditor {
 		}
 
 		private void _cbAssociate_Checked(object sender, RoutedEventArgs e) {
-			SDEAppConfiguration.FileShellAssociated |= FileAssociation.Sde;
+			SdeAppConfiguration.FileShellAssociated |= FileAssociation.Sde;
 			ApplicationManager.AddExtension(Methods.ApplicationFullPath, "Server database editor", ".sde", true);
 		}
 
 		private void _cbAssociate_Unchecked(object sender, RoutedEventArgs e) {
-			GrfPath.Delete(GrfPath.Combine(SDEAppConfiguration.ProgramDataPath, "sde.ico"));
+			GrfPath.Delete(GrfPath.Combine(SdeAppConfiguration.ProgramDataPath, "sde.ico"));
 			ApplicationManager.RemoveExtension(Methods.ApplicationFullPath, ".sde");
 		}
 
@@ -406,9 +405,9 @@ namespace SDE.Tools.DatabaseEditor {
 
 			if (maker.Init(_holder)) {
 				maker.Add(_mainTabControl, _holder, _tabEngine, this);
-				List<string> files = SDEConfiguration.CustomTabs;
+				List<string> files = ProjectConfiguration.CustomTabs;
 				files.Add(file);
-				SDEConfiguration.CustomTabs = files;
+				ProjectConfiguration.CustomTabs = files;
 			}
 			else {
 				ErrorHandler.HandleException("Failed to parse the file to a database format.");

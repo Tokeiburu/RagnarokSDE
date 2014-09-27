@@ -4,7 +4,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using SDE.Others;
+using SDE.Core;
 using SDE.Tools.DatabaseEditor.Jobs;
 using TokeiLibrary;
 using TokeiLibrary.WPF.Styles;

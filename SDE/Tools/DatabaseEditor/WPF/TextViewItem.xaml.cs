@@ -5,7 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using ErrorManager;
-using SDE.Others;
+using SDE.Core;
 using TokeiLibrary.WPF.Styles;
 using Utilities;
 using Utilities.Services;

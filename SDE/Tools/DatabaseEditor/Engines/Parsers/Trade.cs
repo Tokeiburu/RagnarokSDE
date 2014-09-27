@@ -17,8 +17,8 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 	}
 
 	public class Trade : ISettable {
-		public TradeFlag Flag { get; set; }
 		private string _override = "100";
+		public TradeFlag Flag { get; set; }
 
 		#region ISettable Members
 

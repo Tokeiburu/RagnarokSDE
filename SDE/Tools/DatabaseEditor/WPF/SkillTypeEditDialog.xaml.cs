@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using SDE.Others;
-using SDE.Tools.DatabaseEditor.Generic.Core;
+using SDE.Core;
 using TokeiLibrary.WPF.Styles;
 
 namespace SDE.Tools.DatabaseEditor.WPF {
