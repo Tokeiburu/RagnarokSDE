@@ -38,21 +38,21 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 			DebugStreamReader reader = TextFileHelper.LastReader;
 
 			if (reader != null) {
-				Handle(String.Format("file: '{0}', line: {1}, exception: '{2}'", AllLoaders.LatestFile, reader.LineNumber, exception), ErrorLevel.Warning);
+				Handle(String.Format("file: '{0}', line: {1}, exception: '{2}'", TextFileHelper.LatestFile, reader.LineNumber, exception), ErrorLevel.Warning);
 			}
 			else {
 				Handle(String.Format("exception: '{0}'", exception), ErrorLevel.Warning);
 			}
 		}
 
-		public static void Handle(string exception, string id) {
+		public static void Handle(string exception, string id, ErrorLevel errorLevel = ErrorLevel.Warning) {
 			DebugStreamReader reader = TextFileHelper.LastReader;
 
 			if (reader != null) {
-				Handle(String.Format("ID: {0}, file: '{1}', line: {2}, exception: '{3}'", id, AllLoaders.LatestFile, reader.LineNumber, exception), ErrorLevel.Warning);
+				Handle(String.Format("ID: {0}, file: '{1}', line: {2}, exception: '{3}'", id, TextFileHelper.LatestFile, reader.LineNumber, exception), errorLevel);
 			}
 			else {
-				Handle(String.Format("ID: {0}, exception: '{1}'", id, exception), ErrorLevel.Warning);
+				Handle(String.Format("ID: {0}, exception: '{1}'", id, exception), errorLevel);
 			}
 		}
 

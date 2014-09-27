@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
@@ -8,12 +9,18 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Database;
 using ErrorManager;
-using SDE.Tools.DatabaseEditor.Engines;
+using SDE.Tools.DatabaseEditor.Engines.DatabaseEngine;
 using TokeiLibrary;
 using TokeiLibrary.WPF;
 using Utilities;
 
 namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
+	/// <summary>
+	/// This class is responsible for sorting the items. It also
+	/// generates the UI for the search panel.
+	/// </summary>
+	/// <typeparam name="TKey">The type of the key.</typeparam>
+	/// <typeparam name="TValue">The type of the value.</typeparam>
 	public partial class GSearchEngine<TKey, TValue> where TValue : Tuple {
 		#region Delegates
 
@@ -29,6 +36,8 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 		private ComboBox _cbSearchItemsMode;
 		private DatabaseItemSorter<TValue> _entryComparer;
 		private ListView _items;
+		private Grid _searchDrop;
+		private bool _isLoaded;
 		private bool _searchFirstTimeSet;
 		private string _searchItemsFilter = "";
 		private Table<TKey, TValue> _table;
@@ -40,25 +49,108 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			_itemsSearchSettings = new GSearchSettings(SDEConfiguration.ConfigAsker, tabName);
 		}
 
+		public bool IsFiltering { get; private set; }
 		public Func<TValue, bool> SubsetCondition { get; set; }
 		public Action<TValue> SetupImageDataGetter { get; set; }
-
 		public RangeObservableCollection<TValue> Collection {
-			get { return _items.ItemsSource as RangeObservableCollection<TValue>; }
+			get {
+				_validateLoaded();
+				return _items.ItemsSource as RangeObservableCollection<TValue>;
+			}
 		}
 
-		public RangeObservableCollection<TValue> CollectionSafe {
-			get { return (RangeObservableCollection<TValue>) _items.Dispatcher.Invoke(new Func<RangeObservableCollection<TValue>>(() => (RangeObservableCollection<TValue>)_items.ItemsSource)); }
+		private void _validateLoaded() {
+			if (!_isLoaded) {
+				if (_entryComparer == null) {
+					_entryComparer = new DatabaseItemSorter<TValue>(_settings.AttributeList);
+					_entryComparer.SetSort(_settings.AttId.AttributeName, ListSortDirection.Ascending);
+				}
+
+				_load();
+				_isLoaded = true;
+			}
 		}
+		private void _load() {
+			_searchDrop.Dispatch(delegate {
+				try {
+					foreach (var attribute in _states) {
+						_itemsSearchSettings[attribute.Key] = attribute.Value;
+					}
 
-		public bool IsFiltering { get; private set; }
+					_tbSearchItems.TextChanged += _tbSearchItems_TextChanged;
+					int row = 0;
+					int column = 0;
 
-		public void SetSettings(DbAttribute attribute, bool state) {
-			_states[attribute] = state;
+					_addSearch(_searchDrop, "Search options", null, row, column, true);
+
+					_nextRow2(ref row, ref column);
+					column = -2;
+
+					foreach (DbAttribute attribute in _attributes) {
+						_advance(ref row, ref column);
+
+						if (attribute == null) {
+							continue;
+						}
+
+						DbAttribute attributeCopy = attribute;
+						_addSearchAttribute(_searchDrop, attributeCopy, row, column);
+					}
+
+					_attributes = _attributes.Where(p => p != null).ToArray();
+
+					_itemsSearchSettings[GSearchSettings.TupleAdded] = false;
+					_itemsSearchSettings[GSearchSettings.TupleModified] = false;
+					_nextRow(ref row, ref column);
+					_addSearchAttributeSub(_searchDrop, GSearchSettings.TupleAdded, row, column);
+					_advance(ref row, ref column);
+					_addSearchAttributeSub(_searchDrop, GSearchSettings.TupleModified, row, column);
+
+					_tbItemsRange = new TextBox();
+
+					_cbSearchItemsMode = new ComboBox();
+					_cbSearchItemsMode.MinWidth = 120;
+
+					_cbSearchItemsMode.PreviewMouseDown += delegate(object sender, MouseButtonEventArgs args) {
+						ComboBoxItem item = WpfUtilities.FindParentControl<ComboBoxItem>((Mouse.DirectlyOver as DependencyObject));
+
+						if (item != null) {
+							StackPanel panel = WpfUtilities.FindParentControl<StackPanel>(item);
+
+							if (panel != null) {
+								if (panel.Children.Count == 1)
+									return;
+							}
+
+							item.IsSelected = true;
+							args.Handled = true;
+						}
+					};
+
+					_cbSearchItemsMode.SelectionChanged += _cbSearchItemsMode_SelectionChanged;
+					_cbSearchItemsMode.Items.Add("Widen search");
+					_cbSearchItemsMode.Items.Add("Narrow search");
+					_advance(ref row, ref column);
+					_addSearch(_searchDrop, "Mode", _cbSearchItemsMode, row, column);
+					_nextRow2(ref row, ref column);
+
+					if (typeof (TKey) == typeof (int))
+						_addSearch(_searchDrop, "Range (5-10;-4;15+)", _tbItemsRange, row, column);
+
+					_itemsSearchSettings[GSearchSettings.TupleRange] = false;
+					//_itemsSearchSettings[] = false;
+					_tbItemsRange.TextChanged += (sender, e) => _itemsSearchSettings[GSearchSettings.TupleRange] = _tbItemsRange.Text.Trim() != "";
+					_cbSearchItemsMode.SelectedIndex = 1;
+
+					_itemsSearchSettings.Modified += _filter;
+				}
+				catch (Exception err) {
+					ErrorHandler.HandleException(err);
+				}
+			});
 		}
 
 		public event CDEEventHandler FilterFinished;
-
 		public void OnFilterFinished(List<TValue> items) {
 			CDEEventHandler handler = FilterFinished;
 			if (handler != null) handler(this, items);
@@ -73,118 +165,31 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				column += 2;
 			}
 		}
-
-		public void Init(Grid searchDrop, TextBox searchBox, ListView view, Table<TKey, TValue> table) {
-			try {
-				_items = view;
-				_table = table;
-				_tbSearchItems = searchBox;
-
-				foreach (var attribute in _states) {
-					_itemsSearchSettings[attribute.Key] = attribute.Value;
-				}
-
-				_tbSearchItems.TextChanged += new TextChangedEventHandler(_tbSearchItems_TextChanged);
-				int row = 0;
-				int column = 0;
-
-				_addSearch(searchDrop, "Search options", null, row, column);
-
-				_nextRow2(ref row, ref column);
-				column = -2;
-
-				foreach (DbAttribute attribute in _attributes) {
-					_advance(ref row, ref column);
-
-					if (attribute == null) {
-						continue;
-					}
-
-					DbAttribute attributeCopy = attribute;
-					_addSearchAttribute(searchDrop, attributeCopy, row, column);
-				}
-
-				_attributes = _attributes.Where(p => p != null).ToArray();
-
-				_itemsSearchSettings[GSearchSettings.TupleAdded] = false;
-				_itemsSearchSettings[GSearchSettings.TupleModified] = false;
-				_nextRow(ref row, ref column);
-				_addSearchAttributeSub(searchDrop, GSearchSettings.TupleAdded, row, column);
-				_advance(ref row, ref column);
-				_addSearchAttributeSub(searchDrop, GSearchSettings.TupleModified, row, column);
-
-				_tbItemsRange = new TextBox();
-
-				_cbSearchItemsMode = new ComboBox();
-				_cbSearchItemsMode.MinWidth = 120;
-
-				_cbSearchItemsMode.PreviewMouseDown += delegate(object sender, MouseButtonEventArgs args) {
-					ComboBoxItem item = WpfUtilities.FindParentControl<ComboBoxItem>((Mouse.DirectlyOver as DependencyObject));
-
-					if (item != null) {
-						StackPanel panel = WpfUtilities.FindParentControl<StackPanel>(item);
-
-						if (panel != null) {
-							if (panel.Children.Count == 1)
-								return;
-						}
-
-						item.IsSelected = true;
-						args.Handled = true;
-					}
-				};
-
-				_cbSearchItemsMode.SelectionChanged += new SelectionChangedEventHandler(_cbSearchItemsMode_SelectionChanged);
-				_cbSearchItemsMode.Items.Add("Widen search");
-				_cbSearchItemsMode.Items.Add("Narrow search");
-				_advance(ref row, ref column);
-				_addSearch(searchDrop, "Mode", _cbSearchItemsMode, row, column);
-				_nextRow2(ref row, ref column);
-
-				if (typeof(TKey) == typeof(int))
-					_addSearch(searchDrop, "Range (5-10;-4;15+)", _tbItemsRange, row, column);
-
-				_itemsSearchSettings[GSearchSettings.TupleRange] = false;
-				//_itemsSearchSettings[] = false;
-				_tbItemsRange.TextChanged += new TextChangedEventHandler((sender, e) => _itemsSearchSettings[GSearchSettings.TupleRange] = _tbItemsRange.Text.Trim() != "");
-				_cbSearchItemsMode.SelectedIndex = 1;
-
-				_itemsSearchSettings.Modified += new GSearchSettings.SearchSettingsEventHandler(_filter);
-			}
-			catch (Exception err) {
-				ErrorHandler.HandleException(err);
-			}
-		}
-
-		public void Init(Grid searchDrop, TextBox searchBox, GDbTabWrapper<TKey, TValue> tab) {
-			Init(searchDrop, searchBox, tab.List, tab.Table);
-		}
-
 		private void _nextRow(ref int row, ref int column) {
 			if (column != 0) {
 				column = 0;
 				row++;
 			}
 		}
-
 		private void _nextRow2(ref int row, ref int column) {
 			column = 0;
 			row++;
 		}
 
-		private void _addSearch(Grid searchGrid, string display, FrameworkElement element, int row, int column) {
+		private void _addSearch(Grid searchGrid, string display, FrameworkElement element, int row, int column, bool isItalic = false) {
 			Label label = new Label();
 			label.Content = display;
+
+			if (isItalic)
+				label.FontStyle = FontStyles.Italic;
 
 			while (searchGrid.RowDefinitions.Count <= row)
 				searchGrid.RowDefinitions.Add(new RowDefinition {Height = new GridLength(-1, GridUnitType.Auto)});
 
-			label.SetValue(Grid.RowProperty, row);
-			label.SetValue(Grid.ColumnProperty, column);
+			WpfUtilities.SetGridPosition(label, row, column);
 
 			if (element != null) {
-				element.SetValue(Grid.RowProperty, row);
-				element.SetValue(Grid.ColumnProperty, column + 2);
+				WpfUtilities.SetGridPosition(element, row, column + 2);
 				element.Margin = new Thickness(2);
 
 				searchGrid.Children.Add(element);
@@ -192,36 +197,6 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 			searchGrid.Children.Add(label);
 		}
-
-		private void _addSearchAttributeSub(Grid searchGrid, string attribute, int row, int column) {
-			CheckBox box = new CheckBox();
-			box.Margin = new Thickness(3);
-
-			TextBlock block = new TextBlock { Text = attribute };
-			box.MouseEnter += delegate {
-				block.Foreground = new SolidColorBrush(Color.FromArgb(255, 5, 119, 193));
-				block.Cursor = Cursors.Hand;
-				block.TextDecorations = TextDecorations.Underline;
-			};
-
-			box.MouseLeave += delegate {
-				block.Foreground = Brushes.Black;
-				block.Cursor = Cursors.Arrow;
-				block.TextDecorations = null;
-			};
-			box.Content = block;
-
-			while (searchGrid.RowDefinitions.Count <= row)
-				searchGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(-1, GridUnitType.Auto) });
-
-			box.SetValue(Grid.RowProperty, row);
-			box.SetValue(Grid.ColumnProperty, column);
-
-			_itemsSearchSettings.Link(box, attribute);
-
-			searchGrid.Children.Add(box);
-		}
-
 		private void _addSearchAttribute(Grid searchGrid, DbAttribute attribute, int row, int column) {
 			if (attribute.DataType.BaseType == typeof(Enum)) {
 				Grid grid = new Grid();
@@ -265,9 +240,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 					_itemsSearchSettings[attribute] = box.SelectedIndex != 0;
 				};
 
-				grid.SetValue(Grid.RowProperty, row);
-				grid.SetValue(Grid.ColumnProperty, column);
-
+				WpfUtilities.SetGridPosition(grid, row, column);
 				grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(-1, GridUnitType.Auto) });
 				grid.ColumnDefinitions.Add(new ColumnDefinition());
 
@@ -277,8 +250,33 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				searchGrid.Children.Add(grid);
 			}
 			else {
-				_addSearchAttributeSub(searchGrid, attribute.AttributeName, row, column);
+				_addSearchAttributeSub(searchGrid, attribute.DisplayName, row, column);
 			}
+		}
+		private void _addSearchAttributeSub(Grid searchGrid, string attribute, int row, int column) {
+			CheckBox box = new CheckBox();
+			box.Margin = new Thickness(3);
+
+			TextBlock block = new TextBlock { Text = attribute };
+			box.MouseEnter += delegate {
+				block.Foreground = new SolidColorBrush(Color.FromArgb(255, 5, 119, 193));
+				block.Cursor = Cursors.Hand;
+				block.TextDecorations = TextDecorations.Underline;
+			};
+
+			box.MouseLeave += delegate {
+				block.Foreground = Brushes.Black;
+				block.Cursor = Cursors.Arrow;
+				block.TextDecorations = null;
+			};
+			box.Content = block;
+
+			while (searchGrid.RowDefinitions.Count <= row)
+				searchGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(-1, GridUnitType.Auto) });
+
+			WpfUtilities.SetGridPosition(box, row, column);
+			_itemsSearchSettings.Link(box, attribute);
+			searchGrid.Children.Add(box);
 		}
 
 		private void _cbSearchItemsMode_SelectionChanged(object sender, SelectionChangedEventArgs e) {
@@ -289,16 +287,66 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			_filter(this);
 		}
 
+		public void Init(Grid searchDrop, TextBox searchBox, ListView view, Table<TKey, TValue> table) {
+			// The initialization is delayed, it will start when loading the tab
+			_searchDrop = searchDrop;
+			_items = view;
+			_table = table;
+			_tbSearchItems = searchBox;
+		}
+		public void Init(Grid searchDrop, TextBox searchBox, GDbTabWrapper<TKey, TValue> tab) {
+			Init(searchDrop, searchBox, tab.List, tab.Table);
+		}
+
 		public void SetAttributes(params DbAttribute[] attributes) {
 			_attributes = attributes;
 		}
-
 		public void SetAttributes(IEnumerable<DbAttribute> attributes) {
 			_attributes = attributes.ToArray();
 		}
-
+		public void SetSettings(DbAttribute attribute, bool state) {
+			_states[attribute] = state;
+		}
 		public void SetRange(List<int> indexes) {
-			_tbItemsRange.Text = _getQuery(indexes);
+			_validateLoaded();
+			_tbItemsRange.Text = GetQuery(indexes);
+		}
+		public void AddTuple(TValue tuple) {
+			_validateLoaded();
+			_items.Dispatch(delegate {
+				if (_items.ItemsSource == null)
+					return;
+
+				RangeObservableCollection<TValue> allItems = (RangeObservableCollection<TValue>)_items.ItemsSource;
+
+				var index = allItems.ToList().BinarySearch(tuple, _entryComparer);
+				if (index < 0) index = ~index;
+				allItems.Insert(index, tuple);
+			});
+		}
+		public void SetOrder(TValue tuple) {
+			_validateLoaded();
+			_items.Dispatch(delegate {
+				if (_items.ItemsSource == null)
+					return;
+
+				RangeObservableCollection<TValue> allItems = (RangeObservableCollection<TValue>)_items.ItemsSource;
+
+				List<TValue> items = allItems.ToList();
+				var oldInex = items.IndexOf(tuple);
+
+				if (oldInex < 0) {
+					var index = items.BinarySearch(tuple, _entryComparer);
+					if (index < 0) index = ~index;
+					allItems.Insert(index, tuple);
+				}
+				else {
+					items.Remove(tuple);
+					var index = items.BinarySearch(tuple, _entryComparer);
+					if (index < 0) index = ~index;
+					allItems.Move(oldInex, index);
+				}
+			});
 		}
 
 		public static List<Func<TValue, bool>> GetRangePredicates(string query) {
@@ -344,8 +392,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				return new List<Func<TValue, bool>>();
 			}
 		}
-
-		private string _getQuery(List<int> tupleIndexes) {
+		public static string GetQuery(List<int> tupleIndexes) {
 			tupleIndexes.Add(-1);
 
 			string searchQuery = "";
@@ -385,43 +432,6 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			}
 
 			return searchQuery;
-		}
-
-		public void AddTuple(TValue tuple) {
-			_items.Dispatch(delegate {
-				if (_items.ItemsSource == null)
-					return;
-
-				RangeObservableCollection<TValue> allItems = (RangeObservableCollection<TValue>)_items.ItemsSource;
-
-				var index = allItems.ToList().BinarySearch(tuple, _entryComparer);
-				if (index < 0) index = ~index;
-				allItems.Insert(index, tuple);
-			});
-		}
-
-		public void SetOrder(TValue tuple) {
-			_items.Dispatch(delegate {
-				if (_items.ItemsSource == null)
-					return;
-
-				RangeObservableCollection<TValue> allItems = (RangeObservableCollection<TValue>)_items.ItemsSource;
-
-				List<TValue> items = allItems.ToList();
-				var oldInex = items.IndexOf(tuple);
-
-				if (oldInex < 0) {
-					var index = items.BinarySearch(tuple, _entryComparer);
-					if (index < 0) index = ~index;
-					allItems.Insert(index, tuple);
-				}
-				else {
-					items.Remove(tuple);
-					var index = items.BinarySearch(tuple, _entryComparer);
-					if (index < 0) index = ~index;
-					allItems.Move(oldInex, index);
-				}
-			});
 		}
 	}
 }

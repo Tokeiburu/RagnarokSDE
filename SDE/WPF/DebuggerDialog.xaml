@@ -21,9 +21,11 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
                 <TextBox VerticalAlignment="Center" Grid.Column="0" BorderThickness="1" Margin="3" IsReadOnly="True" Name="_tbTime" Text="Time" Grid.Row="0" TextAlignment="Center" />
-                <Button Name="_buttonCopy" Click="_buttonCopy_Click" Content="Copy exception" Grid.Column="1" HorizontalAlignment="Right" Margin="3" />
+                <Button Name="_buttonTerminate" Click="_buttonTerminate_Click" Content="Terminate" Grid.Column="1" HorizontalAlignment="Right" Margin="3" />
+                <Button Name="_buttonCopy" Click="_buttonCopy_Click" Content="Copy exception" Grid.Column="2" HorizontalAlignment="Right" Margin="3" />
             </Grid>
             <Label Grid.Row="0" Content="Time stamp" />
             <Label Grid.Row="1" Content="Exception message" />

@@ -2,13 +2,17 @@
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using ErrorManager;
 using GRF.FileFormats;
 using GRF.IO;
 using GRF.Threading;
 using SDE.ApplicationConfiguration;
-using SDE.Tools.DatabaseEditor.CDECore;
-using SDE.Tools.DatabaseEditor.Engines;
+using SDE.Others;
+using SDE.Others.ViewItems;
+using SDE.Tools.DatabaseEditor.Engines.TabNavigationEngine;
+using SDE.Tools.DatabaseEditor.Generic.Core;
 using SDE.Tools.DatabaseEditor.Generic.DbLoaders;
 using SDE.Tools.DatabaseEditor.Generic.TabsMakerCore;
 using TokeiLibrary;
@@ -18,14 +22,36 @@ using Configuration = SDE.ApplicationConfiguration.SDEAppConfiguration;
 
 namespace SDE.Tools.DatabaseEditor {
 	public partial class SDEditor : TkWindow {
-		private SDERecentFiles _recentFilesManager;
+		private SdeRecentFiles _recentFilesManager;
 
 		private void _loadMenu() {
-			_tabEngine = new TabNavigationEngine(_mainTabControl);
-			_recentFilesManager = new SDERecentFiles(Configuration.ConfigAsker, 6, _menuItemRecentProjects);
+			_tabEngine = new TabNavigation(_mainTabControl);
+			_recentFilesManager = new SdeRecentFiles(Configuration.ConfigAsker, 6, _menuItemRecentProjects);
 			_recentFilesManager.FileClicked += _recentFilesManager_FileClicked;
 			_recentFilesManager.Reload();
-			
+
+			_debugList.MouseRightButtonUp += _debugList_MouseRightButtonUp;
+		}
+
+		private void _debugList_MouseRightButtonUp(object sender, MouseButtonEventArgs e) {
+			try {
+				ListViewItem item = _debugList.GetObjectAtPoint<ListViewItem>(e.GetPosition(_debugList)) as ListViewItem;
+
+				if (item != null) {
+					DebugItemView view = item.Content as DebugItemView;
+
+					if (view != null) {
+						if (view.CanSelectInTextEditor()) {
+							return;
+						}
+					}
+				}
+
+				e.Handled = true;
+			}
+			catch (Exception err) {
+				ErrorHandler.HandleException(err);
+			}
 		}
 
 		private void _recentFilesManager_FileClicked(string fileName) {
@@ -104,7 +130,7 @@ namespace SDE.Tools.DatabaseEditor {
 			}
 		}
 		private void _menuItemAbout_Click(object sender, RoutedEventArgs e) {
-			WindowProvider.ShowWindow(new AboutDialog(Configuration.PublicVersion, Configuration.RealVersion, Configuration.Author, SDEAppConfiguration.ProgramName), this);
+			WindowProvider.ShowWindow(new AboutDialog(Configuration.PublicVersion, Configuration.RealVersion, Configuration.Author, SDEAppConfiguration.ProgramName, "sdeAboutBackground.jpg"), this);
 		}
 		private void _menuItemClose_Click(object sender, RoutedEventArgs e) {
 			Close();
@@ -177,6 +203,12 @@ namespace SDE.Tools.DatabaseEditor {
 		}
 		private void _menuItemExportSqlHercPreRenewal_Click(object sender, RoutedEventArgs e) {
 			_export(ServerType.Hercules, "pre-re", FileType.Sql);
+		}
+		private void _menuItemExportDbCurrent_Click(object sender, RoutedEventArgs e) {
+			_export(AllLoaders.GetServerType(), AllLoaders.GetIsRenewal() ? "re" : "pre-re", FileType.Detect);
+		}
+		private void _menuItemExportSqlCurrent_Click(object sender, RoutedEventArgs e) {
+			_export(AllLoaders.GetServerType(), AllLoaders.GetIsRenewal() ? "re" : "pre-re", FileType.Sql);
 		}
 		private void _menuItemAddItemRaw_Click(object sender, RoutedEventArgs e) {
 			_genericExecute(v => v.AddNewItemRaw());

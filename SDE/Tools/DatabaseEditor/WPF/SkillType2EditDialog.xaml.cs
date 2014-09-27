@@ -19,13 +19,7 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 		public SkillType2EditDialog(string text) : base("Skill type2 edit", "cde.ico", SizeToContent.Height, ResizeMode.CanResize) {
 			InitializeComponent();
 			Extensions.SetMinimalSize(this);
-
-			if ((text.StartsWith("0x") || text.StartsWith("0X")) && text.Length > 2) {
-				_value = Convert.ToInt32(text, 16);
-			}
-			else {
-				Int32.TryParse(text, out _value);
-			}
+			_value = Extensions.ParseToInt(text);
 
 			_cbUpper1.Tag = 0x0001;
 			_cbUpper2.Tag = 0x0002;
@@ -62,7 +56,6 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 			_boxes.ForEach(_addEvents);
 
 			WindowStartupLocation = WindowStartupLocation.CenterOwner;
-			ShowInTaskbar = true;
 		}
 
 		public string Text {

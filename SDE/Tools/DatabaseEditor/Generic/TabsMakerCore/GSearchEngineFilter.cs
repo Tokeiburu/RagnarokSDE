@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Threading;
 using Database;
 using GRF.Threading;
-using SDE.Tools.DatabaseEditor.Engines;
+using SDE.Tools.DatabaseEditor.Engines.DatabaseEngine;
 using TokeiLibrary;
 using TokeiLibrary.WPF;
 using TokeiLibrary.WPF.Styles.ListView;
@@ -20,6 +19,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 		private void _filter(object sender) {
 			string currentSearch = _searchItemsFilter;
 			IsFiltering = true;
+			_validateLoaded();
 			GrfThread.Start(() => _filterInternal(currentSearch), "CDEditor - Search filter items thread");
 		}
 
@@ -88,6 +88,8 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 						 where attribute.DataType.BaseType != typeof (Enum)
 						 select new Func<TValue, string, bool>((p, s) => p.GetValue<string>(attributeCopy).IndexOf(s, StringComparison.OrdinalIgnoreCase) != -1)).ToList();
 
+					bool isAttributeRestricted = false;
+
 					if (search.Any(p => p.StartsWith("[", StringComparison.Ordinal) && p.EndsWith("]", StringComparison.Ordinal))) {
 						generalPredicates.Clear();
 
@@ -97,20 +99,17 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 							if (se.StartsWith("[", StringComparison.Ordinal) && se.EndsWith("]", StringComparison.Ordinal)) {
 								se = se.Substring(1, se.Length - 2);
-
-								if (Int32.TryParse(se, out ival)) {
-									if (ival < _settings.AttributeList.Attributes.Count) {
-										DbAttribute attribute = _settings.AttributeList.Attributes[ival];
-										generalPredicates.Add(new Func<TValue, string, bool>((p, s) => p.GetValue<string>(attribute).IndexOf(s, StringComparison.OrdinalIgnoreCase) != -1));
-									}
-									search.RemoveAt(index);
-									index--;
-								}
-
 								se = se.Replace("_", " ");
 								var att = _settings.AttributeList.Attributes.FirstOrDefault(p => p.DisplayName.IndexOf(se, 0, StringComparison.OrdinalIgnoreCase) > -1);
-								if (att != null) {
-									generalPredicates.Add(new Func<TValue, string, bool>((p, s) => p.GetValue<string>(att).IndexOf(s, StringComparison.OrdinalIgnoreCase) != -1));
+
+								if (Int32.TryParse(se, out ival) || att != null) {
+									if (ival < _settings.AttributeList.Attributes.Count) {
+										DbAttribute attribute = att ?? _settings.AttributeList.Attributes[ival];
+										isAttributeRestricted = true;
+										//generalPredicates.Add(new Func<TValue, string, bool>((p, s) => p.GetValue<string>(attribute).IndexOf(s, StringComparison.OrdinalIgnoreCase) != -1));
+										string nextSearch = index + 1 < search.Count ? search[index + 1] : "";
+										generalPredicates.Add(new Func<TValue, string, bool>((p, s) => String.Compare(p.GetValue<string>(attribute), nextSearch, StringComparison.OrdinalIgnoreCase) == 0));
+									}
 									search.RemoveAt(index);
 									index--;
 								}
@@ -130,32 +129,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 					if (hasTuplePredicates) tuplePredicate = _getTuplePredicates(enumAttributes, predicateSearch);
 					if (currentSearch != _searchItemsFilter) return;
 
-					List<TValue> result;
-
-					if (generalPredicates.Count == 0) {
-						if (tuplePredicate == null) {
-							result = allItems.OrderBy(p => p, _entryComparer).ToList();
-						}
-						else {
-							result = allItems.Where(p => tuplePredicate(p)).OrderBy(p => p, _entryComparer).ToList();
-						}
-					}
-					else {
-						if (tuplePredicate == null) {
-							if (isWiden)
-								result = allItems.Where(item => search.Any(searchWord => generalPredicates.Any(predicate => predicate(item, searchWord)))).OrderBy(p => p, _entryComparer).ToList();
-							else
-								result = allItems.Where(item => search.All(searchWord => generalPredicates.Any(predicate => predicate(item, searchWord)))).OrderBy(p => p, _entryComparer).ToList();
-						}
-						else {
-							bool isSearchEmpty = search.Count == 0;
-
-							if (isWiden)
-								result = (isSearchEmpty ? allItems.Where(p => tuplePredicate(p)).OrderBy(p => p, _entryComparer) : allItems.Where(p => tuplePredicate(p)).Where(item => search.Any(searchWord => generalPredicates.Any(predicate => predicate(item, searchWord))))).OrderBy(p => p, _entryComparer).ToList();
-							else
-								result = (isSearchEmpty ? allItems.Where(p => tuplePredicate(p)).OrderBy(p => p, _entryComparer) : allItems.Where(p => tuplePredicate(p)).Where(item => search.All(searchWord => generalPredicates.Any(predicate => predicate(item, searchWord))))).OrderBy(p => p, _entryComparer).ToList();
-						}
-					}
+					List<TValue> result = _getResults(search, isAttributeRestricted, generalPredicates, allItems, tuplePredicate, isWiden);
 
 					if (currentSearch != _searchItemsFilter) {
 						WpfUtilities.TextBoxOk(_tbSearchItems);
@@ -172,6 +146,33 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				finally {
 					IsFiltering = false;
 				}
+			}
+		}
+
+		private List<TValue> _getResults(ICollection<string> search, bool isAttributeRestricted, ICollection<Func<TValue, string, bool>> generalPredicates, IEnumerable<TValue> allItems, Func<TValue, bool> tuplePredicate, bool isWiden) {
+			if (isAttributeRestricted && generalPredicates.Count != 0) {
+				if (isWiden)
+					return allItems.Where(item => generalPredicates.Any(predicate => predicate(item, null))).OrderBy(p => p, _entryComparer).ToList();
+				 return allItems.Where(item => generalPredicates.All(predicate => predicate(item, null))).OrderBy(p => p, _entryComparer).ToList();
+			}
+
+			if (generalPredicates.Count == 0) {
+				if (tuplePredicate == null)
+					return allItems.OrderBy(p => p, _entryComparer).ToList();
+				return allItems.Where(tuplePredicate).OrderBy(p => p, _entryComparer).ToList();
+			}
+
+			if (tuplePredicate == null) {
+				if (isWiden)
+					return allItems.Where(item => search.Any(searchWord => generalPredicates.Any(predicate => predicate(item, searchWord)))).OrderBy(p => p, _entryComparer).ToList();
+				return allItems.Where(item => search.All(searchWord => generalPredicates.Any(predicate => predicate(item, searchWord)))).OrderBy(p => p, _entryComparer).ToList();
+			}
+			else {
+				bool isSearchEmpty = search.Count == 0;
+
+				if (isWiden)
+					return (isSearchEmpty ? allItems.Where(tuplePredicate).OrderBy(p => p, _entryComparer) : allItems.Where(tuplePredicate).Where(item => search.Any(searchWord => generalPredicates.Any(predicate => predicate(item, searchWord))))).OrderBy(p => p, _entryComparer).ToList();
+				return (isSearchEmpty ? allItems.Where(tuplePredicate).OrderBy(p => p, _entryComparer) : allItems.Where(tuplePredicate).Where(item => search.All(searchWord => generalPredicates.Any(predicate => predicate(item, searchWord))))).OrderBy(p => p, _entryComparer).ToList();
 			}
 		}
 

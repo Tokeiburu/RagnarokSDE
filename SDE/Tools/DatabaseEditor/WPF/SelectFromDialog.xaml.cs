@@ -5,31 +5,31 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using Database;
-using SDE.Tools.DatabaseEditor.Engines;
+using SDE.Others;
+using SDE.Tools.DatabaseEditor.Engines.DatabaseEngine;
 using SDE.Tools.DatabaseEditor.Generic;
 using SDE.Tools.DatabaseEditor.Generic.Lists;
 using SDE.Tools.DatabaseEditor.Generic.TabsMakerCore;
 using TokeiLibrary;
-using TokeiLibrary.WPF;
 using TokeiLibrary.WPF.Styles;
 using TokeiLibrary.WPF.Styles.ListView;
-using Extensions = SDE.Others.Extensions;
+using Extensions = TokeiLibrary.WPF.Extensions;
 
 namespace SDE.Tools.DatabaseEditor.WPF {
 	/// <summary>
 	/// Interaction logic for SelectFromDialog.xaml
 	/// </summary>
 	public partial class SelectFromDialog : TkWindow {
-		public SelectFromDialog(Table<int, ReadableTuple<int>> table, ServerDBs db, string text) : base("Select item in [" + db.Filename + "]", "cde.ico", SizeToContent.Manual, ResizeMode.CanResize) {
+		public SelectFromDialog(Table<int, ReadableTuple<int>> table, ServerDbs db, string text) : base("Select item in [" + db.Filename + "]", "cde.ico", SizeToContent.Manual, ResizeMode.CanResize) {
 			InitializeComponent();
-			Extensions.SetMinimalSize(this);
+			Others.Extensions.SetMinimalSize(this);
 
 			_unclickableBorder.Init(_cbSubMenu);
 
 			DbAttribute attId = table.AttributeList.PrimaryAttribute;
 			DbAttribute attDisplay = table.AttributeList.Attributes.FirstOrDefault(p => p.IsDisplayAttribute) ?? table.AttributeList.Attributes[1];
 
-			Extensions.GenerateListViewTemplate(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			Others.Extensions.GenerateListViewTemplate(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 					new ListViewDataTemplateHelper.GeneralColumnInfo {Header = attId.DisplayName, DisplayExpression = "[" + attId.Index + "]", SearchGetAccessor = attId.AttributeName, FixedWidth = 60, TextAlignment = TextAlignment.Right, ToolTipBinding = "[" + attId.Index + "]"},
 					new ListViewDataTemplateHelper.RangeColumnInfo {Header = attDisplay.DisplayName, DisplayExpression = "[" + attDisplay.Index + "]", SearchGetAccessor = attDisplay.AttributeName, IsFill = true, ToolTipBinding = "[" + attDisplay.Index + "]", MinWidth = 100, TextWrapping = TextWrapping.Wrap }
 				}, new DatabaseItemSorter(table.AttributeList), new string[] { "Deleted", "Red", "Modified", "Green", "Added", "Blue", "Normal", "Black" });
@@ -74,7 +74,7 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 					if (Int32.TryParse(text, out ival)) {
 						_listView.Dispatch(delegate {
 							_listView.SelectedItem = table.TryGetTuple(ival);
-							_listView.ScrollToCenterOfView(_listView.SelectedItem);
+							Extensions.ScrollToCenterOfView(_listView, _listView.SelectedItem);
 						});
 					}
 				}

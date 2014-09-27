@@ -8,11 +8,14 @@ using System.Reflection;
 using System.Threading;
 using System.Windows;
 using System.Windows.Interop;
+using System.Windows.Media.Imaging;
 using ErrorManager;
 using TokeiLibrary;
 using TokeiLibrary.WPF;
+using TokeiLibrary.WPF.Styles;
 using TokeiLibrary.WPF.Styles.ListView;
 using Utilities;
+using Extensions = SDE.Others.Extensions;
 
 namespace SDE.WPF {
 	/// <summary>
@@ -29,7 +32,42 @@ namespace SDE.WPF {
 		public DebuggerDialog(bool isMain = true) {
 			InitializeComponent();
 
-			Others.Extensions.GenerateListViewTemplate(_listViewStackTrace, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			string icon = "cde.ico";
+			Stream bitmapStream;
+			try {
+				bitmapStream = new MemoryStream(ApplicationManager.GetResource(icon));
+			}
+			catch {
+				bitmapStream = null;
+				MessageBox.Show("Couldn't find the icon file in the program's resources. The icon must be a .ico file and it must be placed within the application's resources (embedded resource).");
+				if (TkWindow.ShutDownOnInvalidIcons)
+					ApplicationManager.Shutdown();
+			}
+			if (bitmapStream == null) {
+				MessageBox.Show("Couldn't find the icon file in the program's resources.");
+				if (!TkWindow.ShutDownOnInvalidIcons)
+					return;
+				ApplicationManager.Shutdown();
+			}
+			else {
+				try {
+					Icon = new IconBitmapDecoder(bitmapStream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.None).Frames[0];
+				}
+				catch (Exception) {
+					try {
+						Icon = ApplicationManager.GetResourceImage(icon);
+						return;
+					}
+					catch {
+					}
+					MessageBox.Show("Invalid icon file.");
+					if (!TkWindow.ShutDownOnInvalidIcons)
+						return;
+					Application.Current.Shutdown();
+				}
+			}
+
+			Extensions.GenerateListViewTemplate(_listViewStackTrace, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = "File name", DisplayExpression = "FileName", ToolTipBinding="FileName", TextAlignment = TextAlignment.Right, FixedWidth = 180 },
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = "Line", DisplayExpression = "Line", ToolTipBinding="Line", TextAlignment = TextAlignment.Left, FixedWidth = 60 },
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = "Method", DisplayExpression = "Method", ToolTipBinding="Method", TextAlignment = TextAlignment.Left, IsFill = true}
@@ -194,6 +232,11 @@ namespace SDE.WPF {
 		private void _buttonCopy_Click(object sender, RoutedEventArgs e) {
 			Clipboard.SetText(_tbStackTrace.Text);
 			MessageBox.Show("Raw exception copied.");
+		}
+
+		private void _buttonTerminate_Click(object sender, RoutedEventArgs e) {
+			Process.GetCurrentProcess().Kill();
+			Application.Current.Shutdown(-1);
 		}
 
 		#region Nested type: DebuggerParameters

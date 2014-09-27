@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,6 +9,9 @@ using GRF.IO;
 using GRF.Threading;
 using SDE.ApplicationConfiguration;
 using SDE.Others;
+using SDE.Tools.DatabaseEditor.Engines;
+using SDE.Tools.DatabaseEditor.Generic.DbLoaders;
+using SDE.Tools.DatabaseEditor.Generic.TabsMakerCore;
 using SDE.Tools.DatabaseEditor.WPF;
 using TokeiLibrary;
 using TokeiLibrary.WPF;
@@ -60,6 +64,16 @@ namespace SDE.Tools.DatabaseEditor {
 		public bool ReloadDatabase() {
 			try {
 				if (ShouldCancelDbReload()) return false;
+
+				for (int i = 0; i < GDTabs.Count; i++) {
+					if (GDTabs[i].DbComponent.IsCustom) {
+						GDbTab tab = GDTabs[i];
+						_mainTabControl.Dispatch(p => p.Items.Remove(tab));
+						GDTabs.RemoveAt(i);
+						_holder.RemoveTable(tab.DbComponent);
+						i--;
+					}
+				}
 
 				if (_asyncOperation.IsRunning) {
 					_reloadDatabase(true);
@@ -262,6 +276,8 @@ namespace SDE.Tools.DatabaseEditor {
 				}
 
 				_debugList.Dispatch(p => _debugItems.Clear());
+				_debugList.Dispatch(p => ((TabItem) _mainTabControl.Items[1]).Header = new DisplayLabel { DisplayText = "Error console", FontWeight = FontWeights.Bold });
+				_addCustomTables();
 				_clientDatabase.Reload(this);
 				_clientDatabase.ClearCommands();
 			}
@@ -279,9 +295,27 @@ namespace SDE.Tools.DatabaseEditor {
 				_debugList.Dispatch(delegate {
 					if (_debugItems.Count > 0) {
 						_debugList.ScrollIntoView(_debugItems.Last());
-						WpfUtilities.GetTab(_mainTabControl, "Error console").IsSelected = true;
+						((TabItem) _mainTabControl.Items[1]).IsSelected = true;
 					}
 				});
+			}
+		}
+
+		private void _addCustomTables() {
+			foreach (string file in SDEConfiguration.CustomTabs) {
+				if (File.Exists(file)) {
+					DbMaker maker = new DbMaker(file);
+
+					if (maker.Init(_holder)) {
+						this.Dispatch(() => maker.Add(_mainTabControl, _holder, _tabEngine, this));
+					}
+					else {
+						DbLoaderErrorHandler.Handle("Unable to parse the table for the file '" + file + "'.");
+					}
+				}
+				else {
+					DbLoaderErrorHandler.Handle("Couldn't find the file '" + file + "'.");
+				}
 			}
 		}
 	}

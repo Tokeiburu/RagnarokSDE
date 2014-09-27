@@ -5,51 +5,13 @@ using System.Linq;
 using ErrorManager;
 using GRF.ContainerFormat.Commands;
 using GRF.Core;
-using SDE.Tools.DatabaseEditor.CDECore;
+using SDE.Others.ViewItems;
 using Utilities;
 
 namespace SDE.Others {
-	public class VirtualFileTable : FileTable {
-		private readonly MetaGrfHolder _grf;
-
-		public VirtualFileTable(GrfHeader header, MetaGrfHolder grf) : base(header) {
-			_grf = grf;
-		}
-
-		public override List<string> Files {
-			get { return _grf.Paths; }
-		}
-
-		public override FileEntry this[string fileName] {
-			get {
-				fileName = fileName.ToLower();
-
-				string tkPath = _grf[fileName];
-
-				if (tkPath != null) {
-					TkPath path = new TkPath(tkPath);
-
-					if (String.IsNullOrEmpty(path.RelativePath)) {
-						FileEntry tempEntry = new FileEntry();
-						tempEntry.SetModificationFlags(Modification.Added);
-						tempEntry.SourceFilePath = path.FilePath;
-						tempEntry.Header = _header;
-
-						return tempEntry;
-					}
-
-					return _grf.Grfs.First(p => p.FileName == path.FilePath).FileTable[path.RelativePath];
-				}
-
-				return null;
-			}
-		}
-
-		public override bool Contains(string filename) {
-			return _grf[filename] != null;
-		}
-	}
-
+	/// <summary>
+	/// Merges multiple GRFs in one
+	/// </summary>
 	public class MetaGrfHolder : GrfHolder, IDisposable {
 		private readonly Dictionary<string, byte[]> _bufferedData = new Dictionary<string, byte[]>();
 		private bool _disposed;
@@ -213,21 +175,6 @@ namespace SDE.Others {
 				}
 			}
 		}
-		public object GetEntry(string relativePath) {
-			relativePath = relativePath.ToLower();
-
-			if (_resourcePaths.ContainsKey(relativePath)) {
-				TkPath path = new TkPath(_resourcePaths[relativePath]);
-
-				if (String.IsNullOrEmpty(path.RelativePath)) {
-					return new GrfShellFile(path.FilePath);
-				}
-
-				return _openedGrfs[path.FilePath].FileTable[path.RelativePath];
-			}
-			return null;
-		}
-
 		private byte[] _getData(TkPath path) {
 			try {
 				if (File.Exists(path.FilePath) && String.IsNullOrEmpty(path.RelativePath)) {
@@ -303,6 +250,50 @@ namespace SDE.Others {
 
 				_disposed = true;
 			}
+		}
+	}
+
+	/// <summary>
+	/// Redirects calls to the file table
+	/// </summary>
+	public class VirtualFileTable : FileTable {
+		private readonly MetaGrfHolder _grf;
+
+		public VirtualFileTable(GrfHeader header, MetaGrfHolder grf) : base(header) {
+			_grf = grf;
+		}
+
+		public override List<string> Files {
+			get { return _grf.Paths; }
+		}
+
+		public override FileEntry this[string fileName] {
+			get {
+				fileName = fileName.ToLower();
+
+				string tkPath = _grf[fileName];
+
+				if (tkPath != null) {
+					TkPath path = new TkPath(tkPath);
+
+					if (String.IsNullOrEmpty(path.RelativePath)) {
+						FileEntry tempEntry = new FileEntry();
+						tempEntry.SetModificationFlags(Modification.Added);
+						tempEntry.SourceFilePath = path.FilePath;
+						tempEntry.Header = _header;
+
+						return tempEntry;
+					}
+
+					return _grf.Grfs.First(p => p.FileName == path.FilePath).FileTable[path.RelativePath];
+				}
+
+				return null;
+			}
+		}
+
+		public override bool Contains(string filename) {
+			return _grf[filename] != null;
 		}
 	}
 }

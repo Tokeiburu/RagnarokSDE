@@ -11,10 +11,11 @@ namespace SDE.Others.ViewItems {
 	/// </summary>
 	public class TkPathView :  INotifyPropertyChanged {
 		private bool _fileNotFound;
-		private TkPath _path;
 
 		public TkPathView(TkPath path) {
-			_path = path;
+			if (path == null) throw new ArgumentNullException("path");
+
+			Path = path;
 
 			ImageSource image;
 
@@ -35,18 +36,12 @@ namespace SDE.Others.ViewItems {
 		}
 
 		public ImageSource DataImage { get; set; }
-
-		public TkPath Path {
-			get { return _path; }
-			set { _path = value; }
-		}
-
+		public TkPath Path { get; private set; }
 		public string DisplayFileName {
 			get {
-				return String.IsNullOrEmpty(_path.FilePath) ? _path.RelativePath : _path.FilePath;
+				return String.IsNullOrEmpty(Path.FilePath) ? Path.RelativePath : Path.FilePath;
 			}
 		}
-
 		public bool FileNotFound {
 			get { return _fileNotFound; }
 			set {

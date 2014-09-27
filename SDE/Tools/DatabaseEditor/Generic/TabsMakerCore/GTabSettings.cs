@@ -1,26 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows.Controls;
-using System.Windows.Media.Imaging;
 using Database;
-using SDE.Tools.DatabaseEditor.Engines;
-using SDE.Tools.DatabaseEditor.Generic.DbLoaders;
+using SDE.Tools.DatabaseEditor.Engines.DatabaseEngine;
+using SDE.Tools.DatabaseEditor.Generic.Core;
 using SDE.Tools.DatabaseEditor.Generic.Lists;
 using SDE.Tools.DatabaseEditor.WPF;
 
 namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
+	/// <summary>
+	/// The tab settings contains all the information to generate a tab.
+	/// </summary>
+	/// <typeparam name="TKey">The type of the key.</typeparam>
+	/// <typeparam name="TValue">The type of the value.</typeparam>
 	public class GTabSettings<TKey, TValue> where TValue : Tuple {
 		public List<GItemCommand<TKey, TValue>> AddedCommands = new List<GItemCommand<TKey, TValue>>();
-		public Dictionary<string, BitmapSource> BufferedImages = new Dictionary<string, BitmapSource>();
 		public Action CustomAddItemMethod;
 		public TabGenerator<TKey>.TabGeneratorDelegate Loaded;
 		public string Style = "TabItemStyled";
-		private bool _canChangeId = true;
+		public TabControl Control { get; set; }
 
-		public GTabSettings(ServerDBs serverDb, BaseDb gdb) {
+		public GTabSettings(ServerDbs serverDb, BaseDb gdb) {
 			DbData = serverDb;
 			TabName = new DisplayLabel(serverDb, gdb);
 			GenerateSearchPopUp = true;
+			CanBeDelayed = true;
+			CanChangeId = true;
 			AttIdWidth = 60;
 			SearchEngine = new GSearchEngine<TKey, TValue>(serverDb.Filename, this);
 		}
@@ -28,15 +33,14 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 		public GTabSettings(BaseDb db) : this(db.DbSource, db) {
 		}
 
+		public bool CanBeDelayed { get; set; }
+
 		public int AttIdWidth { get; set; }
-		public bool CanChangeId {
-			get { return _canChangeId; }
-			set { _canChangeId = value; }
-		}
+		public bool CanChangeId { get; set; }
 		public bool GenerateSearchPopUp { get; set; }
 		public object TabName { get; set; }
 		public ContextMenu ContextMenu { get; set; }
-		public ServerDBs DbData { get; set; }
+		public ServerDbs DbData { get; set; }
 		public Action<TValue> NewItemAddedFunction { get; set; }
 		public TextBox TextBoxId { get; set; }
 		public GSearchEngine<TKey, TValue> SearchEngine { get; set; }

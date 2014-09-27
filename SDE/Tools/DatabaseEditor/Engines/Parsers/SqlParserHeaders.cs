@@ -2,11 +2,71 @@
 using System.Globalization;
 using System.Text;
 using SDE.Tools.DatabaseEditor.Generic;
+using SDE.Tools.DatabaseEditor.Generic.Core;
 using SDE.Tools.DatabaseEditor.Generic.Lists;
-using SDE.Tools.DatabaseEditor.Generic.Lists.DbAttributeHelpers;
 
 namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 	public partial class SqlParser {
+		public static string HerculesItemsDbTxtHeader = "//  Items Database\n" +
+		                                                "//\n" +
+		                                                "/******************************************************************************\n" +
+		                                                " ************* Entry structure ************************************************\n" +
+		                                                " ******************************************************************************\n" +
+		                                                "{\n" +
+		                                                "	// =================== Mandatory fields ===============================\n" +
+		                                                "	Id: ID                        (int)\n" +
+		                                                "	AegisName: \"Aegis_Name\"       (string)\n" +
+		                                                "	Name: \"Item Name\"             (string)\n" +
+		                                                "	// =================== Optional fields ================================\n" +
+		                                                "	Type: Item Type               (int, defaults to 3 = etc item)\n" +
+		                                                "	Buy: Buy Price                (int, defaults to Sell * 2)\n" +
+		                                                "	Sell: Sell Price              (int, defaults to Buy / 2)\n" +
+		                                                "	Weight: Item Weight           (int, defaults to 0)\n" +
+		                                                "	Atk: Attack                   (int, defaults to 0)\n" +
+		                                                "	Matk: Magical Attack          (int, defaults to 0, ignored in pre-re)\n" +
+		                                                "	Def: Defense                  (int, defaults to 0)\n" +
+		                                                "	Range: Attack Range           (int, defaults to 0)\n" +
+		                                                "	Slots: Slots                  (int, defaults to 0)\n" +
+		                                                "	Job: Job mask                 (int, defaults to all jobs = 0xFFFFFFFF)\n" +
+		                                                "	Upper: Upper mask             (int, defaults to any = 0x3f)\n" +
+		                                                "	Gender: Gender                (int, defaults to both = 2)\n" +
+		                                                "	Loc: Equip location           (int, required value for equipment)\n" +
+		                                                "	WeaponLv: Weapon Level        (int, defaults to 0)\n" +
+		                                                "	EquipLv: Equip required level (int, defaults to 0)\n" +
+		                                                "	EquipLv: [min, max]           (alternative syntax with min / max level)\n" +
+		                                                "	Refine: Refineable            (boolean, defaults to true)\n" +
+		                                                "	View: View ID                 (int, defaults to 0)\n" +
+		                                                "	BindOnEquip: true/false       (boolean, defaults to false)\n" +
+		                                                "	BuyingStore: true/false       (boolean, defaults to false)\n" +
+		                                                "	Delay: Delay to use item      (int, defaults to 0)\n" +
+		                                                "	Trade: {                      (defaults to no restrictions)\n" +
+		                                                "		override: GroupID             (int, defaults to 100)\n" +
+		                                                "		nodrop: true/false            (boolean, defaults to false)\n" +
+		                                                "		notrade: true/false           (boolean, defaults to false)\n" +
+		                                                "		partneroverride: true/false   (boolean, defaults to false)\n" +
+		                                                "		noselltonpc: true/false       (boolean, defaults to false)\n" +
+		                                                "		nocart: true/false            (boolean, defaults to false)\n" +
+		                                                "		nostorage: true/false         (boolean, defaults to false)\n" +
+		                                                "		nogstorage: true/false        (boolean, defaults to false)\n" +
+		                                                "		nomail: true/false            (boolean, defaults to false)\n" +
+		                                                "		noauction: true/false         (boolean, defaults to false)\n" +
+		                                                "	}\n" +
+		                                                "	Nouse: {                      (defaults to no restrictions)\n" +
+		                                                "		override: GroupID             (int, defaults to 100)\n" +
+		                                                "		sitting: true/false           (boolean, defaults to false)\n" +
+		                                                "	}\n" +
+		                                                "	Stack: [amount, type]         (int, defaults to 0)\n" +
+		                                                "	Sprite: SpriteID              (int, defaults to 0)\n" +
+		                                                "	Script: <\"\n" +
+		                                                "		Script\n" +
+		                                                "		(it can be multi-line)\n" +
+		                                                "	\">\n" +
+		                                                "	OnEquipScript: <\" OnEquip Script (can also be multi-line) \">\n" +
+		                                                "	OnUnequipScript: <\" OnUnequip Script (can also be multi-line) \">\n" +
+		                                                "},\n" +
+		                                                "******************************************************************************/\n" +
+		                                                "\n";
+
 		public static string RAthenaMobSkillDbSqlHeader = "#\r\n" +
 		                                                  "# Table structure for table `{0}`\r\n" +
 		                                                  "#\r\n" +
@@ -350,10 +410,9 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 
 					if (ival >= -1)
 						return ((uint)ival).ToString(CultureInfo.InvariantCulture);
-					else {
-						// Removes the first 0xF byte)
-						return ((uint) (ival + 0x80000000)).ToString(CultureInfo.InvariantCulture);
-					}
+
+					// Removes the first 0xF byte)
+					return ((uint) (ival + 0x80000000)).ToString(CultureInfo.InvariantCulture);
 				}
 				catch {
 					return res;

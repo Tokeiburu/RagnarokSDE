@@ -15,9 +15,14 @@ using Utilities.Extension;
 using SearchPanel = SDE.WPF.SearchPanel;
 
 namespace SDE.Core.Avalon {
+	/// <summary>
+	/// This class is used to attach default settings to an avalon text editor.
+	/// It adds the search feature (the search panel), the folding strategies,
+	/// the word highlighting.
+	/// </summary>
 	public class AvalonDefaultLoading {
 		private readonly object _lock = new object();
-		private readonly List<string> _toIgnore = new List<string> { "\t", Environment.NewLine, "\n", "\r", " ", ",", ".", "!", "\"", "?" };
+		private readonly HashSet<string> _toIgnore = new HashSet<string> { "\t", Environment.NewLine, "\n", "\r", " ", ",", ".", "!", "\"", "?" };
 		private string _currentWord;
 		private SearchPanel.SearchResultBackgroundRenderer _renderer;
 		private TextArea _textArea;

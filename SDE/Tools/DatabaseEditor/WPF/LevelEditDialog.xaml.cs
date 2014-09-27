@@ -6,7 +6,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using ErrorManager;
 using SDE.Others;
 using TokeiLibrary.WPF.Styles;
 
@@ -17,8 +16,8 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 	public partial class LevelEditDialog : TkWindow {
 		private readonly bool _autoFill;
 		private readonly List<TextBox> _boxes = new List<TextBox>();
+		private readonly bool _partialFill;
 		private readonly List<TextBlock> _previews = new List<TextBlock>();
-		private bool _partialFill;
 
 		public LevelEditDialog(string text, object maxLevel, bool showPreview, bool showPreview2, bool autoFill) : base("Level edit", "cde.ico", SizeToContent.Height, ResizeMode.CanResize) {
 			_autoFill = autoFill;
@@ -173,7 +172,6 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 			_updatePreviews();
 
 			WindowStartupLocation = WindowStartupLocation.CenterOwner;
-			ShowInTaskbar = true;
 		}
 
 		public LevelEditDialog(string text, object maxLevel, bool showPreview = true) : this(text, maxLevel, showPreview, true, true) {

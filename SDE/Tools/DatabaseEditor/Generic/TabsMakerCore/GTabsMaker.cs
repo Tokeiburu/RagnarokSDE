@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -9,24 +10,29 @@ using Database;
 using ErrorManager;
 using GRF.Image;
 using GRF.Threading;
-using SDE.Tools.DatabaseEditor.Engines;
-using SDE.Tools.DatabaseEditor.Generic.CustomControls;
+using SDE.Tools.DatabaseEditor.Engines.DatabaseEngine;
+using SDE.Tools.DatabaseEditor.Engines.TabNavigationEngine;
+using SDE.Tools.DatabaseEditor.Generic.Core;
 using SDE.Tools.DatabaseEditor.Generic.DbLoaders;
-using SDE.Tools.DatabaseEditor.Generic.DbLoaders.Writers;
 using SDE.Tools.DatabaseEditor.Generic.IndexProviders;
 using SDE.Tools.DatabaseEditor.Generic.Lists;
+using SDE.Tools.DatabaseEditor.Generic.UI.CustomControls;
 using TokeiLibrary;
 using TokeiLibrary.Shortcuts;
 using Utilities.Services;
 using ServerItemProperties = SDE.Tools.DatabaseEditor.Generic.Lists.ServerItemAttributes;
 
 namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
+	/// <summary>
+	/// Utility class to help generate tabs
+	/// </summary>
 	public static class GTabsMaker {
 		public static readonly GItemCommand<int, ReadableTuple<int>> CopyEntriesToClipboardFunctionInt;
 		public static readonly GItemCommand<string, ReadableTuple<string>> CopyEntriesToClipboardFunctionString;
 		public static readonly TabGenerator<int>.TabGeneratorDelegate SelectFromMobDb;
 		public static readonly TabGenerator<string>.TabGeneratorDelegate SelectFromMobDbString;
 		public static readonly TabGenerator<string>.TabGeneratorDelegate SelectFromSkillDbString;
+		public static readonly TabGenerator<int>.TabGeneratorDelegate SelectFromItemDb;
 		public static readonly TabGenerator<int>.TabGeneratorDelegate SelectFromSkillDb;
 		public static readonly TabGenerator<int>.TabGeneratorDelegate SelectFromSkillRequirementsDb;
 
@@ -69,32 +75,33 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				}
 			};
 
-			SelectFromMobDb = (tab, settings, gdb) => settings.AddedCommands.Add(GenerateSelectFrom(ServerDBs.Mobs, tab));
-			SelectFromSkillDb = (tab, settings, gdb) => settings.AddedCommands.Add(GenerateSelectFrom(ServerDBs.Skills, tab));
-			SelectFromMobDbString = (tab, settings, gdb) => settings.AddedCommands.Add(GenerateSelectFrom(ServerDBs.Mobs, tab, ServerMobSkillAttributes.MobId));
-			SelectFromSkillDbString = (tab, settings, gdb) => settings.AddedCommands.Add(GenerateSelectFrom(ServerDBs.Skills, tab, ServerMobSkillAttributes.SkillId));
-			SelectFromSkillRequirementsDb = (tab, settings, gdb) => settings.AddedCommands.Add(GenerateSelectFrom(ServerDBs.SkillsRequirement, tab));
+			SelectFromMobDb = (tab, settings, gdb) => settings.AddedCommands.Add(GenerateSelectFrom(ServerDbs.Mobs, tab));
+			SelectFromItemDb = (tab, settings, gdb) => settings.AddedCommands.Add(GenerateSelectFrom(ServerDbs.Items, tab));
+			SelectFromSkillDb = (tab, settings, gdb) => settings.AddedCommands.Add(GenerateSelectFrom(ServerDbs.Skills, tab));
+			SelectFromMobDbString = (tab, settings, gdb) => settings.AddedCommands.Add(GenerateSelectFrom(ServerDbs.Mobs, tab, ServerMobSkillAttributes.MobId));
+			SelectFromSkillDbString = (tab, settings, gdb) => settings.AddedCommands.Add(GenerateSelectFrom(ServerDbs.Skills, tab, ServerMobSkillAttributes.SkillId));
+			SelectFromSkillRequirementsDb = (tab, settings, gdb) => settings.AddedCommands.Add(GenerateSelectFrom(ServerDbs.SkillsRequirement, tab));
 		}
 
-		public static GItemCommand<TKey, ReadableTuple<TKey>> GenerateSelectFrom<TKey>(ServerDBs serverDb, GDbTabWrapper<TKey, ReadableTuple<TKey>> tab) {
+		public static GItemCommand<TKey, ReadableTuple<TKey>> GenerateSelectFrom<TKey>(ServerDbs serverDb, GDbTabWrapper<TKey, ReadableTuple<TKey>> tab) {
 			return new GItemCommand<TKey, ReadableTuple<TKey>> {
 				AllowMultipleSelection = false,
 				DisplayName = String.Format("Select in [{0}]", serverDb.DisplayName),
 				ImagePath = "arrowdown.png",
 				InsertIndex = 4,
 				AddToCommandsStack = false,
-				GenericCommand = items => TabNavigationEngine.SelectList(serverDb, items.Select(p => p.GetKey<TKey>()))
+				GenericCommand = items => TabNavigation.SelectList(serverDb, items.Select(p => p.GetKey<TKey>()))
 			};
 		}
 
-		public static GItemCommand<TKey, ReadableTuple<TKey>> GenerateSelectFrom<TKey>(ServerDBs serverDb, GDbTabWrapper<TKey, ReadableTuple<TKey>> tab, DbAttribute attribute) {
+		public static GItemCommand<TKey, ReadableTuple<TKey>> GenerateSelectFrom<TKey>(ServerDbs serverDb, GDbTabWrapper<TKey, ReadableTuple<TKey>> tab, DbAttribute attribute) {
 			return new GItemCommand<TKey, ReadableTuple<TKey>> {
 				AllowMultipleSelection = false,
 				DisplayName = String.Format("Select in [{0}]", serverDb.DisplayName),
 				ImagePath = "arrowdown.png",
 				InsertIndex = 4,
 				AddToCommandsStack = false,
-				GenericCommand = items => TabNavigationEngine.SelectList(serverDb, items.Select(p => p.GetValue<int>(attribute)).Distinct())
+				GenericCommand = items => TabNavigation.SelectList(serverDb, items.Select(p => p.GetValue<int>(attribute)).Distinct())
 			};
 		}
 
@@ -177,6 +184,24 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			line++;
 			return grid;
 		}
+		public static Grid PrintGrid<TKey, TValue>(ref int line, int col, int rowSpan, int colSpan, IIndexProvider provider, AbstractProvider gridProvider, DisplayableProperty<TKey, TValue> generalProperties, AttributeList list) where TValue : Tuple {
+			if (gridProvider is NullIndexProvider && provider is NullIndexProvider) {
+				line++;
+				return null;
+			}
+
+			if (gridProvider is NullIndexProvider) {
+				// No grid is being printed, but the provider is not null
+				Print(ref line, provider, generalProperties, list);
+				return null;
+			}
+
+			if (gridProvider == null) {
+				return PrintGrid(ref line, col, rowSpan, colSpan, provider, -1, 0, -1, 0, generalProperties, list);
+			}
+
+			return PrintGrid(ref line, col, rowSpan, colSpan, provider, gridProvider[0], gridProvider[1], gridProvider[2], gridProvider[3], generalProperties, list);
+		}
 		public static GDbTab Instantiate<TKey>(GTabSettings<TKey, ReadableTuple<TKey>> settings, AbstractDb<TKey> db) {
 			Table<TKey, ReadableTuple<TKey>> table = db.Table;
 			GDbTabWrapper<TKey, ReadableTuple<TKey>> tab = new GDbTabWrapper<TKey, ReadableTuple<TKey>>();
@@ -205,7 +230,11 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				if (settings.DbData != null) {
 					try {
 						string path = AllLoaders.DetectPath(settings.DbData);
-						OpeningService.FilesOrFolders(path);
+
+						if (path != null)
+							OpeningService.FilesOrFolders(path);
+						else
+							ErrorHandler.HandleException("File not found.");
 					}
 					catch (Exception err) {
 						ErrorHandler.HandleException(err);
@@ -309,6 +338,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			SInit(null, settings, null);
 		}
 
+		// TODO: The TabGenerator class works better than these custom generators
 		public static GDbTab LoadSItemsTab<TKey>(GenericDatabase database, TabControl control, BaseDb gdb) {
 			AbstractDb<TKey> db = gdb.To<TKey>();
 			AttributeList list = ServerItemProperties.AttributeList;
@@ -339,12 +369,12 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 			Grid grid = PrintGrid(ref line, 3, 1, 2, new DefaultIndexProvider(ServerItemProperties.BindOnEquip.Index, 8), -1, 0, -1, 0, generalProperties, list);
 
-			tab.Loaded += delegate {
+			generalProperties.AddDeployAction(delegate {
 				grid.Children[0].IsEnabled = false;
 				grid.Children[1].IsEnabled = false;
 				grid.Children[4].IsEnabled = false;
 				grid.Children[5].IsEnabled = false;
-			};
+			});
 
 			settings.DisplayablePropertyMaker = generalProperties;
 			settings.ClientDatabase = database;
@@ -363,7 +393,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			settings.SearchEngine.SetupImageDataGetter = delegate(ReadableTuple<TKey> tuple) {
 				tuple.GetImageData = delegate {
 					try {
-						var cDb = database.GetTable<int>(ServerDBs.ClientResourceDb);
+						var cDb = database.GetTable<int>(ServerDbs.ClientResourceDb);
 
 						if (cDb == null)
 							return null;
@@ -373,7 +403,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 						if (!cDb.ContainsKey(id))
 							return null;
 
-						byte[] data = database.MetaGrf.GetData(EncodingService.FromAnyToDisplayEncoding(@"data\texture\À¯ÀúÀÎÅÍÆäÀÌ½º\item\" + cDb.GetTuple(id).GetValue<string>(ClientResourceProperties.ResourceName) + ".bmp"));
+						byte[] data = database.MetaGrf.GetData(EncodingService.FromAnyToDisplayEncoding(@"data\texture\À¯ÀúÀÎÅÍÆäÀÌ½º\item\" + cDb.GetTuple(id).GetValue<string>(ClientResourceAttributes.ResourceName) + ".bmp"));
 
 						if (data != null) {
 							GrfImage gimage = new GrfImage(ref data);
@@ -398,7 +428,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				AddToCommandsStack = false,
 				GenericCommand = delegate(List<ReadableTuple<TKey>> items) {
 					StringBuilder builder = new StringBuilder();
-					DbWriters.DbItemsWriterSub(builder, db, items.OrderBy(p => p.GetKey<TKey>()), ServerType.RAthena);
+					DbWriters.DbWriterMethods.DbItemsWriterSub(builder, db, items.OrderBy(p => p.GetKey<TKey>()), ServerType.RAthena);
 					Clipboard.SetText(builder.ToString());
 				}
 			});
@@ -408,11 +438,11 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				DisplayName = "Copy entries to clipboard (Hercules)",
 				ImagePath = "export.png",
 				InsertIndex = 4,
-				Shortcut = ApplicationShortcut.Cut,
+				Shortcut = ApplicationShortcut.Copy2,
 				AddToCommandsStack = false,
 				GenericCommand = delegate(List<ReadableTuple<TKey>> items) {
 					StringBuilder builder = new StringBuilder();
-					DbWriters.DbItemsWriterSub(builder, db, items, ServerType.Hercules);
+					DbWriters.DbWriterMethods.DbItemsWriterSub(builder, db, items, ServerType.Hercules);
 					Clipboard.SetText(builder.ToString(), TextDataFormat.UnicodeText);
 				}
 			});
@@ -422,133 +452,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			AddTagGeneratorTabChangedEvent(control, tab, settings, gdb);
 			return tab;
 		}
-		public static GDbTab LoadSMobsTab(GenericDatabase database, TabControl control, BaseDb gdb) {
-			ServerDBs itemDbName = gdb.DbSource;
-			AttributeList list = gdb.AttributeList;
-
-			GTabSettings<int, ReadableTuple<int>> settings = new GTabSettings<int, ReadableTuple<int>>(itemDbName, gdb);
-
-			SInit(settings);
-			settings.AttributeList = ServerMobAttributes.AttributeList;
-			settings.AttId = ServerMobAttributes.Id;
-			settings.AttDisplay = ServerMobAttributes.KRoName;
-
-			DisplayableProperty<int, ReadableTuple<int>> generalProperties = new DisplayableProperty<int, ReadableTuple<int>>();
-			generalProperties.Spacing = 0;
-
-			int line = 0;
-
-			Print(ref line, new SpecifiedIndexProvider(new int[] {0, -1, 1, -1, 2, -1, 3, -1}), generalProperties, list);
-			PrintGrid(ref line, 0, 1, 2, new SpecifiedIndexProvider(new int[] {
-				ServerMobAttributes.Lv.Index, -1,
-				ServerMobAttributes.Str.Index, ServerMobAttributes.Agi.Index,
-				ServerMobAttributes.Vit.Index, ServerMobAttributes.Int.Index,
-				ServerMobAttributes.Dex.Index, ServerMobAttributes.Luk.Index
-			}), 60, 0, -1, 0, generalProperties, list);
-
-			line--;
-
-			PrintGrid(ref line, 3, 1, 2, new SpecifiedRangeIndexProvider(new int[] {
-				ServerMobAttributes.Hp.Index, 2,
-				ServerMobAttributes.Exp.Index, 2,
-				ServerMobAttributes.Atk1.Index, 2,
-				ServerMobAttributes.Def.Index, 2
-			}), -1, 0, -1, 0, generalProperties, list);
-
-			PrintGrid(ref line, 0, 1, 2, new SpecifiedIndexProvider(new int[] {
-				ServerMobAttributes.Race.Index, ServerMobAttributes.Range1.Index,
-				ServerMobAttributes.Size.Index, ServerMobAttributes.Range2.Index,
-				ServerMobAttributes.Element.Index, ServerMobAttributes.Range3.Index
-			}), 60, -115, 77, 0, generalProperties, list);
-
-			line--;
-
-			PrintGrid(ref line, 3, 1, 2, new SpecifiedIndexProvider(new int[] {
-				ServerMobAttributes.Mexp.Index, ServerMobAttributes.DMotion.Index,
-				ServerMobAttributes.Speed.Index, ServerMobAttributes.AMotion.Index,
-				ServerMobAttributes.Mode.Index, ServerMobAttributes.ADelay.Index
-			}), -1, 0, -1, 0, generalProperties, list);
-
-			generalProperties.AddCustomProperty(new CustomLinkedImage<int, ReadableTuple<int>>(generalProperties.GetComponent<TextBox>(2, 1), @"data\sprite\¸ó½ºÅÍ\", ".spr", 0, 3, 8, 2));
-			generalProperties.SetRow(line, new GridLength(1, GridUnitType.Star));
-			generalProperties.AddCustomProperty(new CustomQueryViewerMobOther<int, ReadableTuple<int>>(line, 1));
-			generalProperties.AddCustomProperty(new CustomQueryViewerMobMvp<int, ReadableTuple<int>>(line, 3, 1, 2));
-			generalProperties.AddCustomProperty(new CustomQueryViewerMobSkills<int, ReadableTuple<int>>(line));
-
-			settings.DisplayablePropertyMaker = generalProperties;
-			settings.ClientDatabase = database;
-			settings.SearchEngine.SetAttributes(
-				settings.AttId, settings.AttDisplay,
-				ServerMobAttributes.SpriteName, ServerMobAttributes.InternationalRoName,
-				ServerMobAttributes.Race, ServerMobAttributes.Size
-			);
-
-			settings.SearchEngine.SetSettings(settings.AttId, true);
-			settings.SearchEngine.SetSettings(settings.AttDisplay, true);
-			settings.SearchEngine.SetSettings(ServerMobAttributes.KRoName, true);
-			settings.SearchEngine.SetSettings(ServerMobAttributes.InternationalRoName, true);
-
-			settings.AddedCommands.Add(CopyEntriesToClipboardFunctionInt);
-
-			var tab = Instantiate(settings, (AbstractDb<int>) gdb);
-			AddTagGeneratorTabChangedEvent(control, tab, settings, gdb);
-			return tab;
-		}
-		public static GDbTab LoadSItemGroupsTab(GenericDatabase database, TabControl control, BaseDb gdb) {
-			ServerDBs itemDbName = gdb.DbSource;
-			AttributeList list = gdb.AttributeList;
-
-			GTabSettings<int, ReadableTuple<int>> settings = new GTabSettings<int, ReadableTuple<int>>(itemDbName, gdb);
-
-			SInit(settings);
-			settings.AttributeList = list;
-			settings.AttId = list.PrimaryAttribute;
-			settings.AttDisplay = ServerItemGroupAttributes.Display;
-
-			DisplayableProperty<int, ReadableTuple<int>> generalProperties = new DisplayableProperty<int, ReadableTuple<int>>();
-			generalProperties.Spacing = 0;
-			generalProperties.AddProperty(ServerItemGroupAttributes.Table, 0, 1);
-
-			settings.DisplayablePropertyMaker = generalProperties;
-			settings.ClientDatabase = database;
-			settings.SearchEngine.SetAttributes(
-				settings.AttId, settings.AttDisplay
-			);
-
-			settings.SearchEngine.SetSettings(settings.AttId, true);
-			settings.SearchEngine.SetSettings(settings.AttDisplay, true);
-
-			settings.AddedCommands.Add(new GItemCommand<int, ReadableTuple<int>> {
-				AllowMultipleSelection = true,
-				DisplayName = "Copy entries to clipboard (rAthena)",
-				ImagePath = "export.png",
-				Shortcut = ApplicationShortcut.Copy,
-				InsertIndex = 3,
-				AddToCommandsStack = false,
-				GenericCommand = delegate(List<ReadableTuple<int>> items) {
-					_itemGroupCopyEntries(items, gdb, control, ServerType.RAthena);
-				}
-			});
-
-			settings.AddedCommands.Add(new GItemCommand<int, ReadableTuple<int>> {
-				AllowMultipleSelection = true,
-				DisplayName = "Copy entries to clipboard (Hercules)",
-				ImagePath = "export.png",
-				Shortcut = ApplicationShortcut.Cut,
-				InsertIndex = 4,
-				AddToCommandsStack = false,
-				GenericCommand = delegate(List<ReadableTuple<int>> items) {
-					_itemGroupCopyEntries(items, gdb, control, ServerType.Hercules);
-				}
-			});
-
-			var tab = Instantiate(settings, (AbstractDb<int>) gdb);
-			ServerItemGroupAttributes.Display.AttachedObject = gdb;
-			AddTagGeneratorTabChangedEvent(control, tab, settings, gdb);
-			return tab;
-		}
-
-		private static void _itemGroupCopyEntries(List<ReadableTuple<int>> items, BaseDb gdb, TabControl control, ServerType serverType) {
+		public static void ItemGroupCopyEntries(List<ReadableTuple<int>> items, BaseDb gdb, TabControl control, ServerType serverType) {
 			var parent = WpfUtilities.FindDirectParentControl<SDEditor>(control);
 			parent.AsyncOperation.SetAndRunOperation(new GrfThread(delegate {
 				items = items.OrderBy(p => p.GetKey<int>()).ToList();
@@ -559,14 +463,14 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 					AProgress.Init(parent);
 					DbLoaderErrorHandler.Start();
 
-					var dbItems = gdb.Get<int>(ServerDBs.Items);
+					var dbItems = gdb.GetMeta<int>(ServerDbs.Items);
 
 					List<string> aegisNames = dbItems.FastItems.Select(p => p.GetStringValue(ServerItemAttributes.AegisName.Index)).ToList();
 					List<string> names = dbItems.FastItems.Select(p => p.GetStringValue(ServerItemAttributes.Name.Index)).ToList();
 
 					for (int i = 0; i < items.Count; i++) {
 						AProgress.IsCancelling(parent);
-						DbWriters.DbItemGroupWriter2(items[i], serverType, builder, gdb, aegisNames, names);
+						DbWriters.DbWriterMethods.DbItemGroupWriter2(items[i], serverType, builder, gdb, aegisNames, names);
 						parent.Progress = (i + 1f) / items.Count * 100f;
 					}
 				}
@@ -579,11 +483,12 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				Clipboard.SetText(builder.ToString());
 			}, parent, 200, null, true, true));
 		}
-
 		public static void AddTagGeneratorTabChangedEvent<TKey>(TabControl control, GDbTab tab, GTabSettings<TKey, ReadableTuple<TKey>> settings, BaseDb gdb) {
 			control.SelectionChanged += delegate(object sender, SelectionChangedEventArgs e) {
 				if (e == null || e.RemovedItems.Count <= 0 || e.RemovedItems[0] as TabItem == null || (e.AddedItems.Count > 0 && e.AddedItems[0] as TabItem == null))
 					return;
+
+				if (e.AddedItems.Count <= 0) return;
 
 				TabItem item = e.AddedItems[0] as TabItem;
 
@@ -679,6 +584,10 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 				row += 2;
 			}
+		}
+
+		public static void SelectInNotepadpp(string filePath, string line) {
+			Process.Start("notepad++.exe", "\"" + filePath + "\" -n" + line);
 		}
 	}
 }

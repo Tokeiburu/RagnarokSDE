@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Input;
-using SDE.Tools.DatabaseEditor.Generic.DbLoaders;
-using TokeiLibrary.WPF;
+using SDE.Tools.DatabaseEditor.Engines.DatabaseEngine;
+using SDE.Tools.DatabaseEditor.Generic.Lists;
 using TokeiLibrary.WPF.Styles;
 
 namespace SDE.Tools.DatabaseEditor.WPF {
@@ -10,13 +10,15 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 	/// </summary>
 	public partial class DropEdit : TkWindow {
 		private readonly string _dropChance;
-		private readonly BaseDb _db;
+		private readonly GenericDatabase _gdb;
 		private readonly string _id;
+		private readonly ServerDbs _sdb;
 
-		public DropEdit(string id, string dropChance, BaseDb db) : base("Item edit", "cde.ico", SizeToContent.Height, ResizeMode.NoResize) {
+		public DropEdit(string id, string dropChance, ServerDbs sdb, GenericDatabase gdb) : base("Item edit", "cde.ico", SizeToContent.Height, ResizeMode.NoResize) {
 			_id = id;
 			_dropChance = dropChance;
-			_db = db;
+			_sdb = sdb;
+			_gdb = gdb;
 
 			InitializeComponent();
 
@@ -30,21 +32,11 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 				_tbChance.Focus();
 			};
 
-			if (db != null) {
+			if (sdb != null) {
 				_buttonQuery.Click += new RoutedEventHandler(_buttonQuery_Click);
 			}
 			else {
 				_buttonQuery.Visibility = Visibility.Collapsed;
-			}
-		}
-
-		private void _buttonQuery_Click(object sender, RoutedEventArgs e) {
-			var db = _db.To<int>();
-			var dialog = new SelectFromDialog(db.Table, db.DbSource, _tbId.Text);
-			dialog.Owner = this;
-
-			if (dialog.ShowDialog() == true) {
-				_tbId.Text = dialog.Id;
 			}
 		}
 
@@ -61,6 +53,15 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 		public string DropChance {
 			get {
 				return _tbChance.Text;
+			}
+		}
+
+		private void _buttonQuery_Click(object sender, RoutedEventArgs e) {
+			var dialog = new SelectFromDialog(_gdb.GetMetaTable<int>(_sdb), _sdb, _tbId.Text);
+			dialog.Owner = this;
+
+			if (dialog.ShowDialog() == true) {
+				_tbId.Text = dialog.Id;
 			}
 		}
 

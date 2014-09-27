@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using SDE.Others;
-using SDE.Tools.DatabaseEditor.Objects.Jobs;
+using SDE.Tools.DatabaseEditor.Jobs;
 using TokeiLibrary;
 using TokeiLibrary.WPF.Styles;
 using Utilities;
@@ -62,7 +62,12 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 			_cbJobs.SelectionChanged += new SelectionChangedEventHandler(_cbJobs_SelectionChanged);
 			_preview.Text = text;
 			WindowStartupLocation = WindowStartupLocation.CenterOwner;
-			ShowInTaskbar = true;
+		}
+
+		public string Text {
+			get {
+				return _preview.Text.Replace("0X", "").Replace("0x", "");
+			}
 		}
 
 		private void _cbJobs_SelectionChanged(object sender, SelectionChangedEventArgs e) {
@@ -78,12 +83,6 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 			}
 			finally {
 				_dbEventsEnabled = true;
-			}
-		}
-
-		public string Text {
-			get {
-				return _preview.Text.Replace("0X", "").Replace("0x", "");
 			}
 		}
 

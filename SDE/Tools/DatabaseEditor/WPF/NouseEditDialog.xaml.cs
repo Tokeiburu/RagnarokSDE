@@ -31,7 +31,7 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 
 			_boxes.Add(_cbUpper1);
 
-			_tbOverride.Text = Parser.GetVal(_value, "override", "100");
+			_tbOverride.Text = ParserHelper.GetVal(_value, "override", "100");
 			_boxes.ForEach(_addEvents);
 
 			_tbOverride.TextChanged += delegate {
@@ -39,7 +39,6 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 			};
 
 			WindowStartupLocation = WindowStartupLocation.CenterOwner;
-			ShowInTaskbar = true;
 		}
 
 		public string Text {
@@ -48,7 +47,7 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 
 		private void _addEvents(CheckBox cb) {
 			ToolTipsBuilder.SetupNextToolTip(cb, this);
-			cb.IsChecked = Parser.IsTrue(_value, cb.Tag);
+			cb.IsChecked = ParserHelper.IsTrue(_value, cb.Tag);
 
 			cb.Checked += (e, a) => _update();
 			cb.Unchecked += (e, a) => _update();

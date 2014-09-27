@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using SDE.Others;
 using TokeiLibrary;
 using TokeiLibrary.WPF.Styles.ListView;
 using Utilities;
@@ -191,8 +190,8 @@ namespace SDE.WPF {
 			}
 
 			this.Dispatch(p => p.IsEnabled = ((AbstractCommand<T>)_command).CanUndo);
-			_button.Dispatch(p => p.IsButtonEnabled = ((AbstractCommand<T>)_command).CanUndo);
-			_buttonOpenSubMenuDrop.Dispatch(p => p.IsButtonEnabled = ((AbstractCommand<T>)_command).CanUndo);
+			_button.Dispatcher.BeginInvoke(new Action(() => _button.IsButtonEnabled = ((AbstractCommand<T>)_command).CanUndo));
+			_buttonOpenSubMenuDrop.Dispatcher.BeginInvoke(new Action(() => _buttonOpenSubMenuDrop.IsButtonEnabled = ((AbstractCommand<T>)_command).CanUndo));
 		}
 
 		private void _listView_PreviewMouseDown2<T>(object sender, MouseButtonEventArgs e) {

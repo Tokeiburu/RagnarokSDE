@@ -7,4 +7,8 @@
 	<s:Boolean x:Key="/Default/Housekeeping/Bookmarks/NumberedBookmarks/=Bookmark0/@KeyIndexDefined">True</s:Boolean>
 	<s:String x:Key="/Default/Housekeeping/Bookmarks/NumberedBookmarks/=Bookmark0/Coords/@EntryValue">(Doc Ln 199 Col 44)</s:String>
 	<s:String x:Key="/Default/Housekeeping/Bookmarks/NumberedBookmarks/=Bookmark0/FileId/@EntryValue">12A88ED1-4219-4F6A-8D4C-3B4CFE3D2865/d:Tools/d:DatabaseEditor/d:Engines/d:Parsers/f:SqlParser.cs</s:String>
-	<s:String x:Key="/Default/Housekeeping/Bookmarks/NumberedBookmarks/=Bookmark0/Owner/@EntryValue">NumberedBookmarkManager</s:String></wpf:ResourceDictionary>
+	<s:String x:Key="/Default/Housekeeping/Bookmarks/NumberedBookmarks/=Bookmark0/Owner/@EntryValue">NumberedBookmarkManager</s:String>
+	
+	
+	
+	</wpf:ResourceDictionary>

@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Windows.Controls;
 using Database;
-using SDE.Tools.DatabaseEditor.Engines;
+using SDE.Tools.DatabaseEditor.Engines.DatabaseEngine;
+using SDE.Tools.DatabaseEditor.Generic.Core;
 
 namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 	/// <summary>
@@ -17,6 +18,8 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 		public virtual DbAttribute IdAttribute { get { throw new InvalidOperationException(); } }
 
 		public BaseGenericDatabase Database { get; set; }
+
+		public BaseDb DbComponent { get; set; }
 
 		public bool DelayedReload { get; protected set; }
 
@@ -45,6 +48,9 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 		}
 
 		public virtual void ChangeId() {
+		}
+
+		public virtual void ImportFromFile(string fileDefault = null) {
 		}
 
 		public virtual void ShowSelectedOnly() {

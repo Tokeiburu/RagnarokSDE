@@ -21,6 +21,8 @@ namespace SDE.WPF {
 			_offset = thick.Left + thick.Right + _offset;
 		}
 
+		#region IValueConverter Members
+
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
 			if (!(value is double))
 				return value;
@@ -49,6 +51,8 @@ namespace SDE.WPF {
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) {
 			throw new NotImplementedException();
 		}
+
+		#endregion
 
 		private static bool _isScrollBarVisible(DependencyObject view) {
 			ScrollViewer[] sv = WpfUtilities.FindChildren<ScrollViewer>(view);

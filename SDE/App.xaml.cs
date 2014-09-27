@@ -10,6 +10,7 @@ using SDE.ApplicationConfiguration;
 using SDE.Tools.DatabaseEditor;
 using TokeiLibrary;
 using TokeiLibrary.WPF.Styles;
+using Utilities;
 
 namespace SDE {
 	/// <summary>
@@ -30,7 +31,17 @@ namespace SDE {
 
 			Configuration.SetImageRendering(Resources);
 
+
 			Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/" + Assembly.GetEntryAssembly().GetName().Name.Replace(" ", "%20") + ";component/WPF/Styles/GRFEditorStyles.xaml", UriKind.RelativeOrAbsolute) });
+			
+			if (!Methods.IsWinVistaOrHigher() && Methods.IsWinXPOrHigher()) {
+				// We are on Windows XP, force the style.
+				try {
+					Uri uri = new Uri("PresentationFramework.Aero;V3.0.0.0;31bf3856ad364e35;component\\themes/aero.normalcolor.xaml", UriKind.Relative);
+					Resources.MergedDictionaries.Add(LoadComponent(uri) as ResourceDictionary);
+				}
+				catch { }
+			}
 
 			if (!CustomStyles.StyleSet) {
 				CustomStyles.SetDefault();

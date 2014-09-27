@@ -20,13 +20,7 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 		public ModeEditDialog(string text) : base("Mode edit", "cde.ico", SizeToContent.Height, ResizeMode.CanResize) {
 			InitializeComponent();
 			Extensions.SetMinimalSize(this);
-
-			if ((text.StartsWith("0x") || text.StartsWith("0X")) && text.Length > 2) {
-				_value = Convert.ToInt32(text, 16);
-			}
-			else {
-				Int32.TryParse(text, out _value);
-			}
+			_value = Extensions.ParseToInt(text);
 
 			ToolTipsBuilder.Initialize(new string[] {
 				"Allows the monster to move.",
@@ -72,7 +66,6 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 			_boxes.ForEach(_addEvents);
 
 			WindowStartupLocation = WindowStartupLocation.CenterOwner;
-			ShowInTaskbar = true;
 		}
 
 		public string Text {

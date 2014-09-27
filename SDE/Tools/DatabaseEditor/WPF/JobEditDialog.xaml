@@ -4,7 +4,7 @@
               xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
                  xmlns:TokeiLibrary="clr-namespace:TokeiLibrary;assembly=TokeiLibrary"
                  xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
-                 xmlns:Items="clr-namespace:SDE.Tools.DatabaseEditor.Objects.Items" Width="650">
+                 xmlns:Jobs="clr-namespace:SDE.Tools.DatabaseEditor.Jobs" Width="650">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -39,7 +39,7 @@
             <Border />
             <Border />
             <Border />
-            <TextBox Grid.Row="2" Height="40" Grid.ColumnSpan="4" Name="_previewClass" Margin="3" Background="Transparent" BorderThickness="0" AcceptsReturn="True" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Column="0" />
+            <TextBox IsReadOnly="True" Grid.Row="2" Height="40" Grid.ColumnSpan="4" Name="_previewClass" Margin="3" Background="Transparent" BorderThickness="0" AcceptsReturn="True" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Column="0" />
         </Grid>
         <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="50" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
             <Grid Margin="0 0 3 0">
@@ -49,7 +49,7 @@
                     <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
                 <DockPanel Grid.Column="2">
-                    <ComboBox Name="_cbJobs" VerticalAlignment="Center" Margin="3" Width="120" ItemsSource="{x:Static Items:ItemHelper.Jobs}" />
+                    <ComboBox Name="_cbJobs" VerticalAlignment="Center" Margin="3" Width="120" ItemsSource="{x:Static Jobs:Job.Jobs}" />
                     <TextBox Name="_preview" Width="120" Margin="3" VerticalAlignment="Center" Grid.Column="1" />
                     <Button Name="_buttonOk" Click="_buttonOk_Click" Content="Ok" Height="25" Margin="3" MinWidth="100" Grid.Column="2" />
                     <Button Name="_buttonCancel" Click="_buttonCancel_Click" Content="Cancel" Height="25" Margin="3" MinWidth="100" Grid.Column="3" />

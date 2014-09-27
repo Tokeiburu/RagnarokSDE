@@ -19,13 +19,7 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 		public LocationEditDialog(string text) : base("Location edit", "cde.ico", SizeToContent.Height, ResizeMode.CanResize) {
 			InitializeComponent();
 			Extensions.SetMinimalSize(this);
-
-			if ((text.StartsWith("0x") || text.StartsWith("0X")) && text.Length > 2) {
-				_value = Convert.ToInt32(text, 16);
-			}
-			else {
-				Int32.TryParse(text, out _value);
-			}
+			_value = Extensions.ParseToInt(text);
 
 			_cbUpper1.Tag = 1;
 			_cbUpper2.Tag = 2;
@@ -74,7 +68,6 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 			_boxes.ForEach(_addEvents);
 
 			WindowStartupLocation = WindowStartupLocation.CenterOwner;
-			ShowInTaskbar = true;
 		}
 
 		public string Text {

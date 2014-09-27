@@ -8,16 +8,17 @@ using Utilities.Services;
 
 namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 	public static class TextFileHelper {
-		public static string LastLineRead;
-		public static bool SaveLastLine { get; set; }
-
 		#region Delegates
 
 		public delegate IEnumerable<string[]> TextFileHelperGetterDelegate(byte[] data);
 
 		#endregion
 
+		public const char SplitCharacter = '¤';
+		public static string LastLineRead;
+		public static bool SaveLastLine { get; set; }
 		public static DebugStreamReader LastReader { get; set; }
+		public static string LatestFile { get; set; }
 
 		public static string ReadNextLine(StreamReader reader) {
 			string line = null;
@@ -25,27 +26,27 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 			while (!reader.EndOfStream) {
 				line = reader.ReadLine();
 
-				if (string.IsNullOrEmpty(line) || (line.Length >= 2 && line[0] == '/' && line[1] == '/'))
+				if (String.IsNullOrEmpty(line) || (line.Length >= 2 && line[0] == '/' && line[1] == '/'))
 					continue;
 
 				if (line.Length >= 2 && line[0] == '/' && line[1] == '*') {
 					while (!reader.EndOfStream) {
 						line = reader.ReadLine();
 
-						if (string.IsNullOrEmpty(line))
+						if (String.IsNullOrEmpty(line))
 							continue;
 
 						if (line.IndexOf("*/", 0, StringComparison.Ordinal) > -1) {
 							line = reader.ReadLine();
 
-							if (!string.IsNullOrEmpty(line) && line.Length >= 2 && line[0] == '/' && line[1] == '*')
+							if (!String.IsNullOrEmpty(line) && line.Length >= 2 && line[0] == '/' && line[1] == '*')
 								continue;
 							break;
 						}
 					}
 				}
 
-				if (string.IsNullOrEmpty(line) || (line.Length >= 2 && line[0] == '/' && line[1] == '/'))
+				if (String.IsNullOrEmpty(line) || (line.Length >= 2 && line[0] == '/' && line[1] == '/'))
 					continue;
 
 				if (line.IndexOf("//", 0, StringComparison.Ordinal) > -1) {
@@ -55,7 +56,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 				return line;
 			}
 
-			if (string.IsNullOrEmpty(line) || (line.Length >= 2 && line[0] == '/' && line[1] == '/'))
+			if (String.IsNullOrEmpty(line) || (line.Length >= 2 && line[0] == '/' && line[1] == '/'))
 				return null;
 
 			return line;
@@ -142,7 +143,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 							if (SaveLastLine)
 								LastLineRead = line;
 
-							yield return ExcludeBrackets(line.Trim('\t'));
+							yield return ExcludeBrackets(line.Trim('\t'), '{', '}');
 						}
 					}
 				}
@@ -150,7 +151,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 		}
 
 		public static StreamReader SetAndLoadReader(string file, Encoding @default) {
-			AllLoaders.LatestFile = file;
+			LatestFile = file;
 			LastReader = new DebugStreamReader(new FileStream(file, FileMode.Open, FileAccess.Read), @default);
 			return LastReader;
 		}
@@ -167,14 +168,14 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 						string line = ReadNextLine(reader);
 
 						if (!String.IsNullOrEmpty(line)) {
-							yield return line.Trim('\t').Split('\t').Select(p => p.Trim(' ')).Where(p => !String.IsNullOrEmpty(p)).ToArray();
+							yield return line.Trim('\t', ' ').Split('\t', ' ').Select(p => p.Trim(' ')).Where(p => !String.IsNullOrEmpty(p)).ToArray();
 						}
 					}
 				}
 			}
 		}
 
-		public static string[] ExcludeBrackets(string line) {
+		public static string[] ExcludeBrackets(string line, char left = '{', char right = '}') {
 			List<string> elements = new List<string>();
 
 			int index = 0;
@@ -185,21 +186,25 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 					elements.Add(line.Substring(start, index - start));
 					start = index + 1;
 				}
-				else if (line[index] == '{') {
+				else if (line[index] == left) {
 					int level = 1;
 					index++;
 
 					while (index < line.Length && level > 0) {
-						if (line[index] == '{')
+						if (line[index] == left)
 							level++;
 
-						if (line[index] == '}')
+						if (line[index] == right)
 							level--;
 
 						index++;
 					}
 
 					elements.Add(line.Substring(start, index - start));
+
+					while (index < line.Length && line[index] != ',')
+						index++;
+
 					start = index + 1;
 				}
 
@@ -212,6 +217,9 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 			else if (index == start && index > 0 && line[line.Length - 1] == ',') {
 				elements.Add("");
 			}
+
+			if (elements.Count > 0)
+				elements[elements.Count - 1] = elements[elements.Count - 1].Trim(' ', '\t');
 
 			return elements.ToArray();
 		}
@@ -253,7 +261,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 								}
 								else {
 									currentGroup.Append(line);
-									currentGroup.Append('¤');
+									currentGroup.Append(SplitCharacter);
 									continue;
 								}
 							}
@@ -318,13 +326,5 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 				}
 			}
 		}
-	}
-
-	public class ElementRead {
-		public string Element1 { get; set; }
-		public string Element2 { get; set; }
-		public string Element3 { get; set; }
-		public string Element4 { get; set; }
-		public string Element5 { get; set; }
 	}
 }

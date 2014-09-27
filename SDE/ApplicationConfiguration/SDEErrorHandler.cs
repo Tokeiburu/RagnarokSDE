@@ -10,6 +10,17 @@ using TokeiLibrary;
 using TokeiLibrary.WPF;
 
 namespace SDE.ApplicationConfiguration {
+	/// <summary>
+	/// The primary error handler used throughout the application.
+	/// It displays the exceptions with an error dialog and sends the information
+	/// to the debugger dialog if necessary.
+	/// 
+	/// Exceptions are ALWAYS dispalyed with this class. The priority order is as follow :
+	/// - Top most window if it exists
+	/// - Application's main window if it exists and is loaded
+	/// - System.Windows.MessageBox's dialog window
+	/// - If all the above fails, the exception is stored in crash.log or debug.log
+	/// </summary>
 	public class SDEErrorHandler : IErrorHandler {
 		private static DebuggerDialog _debugDialog;
 		private string _latestException;
@@ -49,12 +60,12 @@ namespace SDE.ApplicationConfiguration {
 					WindowProvider.ShowWindow(new ErrorDialog("Information", _getHeader(errorLevel) + exception.Message, errorLevel), WpfUtilities.TopWindow);
 				}
 				else {
-					if (!(bool)Application.Current.Dispatcher.Invoke(new Func<bool>(() => Application.Current.MainWindow != null && Application.Current.MainWindow.IsLoaded))) {
+					if (!Application.Current.Dispatch(() => Application.Current.MainWindow != null && Application.Current.MainWindow.IsLoaded)) {
 						_showBasicError(_getHeader(errorLevel) + exception.Message, "Information");
 						return;
 					}
 
-					Application.Current.Dispatcher.Invoke((Action)(() => WindowProvider.ShowWindow(new ErrorDialog("Information", _getHeader(errorLevel) + exception.Message, errorLevel), Application.Current.MainWindow)));
+					Application.Current.Dispatch(() => WindowProvider.ShowWindow(new ErrorDialog("Information", _getHeader(errorLevel) + exception.Message, errorLevel), Application.Current.MainWindow));
 				}
 			}
 		}
@@ -72,36 +83,40 @@ namespace SDE.ApplicationConfiguration {
 					WindowProvider.ShowWindow(new ErrorDialog("Information", _getHeader(errorLevel) + exception, errorLevel), WpfUtilities.TopWindow);
 				}
 				else {
-					if (!(bool) Application.Current.Dispatcher.Invoke(new Func<bool>(() => Application.Current.MainWindow != null && Application.Current.MainWindow.IsLoaded))) { _showBasicError(_getHeader(errorLevel) + exception, "Information");
+					if (!Application.Current.Dispatch(() => Application.Current.MainWindow != null && Application.Current.MainWindow.IsLoaded)) { 
+						_showBasicError(_getHeader(errorLevel) + exception, "Information");
 						return;
 					}
 
-					Application.Current.Dispatcher.Invoke((Action) (() => WindowProvider.ShowWindow(new ErrorDialog("Information", _getHeader(errorLevel) + exception, errorLevel), Application.Current.MainWindow)));
+					Application.Current.Dispatch(() => WindowProvider.ShowWindow(new ErrorDialog("Information", _getHeader(errorLevel) + exception, errorLevel), Application.Current.MainWindow));
 				}
 			}
 		}
 
+		// Never used
 		public void Handle(object caller, Exception exception, ErrorLevel errorLevel) {
 			_reportAnyManagedExceptions(exception.Message, exception, errorLevel);
 			Handle(caller, exception.Message, errorLevel);
 		}
 
+		// Never used
 		public void Handle(object caller, string exception, ErrorLevel errorLevel) {
 			_reportAnyManagedExceptions(exception, null, errorLevel);
 			if (errorLevel < SDEAppConfiguration.WarningLevel) return;
 			if (Application.Current != null) {
-				if (!(bool) Application.Current.Dispatcher.Invoke(new Func<bool>(() => Application.Current.MainWindow != null && Application.Current.MainWindow.IsLoaded))) {
+				if (!Application.Current.Dispatch(() => Application.Current.MainWindow != null && Application.Current.MainWindow.IsLoaded)) {
 					_showBasicError(_getHeader(errorLevel) + exception, "Service report - " + Path.GetExtension(caller.GetType().ToString()).Remove(0, 1));
 					return;
 				}
 
-				Application.Current.Dispatcher.Invoke((Action) (() => {
+				Application.Current.Dispatch(() => {
 					WindowProvider.ShowWindow(new ErrorDialog("Service report - " + Path.GetExtension(caller.GetType().ToString()).Remove(0, 1),
-					                                          _getHeader(errorLevel) + exception, errorLevel), Application.Current.MainWindow);
-				}));
+						_getHeader(errorLevel) + exception, errorLevel), Application.Current.MainWindow);
+				});
 			}
 		}
 
+		// Never used
 		public bool YesNoRequest(string message, string caption) {
 			return WindowProvider.ShowDialog(message, caption, MessageBoxButton.YesNo) == MessageBoxResult.Yes;
 		}
@@ -118,14 +133,14 @@ namespace SDE.ApplicationConfiguration {
 				if (_latestException != null) {
 					if (exception == _latestException) {
 						if (Application.Current != null) {
-							bool res = (bool) Application.Current.Dispatcher.Invoke(new Func<bool>(delegate {
+							bool res = Application.Current.Dispatch(() => {
 								try {
 									return Application.Current.Windows.OfType<ErrorDialog>().Any();
 								}
 								catch {
 									return false;
 								}
-							}));
+							});
 
 							if (!res) {
 								_latestException = exception;
@@ -145,7 +160,7 @@ namespace SDE.ApplicationConfiguration {
 		}
 
 		private void _checkMainWindow() {
-			Application.Current.Dispatcher.Invoke(new Action(delegate {
+			Application.Current.Dispatch(delegate {
 				if (Application.Current.MainWindow == null || !Application.Current.MainWindow.IsLoaded || Application.Current.MainWindow == _debugDialog) {
 					foreach (Window window in Application.Current.Windows) {
 						if (window.Visibility == Visibility.Visible && window.IsLoaded && window != _debugDialog) {
@@ -153,7 +168,7 @@ namespace SDE.ApplicationConfiguration {
 						}
 					}
 				}
-			}));
+			});
 		}
 
 		public static void ShowStackTraceViewer() {
@@ -186,8 +201,7 @@ namespace SDE.ApplicationConfiguration {
 		private void _reportAnyManagedExceptions(string message, Exception exception, ErrorLevel errorLevel) {
 			if (Configuration.LogAnyExceptions) {
 				try {
-					string crash = "\r\n\r\n\r\n" +
-					               ApplicationManager.PrettyLine(DateTime.Now.ToString(CultureInfo.InvariantCulture)) + "\r\n";
+					string crash = "\r\n\r\n\r\n" + ApplicationManager.PrettyLine(DateTime.Now.ToString(CultureInfo.InvariantCulture)) + "\r\n";
 
 					try {
 						if (exception != null) {
@@ -219,7 +233,7 @@ namespace SDE.ApplicationConfiguration {
 				if (errorLevel == ErrorLevel.NotSpecified)
 					return;
 
-				_debugDialog.Dispatcher.Invoke(new Action(delegate {
+				_debugDialog.Dispatch(delegate {
 					if (!_debugDialog.IsLoaded)
 						_debugDialog.Show();
 
@@ -230,7 +244,7 @@ namespace SDE.ApplicationConfiguration {
 					}
 
 					_debugDialog.Update(DateTime.Now, exception, trace, message);
-				}));
+				});
 			}
 		}
 

@@ -1,10 +1,10 @@
-﻿using System.Globalization;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
 using SDE.Tools.DatabaseEditor.Generic;
-using SDE.Tools.DatabaseEditor.Generic.DbLoaders;
-using SDE.Tools.DatabaseEditor.Generic.DbLoaders.Writers;
+using SDE.Tools.DatabaseEditor.Generic.Core;
+using SDE.Tools.DatabaseEditor.Generic.DbWriters;
 using SDE.Tools.DatabaseEditor.Generic.Lists;
+using SDE.Tools.DatabaseEditor.Writers;
 using Utilities.Extension;
 
 namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
@@ -14,7 +14,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 			writer.Init(debug);
 
 			if (debug.DestinationServer == ServerType.RAthena) {
-				DbWriters.DbItemsCommaWriter(debug, db);
+				DbWriterMethods.DbItemsCommaWriter(debug, db);
 				writer.AppendHeader(writer.IsRenewal ? RAthenaItemDbSqlHeaderRenewal : RAthenaItemDbSqlHeader);
 
 				foreach (string line in writer.Read()) {
@@ -29,7 +29,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 				writer.AppendHeader(HerculesItemDbSqlHeader, writer.TableName.Replace("_re", ""));
 
 				foreach (var tuple in table.FastItems.OrderBy(p => p.GetKey<TKey>())) {
-					_getItemsHercules(writer.IsRenewal, writer.TableName, writer.Builder, tuple);
+					_getItemsHercules(writer.TableName, writer.Builder, tuple);
 				}
 			}
 
@@ -39,7 +39,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 		public static void DbSqlMobs<TKey>(DbDebugItem<TKey> debug, AbstractDb<TKey> db) {
 			DbSqlWriter writer = new DbSqlWriter();
 			writer.Init(debug);
-			DbWriters.DbIntComma(debug, db);
+			DbWriterMethods.DbIntComma(debug, db);
 
 			if (debug.DestinationServer == ServerType.RAthena) {
 				writer.AppendHeader(RAthenaMobDbSqlHeader);
@@ -65,7 +65,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 		public static void DbSqlMobSkills<TKey>(DbDebugItem<TKey> debug, AbstractDb<TKey> db) {
 			DbSqlWriter writer = new DbSqlWriter();
 			writer.Init(debug);
-			DbWriters.DbUniqueWriter(debug, db);
+			DbWriterMethods.DbUniqueWriter(debug, db);
 
 			if (debug.DestinationServer == ServerType.RAthena) {
 				writer.AppendHeader(RAthenaMobSkillDbSqlHeader);
@@ -127,7 +127,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 			}
 		}
 
-		private static void _getItemsHercules<TKey>(bool isRenewal, string table, StringBuilder output, ReadableTuple<TKey> tuple) {
+		private static void _getItemsHercules<TKey>(string table, StringBuilder output, ReadableTuple<TKey> tuple) {
 			// The parser for Hercules does not trim off the spaces for the first 4 attributes (strings)
 			// Many attributes in the item table do not have data converters, so we set the value to "0" instead
 			output.AppendFormat("REPLACE INTO `" + table + "` VALUES ({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},{23},{24},{25},{26},{27},{28},{29},{30},{31},{32},{33});\n",
@@ -157,8 +157,8 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 								_addCommaIfNotNull(_notNullDefault(_parseAndSetToInteger(tuple.GetValue<string>(ServerItemAttributes.Delay)), "0")),
 								_addCommaIfNotNull(_defaultNull(_settableInt<Trade>(tuple.GetValue<string>(ServerItemAttributes.Trade)))),
 								_addCommaIfNotNull(_defaultNull(_settableOverride<Trade>(tuple.GetValue<string>(ServerItemAttributes.Trade)))),
-								_addCommaIfNotNull(_defaultNull(_settableInt<Nouse>(tuple.GetValue<string>(ServerItemAttributes.Nouse)))),
-								_addCommaIfNotNull(_defaultNull(_settableOverride<Nouse>(tuple.GetValue<string>(ServerItemAttributes.Nouse)))),
+								_addCommaIfNotNull(_defaultNull(_settableInt<NoUse>(tuple.GetValue<string>(ServerItemAttributes.NoUse)))),
+								_addCommaIfNotNull(_defaultNull(_settableOverride<NoUse>(tuple.GetValue<string>(ServerItemAttributes.NoUse)))),
 								_addCommaIfNotNull(_notNullDefault(_parseEquip(tuple.GetValue<string>(ServerItemAttributes.Stack), true), "0")),	// Stack amount
 								_addCommaIfNotNull(_defaultNull(_parseEquip(tuple.GetValue<string>(ServerItemAttributes.Stack), false))),			// Stack flag
 								_addCommaIfNotNull(_notNullDefault(_parseAndSetToInteger(tuple.GetValue<string>(ServerItemAttributes.Sprite)), "0")),	// Sprite

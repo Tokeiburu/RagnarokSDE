@@ -2,12 +2,12 @@
 using System.IO;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using ErrorManager;
 using GRF.Threading;
 using SDE.ApplicationConfiguration;
-using SDE.Tools.DatabaseEditor.Engines;
+using SDE.Others.ViewItems;
+using SDE.Tools.DatabaseEditor.Engines.BackupsEngine;
 using SDE.Tools.DatabaseEditor.WPF;
 using TokeiLibrary;
 using TokeiLibrary.WPF;
@@ -28,25 +28,16 @@ namespace SDE.WPF {
 			Extensions.SetMinimalSize(this);
 
 			WindowStartupLocation = WindowStartupLocation.CenterOwner;
-			ShowInTaskbar = true;
 
 			Extensions.GenerateListViewTemplate(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 					new ListViewDataTemplateHelper.GeneralColumnInfo {Header = "Date", DisplayExpression = "Date", SearchGetAccessor = "DateInt", ToolTipBinding = "Date", TextWrapping = TextWrapping.Wrap, TextAlignment = TextAlignment.Center, FixedWidth = 140 },
 					new ListViewDataTemplateHelper.RangeColumnInfo {Header = "Database path", DisplayExpression = "DbPath", SearchGetAccessor = "DbPath", IsFill = true, ToolTipBinding = "DbPath", MinWidth = 100, TextWrapping = TextWrapping.Wrap }
-				}, new DefaultListViewComparer<BackupView>(), new string[] { "Normal", "Black" });
+				}, null, new string[] { "Normal", "Black" });
 
 			_items = new RangeObservableCollection<BackupView>();
 			_listView.ItemsSource = _items;
 			_load();
-			this.MouseRightButtonUp += new MouseButtonEventHandler(_backupDialog_MouseRightButtonUp);
-		}
-
-		private void _backupDialog_MouseRightButtonUp(object sender, MouseButtonEventArgs e) {
-			object item = _listView.InputHitTest(e.GetPosition(_listView));
-
-			if (item is ScrollViewer) {
-				e.Handled = true;
-			}
+			WpfUtils.DisableContextMenuIfEmpty(_listView);
 		}
 
 		private void _load() {
@@ -68,7 +59,7 @@ namespace SDE.WPF {
 			if (view != null) {
 				ProgressDialog dialog = new ProgressDialog("Restoring databases...", "Restoring...");
 				dialog.Loaded += delegate {
-					this.IsEnabled = false;
+					IsEnabled = false;
 
 					GrfThread.Start(delegate {
 						try {
@@ -84,6 +75,7 @@ namespace SDE.WPF {
 						}
 					});
 				};
+
 				dialog.ShowDialog();
 			}
 		}
@@ -120,26 +112,6 @@ namespace SDE.WPF {
 					BackupEngine.Instance.Export(folder, view.BackupDate);
 				}
 			}
-		}
-	}
-
-	public class BackupView {
-		public string Date { get; set; }
-		public string DbPath { get; set; }
-		public string BackupDate { get; set; }
-		public long DateInt { get; set; }
-
-		public bool Normal {
-			get {
-				return true;
-			}
-		}
-
-		public BackupView(Backup backup) {
-			BackupDate = backup.BackupDate;
-			DbPath = backup.Info.DestinationPath;
-			DateInt = long.Parse(backup.BackupDate);
-			Date = DateTime.FromFileTime(DateInt).ToString("d/M/yyyy HH:mm:ss");
 		}
 	}
 }

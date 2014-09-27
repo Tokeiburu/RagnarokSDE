@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -10,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using Database;
 using ErrorManager;
+using GRF.FileFormats;
 using GRF.IO;
 using GRF.System;
 using GRF.Threading;
@@ -17,9 +19,12 @@ using GrfToWpfBridge.Application;
 using SDE.ApplicationConfiguration;
 using SDE.Others.ViewItems;
 using SDE.Tools.DatabaseEditor.Engines;
-using SDE.Tools.DatabaseEditor.Engines.Commands;
+using SDE.Tools.DatabaseEditor.Engines.DatabaseEngine;
+using SDE.Tools.DatabaseEditor.Engines.TabNavigationEngine;
 using SDE.Tools.DatabaseEditor.Generic;
+using SDE.Tools.DatabaseEditor.Generic.Core;
 using SDE.Tools.DatabaseEditor.Generic.DbLoaders;
+using SDE.Tools.DatabaseEditor.Generic.Lists;
 using SDE.Tools.DatabaseEditor.Generic.TabsMakerCore;
 using SDE.Tools.DatabaseEditor.WPF;
 using SDE.WPF;
@@ -30,6 +35,7 @@ using TokeiLibrary.WPF.Styles;
 using TokeiLibrary.WPF.Styles.ListView;
 using Utilities;
 using Utilities.CommandLine;
+using Extensions = SDE.Others.Extensions;
 
 namespace SDE.Tools.DatabaseEditor {
 	/// <summary>
@@ -39,11 +45,12 @@ namespace SDE.Tools.DatabaseEditor {
 		private readonly AsyncOperation _asyncOperation;
 		private readonly GenericDatabase _clientDatabase;
 		private readonly ObservableCollection<DebugItemView> _debugItems;
-		private readonly List<GDbTab> _tabs = new List<GDbTab>();
-		private TabNavigationEngine _tabEngine;
+		public readonly List<GDbTab> GDTabs = new List<GDbTab>();
+		private DbHolder _holder;
+		private TabNavigation _tabEngine;
 
 		public SDEditor() : base("Server database editor", "cde.ico", SizeToContent.Manual, ResizeMode.CanResize) {
-			ProgressDialog loading = new ProgressDialog();
+			SplashDialog loading = new SplashDialog();
 			loading.Show();
 			Loaded += delegate {
 				loading.Terminate();
@@ -105,7 +112,7 @@ namespace SDE.Tools.DatabaseEditor {
 			_tmbUndo.SetUndo(_clientDatabase.Commands);
 			_tmbRedo.SetRedo(_clientDatabase.Commands);
 
-			Others.Extensions.GenerateListViewTemplate(_debugList, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			Extensions.GenerateListViewTemplate(_debugList, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = "#", DisplayExpression = "ErrorNumber", SearchGetAccessor = "ErrorNumber", FixedWidth = 35, ToolTipBinding = "ErrorNumber", TextAlignment = TextAlignment.Right },
 				new ListViewDataTemplateHelper.ImageColumnInfo { Header = "", DisplayExpression = "DataImage", SearchGetAccessor = "Exception", FixedWidth = 20, MaxHeight = 24 },
 				new ListViewDataTemplateHelper.RangeColumnInfo { Header = "Exception", DisplayExpression = "Exception", SearchGetAccessor = "Exception", IsFill = true, TextAlignment = TextAlignment.Left, ToolTipBinding="OriginalException", TextWrapping = TextWrapping.Wrap, MinWidth = 120 },
@@ -122,8 +129,33 @@ namespace SDE.Tools.DatabaseEditor {
 			DbLoaderErrorHandler.ClearListeners();
 			DbLoaderErrorHandler.AddListener(this);
 
+			_clientDatabase.PreviewReloaded += delegate {
+				this.BeginDispatch(delegate {
+					foreach (TabItem tabItem in _mainTabControl.Items) {
+						tabItem.IsEnabled = true;
+
+						var tabItemHeader = tabItem.Header as DisplayLabel;
+
+						if (tabItemHeader != null)
+							tabItemHeader.ResetEnabled();
+					}
+				});
+			};
+
 			_clientDatabase.Reloaded += delegate {
 				_mainTabControl.Dispatch(p => p.RaiseEvent(new SelectionChangedEventArgs(Selector.SelectionChangedEvent, new List<object>(), _mainTabControl.SelectedItem == null ? new List<object>() : new List<object> { _mainTabControl.SelectedItem })));
+				ServerType serverType = AllLoaders.GetServerType();
+				bool renewal = AllLoaders.GetIsRenewal();
+
+				string header = String.Format("Current ({0} - {1})", serverType == ServerType.RAthena ? "rA" : "Herc", renewal ? "Renewal" : "Pre-Renewal");
+
+				this.BeginDispatch(delegate {
+					_menuItemExportDbCurrent.IsEnabled = true;
+					_menuItemExportDbCurrent.Header = header;
+
+					_menuItemExportSqlCurrent.IsEnabled = true;
+					_menuItemExportSqlCurrent.Header = header;
+				});
 			};
 		}
 
@@ -132,7 +164,7 @@ namespace SDE.Tools.DatabaseEditor {
 		}
 
 		public List<GDbTab> Tabs {
-			get { return _tabs; }
+			get { return GDTabs; }
 		}
 
 		#region IErrorListener Members
@@ -143,6 +175,9 @@ namespace SDE.Tools.DatabaseEditor {
 
 		public void Handle(string exception, ErrorLevel errorLevel) {
 			Dispatcher.Invoke(new Action(delegate {
+				if (_mainTabControl.SelectedIndex != 1 && ((TabItem)_mainTabControl.Items[1]).Header.ToString() != "Error console *")
+					((TabItem)_mainTabControl.Items[1]).Header = new DisplayLabel { DisplayText = "Error console *", FontWeight = FontWeights.Bold };
+
 				_debugItems.Add(new DebugItemView(_debugItems.Count + 1, exception, errorLevel));
 			}), DispatcherPriority.Background);
 		}
@@ -179,44 +214,57 @@ namespace SDE.Tools.DatabaseEditor {
 		}
 
 		private void _clientDatabase_Modified(object sender) {
-			this.Dispatch(p => p.Title = "Server database editor - " + Methods.CutFileName(SDEConfiguration.ConfigAsker.ConfigFile) + (_clientDatabase.IsModified ? " *" : ""));
+			Dispatcher.BeginInvoke(new Action(() => Title = "Server database editor - " + Methods.CutFileName(SDEConfiguration.ConfigAsker.ConfigFile) + (_clientDatabase.IsModified ? " *" : "")));
 		}
 
 		private void _loadGenericTab() {
-			DbHolder holder = new DbHolder();
-			holder.Instantiate(_clientDatabase);
-			_tabs.AddRange(holder.GetTabs(_mainTabControl));
+			try {
+				SDEConfiguration.ConfigAsker.IsAutomaticSaveEnabled = false;
 
-			foreach (var tab in _clientDatabase.AllTables) {
-				var copy = tab.Value;
+				_holder = new DbHolder();
+#if SDE_DEBUG
+				CLHelper.WA = "_CPInstantiate database";
+#endif
+				_holder.Instantiate(_clientDatabase);
+#if SDE_DEBUG
+				CLHelper.WL = " : _CS_CDms";
+#endif
+				GDTabs.AddRange(_holder.GetTabs(_mainTabControl));
 
-				if (copy is AbstractDb<int>) {
-					AbstractDb<int> db = (AbstractDb<int>)copy;
-					db.Table.Commands.CommandIndexChanged += (e, a) => _updateTabHeader(db);
-				}
-				else if (copy is AbstractDb<string>) {
-					AbstractDb<string> db = (AbstractDb<string>)copy;
-					db.Table.Commands.CommandIndexChanged += (e, a) => _updateTabHeader(db);
-				}
-			}
+				foreach (var tab in _clientDatabase.AllTables) {
+					var copy = tab.Value;
 
-			foreach (var tab in _tabs) {
-				var copy = tab;
-				copy._listView.SelectionChanged += delegate(object sender, SelectionChangedEventArgs args) {
-					if (sender is ListView) {
-						ListView view = (ListView)sender;
-						_tabEngine.StoreAndExecute(new SelectionChanged(copy.Header.ToString(), view.SelectedItem, view, copy));
+					if (copy is AbstractDb<int>) {
+						AbstractDb<int> db = (AbstractDb<int>)copy;
+						db.Table.Commands.CommandIndexChanged += (e, a) => UpdateTabHeader(db);
 					}
-				};
-			}
+					else if (copy is AbstractDb<string>) {
+						AbstractDb<string> db = (AbstractDb<string>)copy;
+						db.Table.Commands.CommandIndexChanged += (e, a) => UpdateTabHeader(db);
+					}
+				}
 
-			foreach (GDbTab tab in _tabs) {
-				GDbTab tabCopy = tab;
-				_mainTabControl.Items.Insert(_mainTabControl.Items.Count, tabCopy);
+				foreach (var tab in GDTabs) {
+					var copy = tab;
+					copy._listView.SelectionChanged += delegate(object sender, SelectionChangedEventArgs args) {
+						if (sender is ListView) {
+							ListView view = (ListView)sender;
+							_tabEngine.StoreAndExecute(new SelectionChanged(copy.Header.ToString(), view.SelectedItem, view, copy));
+						}
+					};
+				}
+
+				foreach (GDbTab tab in GDTabs) {
+					GDbTab tabCopy = tab;
+					_mainTabControl.Items.Insert(_mainTabControl.Items.Count, tabCopy);
+				}
+			}
+			finally {
+				SDEConfiguration.ConfigAsker.IsAutomaticSaveEnabled = true;
 			}
 		}
 
-		private void _updateTabHeader<TKey>(AbstractDb<TKey> db) {
+		public void UpdateTabHeader<TKey>(AbstractDb<TKey> db) {
 			Table<TKey, ReadableTuple<TKey>> table = db.Table;
 
 			if (table != null) {
@@ -226,13 +274,13 @@ namespace SDE.Tools.DatabaseEditor {
 					header += " *";
 				}
 
-				this.Dispatch(delegate {
+				Dispatcher.BeginInvoke(new Action(delegate {
 					var gdt = _mainTabControl.Items.OfType<GDbTabWrapper<TKey, ReadableTuple<TKey>>>().FirstOrDefault(p => p.Header.ToString() == db.DbSource.Filename);
 
 					if (gdt != null) {
 						((DisplayLabel) gdt.Header).Content = header;
 					}
-				});
+				}));
 			}
 		}
 
@@ -248,6 +296,12 @@ namespace SDE.Tools.DatabaseEditor {
 				if (!ReloadDatabase()) {
 					_mainTabControl.SelectedIndex = 0;
 				}
+
+				return;
+			}
+
+			if (WpfUtilities.IsTab(item, "Error console *")) {
+				_mainTabControl.Dispatch(p => ((TabItem)_mainTabControl.Items[1]).Header = new DisplayLabel { DisplayText = "Error console", FontWeight = FontWeights.Bold });
 			}
 		}
 
@@ -340,6 +394,49 @@ namespace SDE.Tools.DatabaseEditor {
 
 		private void _menuItemBackups_Click(object sender, RoutedEventArgs e) {
 			WindowProvider.Show(new BackupDialog(), _menuItemBackups, this);
+		}
+
+		private void _menuItemAddTable_Click(object sender2, RoutedEventArgs er) {
+			//string file = @"C:\Users\Sylvain\Desktop\SVN\Hercules\Hercules\trunk\db\homun_skill_tree.txt";// PathRequest.OpenFileCde("filter", FileFormat.MergeFilters(Format.Txt));
+			string file = PathRequest.OpenFileCde("filter", FileFormat.MergeFilters(Format.Txt));
+
+			if (file == null) return;
+
+			DbMaker maker = new DbMaker(file);
+
+			if (maker.Init(_holder)) {
+				maker.Add(_mainTabControl, _holder, _tabEngine, this);
+				List<string> files = SDEConfiguration.CustomTabs;
+				files.Add(file);
+				SDEConfiguration.CustomTabs = files;
+			}
+			else {
+				ErrorHandler.HandleException("Failed to parse the file to a database format.");
+			}
+		}
+
+		private void _miOpen_Click(object sender, RoutedEventArgs e) {
+			try {
+				DebugItemView view = (DebugItemView)_debugList.SelectedItem;
+				Process.Start(view.FilePath);
+			}
+			catch (Exception err) {
+				ErrorHandler.HandleException(err);
+			}
+		}
+
+		private void _miOpenNotepad_Click(object sender, RoutedEventArgs e) {
+			try {
+				DebugItemView view = (DebugItemView) _debugList.SelectedItem;
+				GTabsMaker.SelectInNotepadpp(view.FilePath, view.Line);
+			}
+			catch (Exception err) {
+				ErrorHandler.HandleException(err);
+			}
+		}
+
+		private void _menuItemImportFromFile_Click(object sender, RoutedEventArgs e) {
+			_execute(v => v.ImportFromFile());
 		}
 	}
 }

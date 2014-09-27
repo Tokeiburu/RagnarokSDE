@@ -1,89 +1,50 @@
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows.Media.Imaging;
 using ErrorManager;
 using TokeiLibrary;
 
 namespace SDE.Others.ViewItems {
+	/// <summary>
+	/// Item to be showed in the error console
+	/// </summary>
 	public class DebugItemView {
+		private static readonly Regex _debugItemRegex = new Regex(@"(([^,\r\n ]+): ([^,\r\n]+))", RegexOptions.Compiled);
+
 		public DebugItemView(int errorNumber, string exception, ErrorLevel errorLevel) {
+			if (exception == null) throw new ArgumentNullException("exception");
+			if (errorNumber < 0) throw new ArgumentOutOfRangeException("errorNumber");
+
 			OriginalException = exception;
 			ErrorNumber = errorNumber;
 			Exception = exception;
 
-			string line = "line: ";
-			int index = Exception.IndexOf(line, 0, StringComparison.Ordinal);
+			foreach (Match match in _debugItemRegex.Matches(exception)) {
+				if (match.Groups.Count > 3) {
+					string matchGroup = match.Groups[2].Value;
+					string matchValue = match.Groups[3].Value;
 
-			if (index > -1) {
-				int indexOfComa = Exception.IndexOf(',', index + 1);
-				indexOfComa = indexOfComa < 0 ? Exception.Length : indexOfComa;
-				Line = Exception.Substring(index + line.Length, indexOfComa - index - line.Length).Trim(' ', '\'');
-				Exception = Exception.Remove(index, indexOfComa - index);
+					if (matchGroup == "file") {
+						FilePath = matchValue.Trim('\'');
+						FileName = Path.GetFileName(FilePath);
+					}
+					else if (matchGroup == "line") {
+						Line = matchValue;
+					}
+					else if (matchGroup == "ID") {
+						Id = matchValue;
+					}
+					else if (matchGroup == "exception") {
+						Exception = matchValue.Trim('\'');
+						break;
+					}
 
-				if (index > 0) {
-					Exception = Exception.Remove(index - 2, 2);
-				}
-
-				if (index + 2 < Exception.Length && Exception[index] == ',') {
-					Exception = Exception.Remove(index, 2);
-				}
-			}
-
-			line = "file: ";
-			index = Exception.IndexOf(line, 0, StringComparison.Ordinal);
-
-			if (index > -1) {
-				int indexOfComa = Exception.IndexOf(',', index + 1);
-				indexOfComa = indexOfComa < 0 ? Exception.Length : indexOfComa;
-				FilePath = Exception.Substring(index + line.Length, indexOfComa - index - line.Length).Trim(' ', '\'');
-				FileName = Path.GetFileName(FilePath);
-				Exception = Exception.Remove(index, indexOfComa - index);
-
-				if (index > 0) {
-					Exception = Exception.Remove(index - 2, 2);
-				}
-
-				if (index + 2 < Exception.Length  && Exception[index] == ',') {
-					Exception = Exception.Remove(index, 2);
+					Exception = Exception.Replace(matchGroup + ": " + matchValue + ", ", "");
+					Exception = Exception.Replace(matchGroup + ": " + matchValue, "");
 				}
 			}
-
-			line = "ID: ";
-			index = Exception.IndexOf(line, 0, StringComparison.Ordinal);
-
-			if (index > -1) {
-				int indexOfComa = Exception.IndexOf(',', index + 1);
-				indexOfComa = indexOfComa < 0 ? Exception.Length : indexOfComa;
-				Id = Exception.Substring(index + line.Length, indexOfComa - index - line.Length).Trim(' ', '\'');
-				Exception = Exception.Remove(index, indexOfComa - index);
-
-				if (index > 0) {
-					Exception = Exception.Remove(index - 2, 2);
-				}
-
-				if (index + 2 < Exception.Length && Exception[index] == ',') {
-					Exception = Exception.Remove(index, 2);
-				}
-			}
-
-			line = "exception: ";
-			index = Exception.IndexOf(line, 0, StringComparison.Ordinal);
-
-			if (index > -1) {
-				int indexOfComa = Exception.IndexOf(',', index + 1);
-				indexOfComa = indexOfComa < 0 ? Exception.Length : indexOfComa;
-				Exception = Exception.Substring(index + line.Length, indexOfComa - index - line.Length);
-				Exception = Exception.Substring(1, Exception.Length - 2);
-
-				if (index > 0) {
-					Exception = Exception.Remove(index - 2, 2);
-				}
-
-				if (index + 2 < Exception.Length && Exception[index] == ',') {
-					Exception = Exception.Remove(index, 2);
-				}
-			}
-
+			
 			switch (errorLevel) {
 				case ErrorLevel.Critical: DataImage = ApplicationManager.PreloadResourceImage("error16.png") as BitmapSource; break;
 				case ErrorLevel.Low: DataImage = ApplicationManager.PreloadResourceImage("validity.png") as BitmapSource; break;
@@ -92,21 +53,23 @@ namespace SDE.Others.ViewItems {
 			}
 		}
 
+		public int ErrorNumber { get; set; }
+		public string Line { get; set; }
 		public string Exception { get; set; }
 		public string OriginalException { get; set; }
-		public BitmapSource DataImage { get; set; }
-
-		public int ErrorNumber { get; set; }
-
 		public string FileName { get; set; }
 		public string FilePath { get; set; }
 		public string Id { get; set; }
+		public BitmapSource DataImage { get; set; }
 
 		public bool Default {
 			get { return true; }
 		}
 
-		public string Line { get; set; }
+
+		public bool CanSelectInTextEditor() {
+			return File.Exists(FilePath) && Line != null;
+		}
 
 		public override string ToString() {
 			return OriginalException;

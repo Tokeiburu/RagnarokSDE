@@ -64,6 +64,16 @@
                                 <Image Source="../../../../Resources/convert.png"  />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Name="_miCut" Header="Cut" InputGestureText="Ctrl-X" >
+                            <MenuItem.Icon>
+                                <Image Source="../../../../Resources/cut.png" Width="16" Height="16" RenderOptions.BitmapScalingMode="NearestNeighbor" Stretch="Uniform" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Name="_miSelectInNotepad" Header="Select in Notepad++" >
+                            <MenuItem.Icon>
+                                <Image Source="../../../../Resources/notepad.png" Width="16" Height="16" RenderOptions.BitmapScalingMode="NearestNeighbor" Stretch="Uniform" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Name="_miShowSelected" Header="Show selected items only" InputGestureText="Ctrl-R" >
                             <MenuItem.Icon>
                                 <Image Source="../../../../Resources/find.png" Width="16" Height="16" RenderOptions.BitmapScalingMode="NearestNeighbor" Stretch="Uniform" />

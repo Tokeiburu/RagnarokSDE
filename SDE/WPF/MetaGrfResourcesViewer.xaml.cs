@@ -29,6 +29,7 @@ namespace SDE.WPF {
 
 			_itemsResources.ItemsSource = _itemsResourcesSource;
 			_loadResourcesInfo();
+			WpfUtils.DisableContextMenuIfEmpty(_itemsResources);
 		}
 
 		public List<TkPath> Paths {
@@ -37,22 +38,6 @@ namespace SDE.WPF {
 
 		public Action<string> SaveResourceMethod { get; set; }
 		public Func<List<string>> LoadResourceMethod { get; set; }
-
-		private void _itemsResources_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e) {
-			try {
-				object item = _itemsResources.InputHitTest(e.GetPosition(_itemsResources));
-
-				if (item is ScrollViewer) {
-					e.Handled = true;
-					return;
-				}
-
-				e.Handled = false;
-			}
-			catch (Exception err) {
-				ErrorHandler.HandleException(err.Message, ErrorLevel.Warning);
-			}
-		}
 
 		private void _itemsResources_DragEnter(object sender, DragEventArgs e) {
 			e.Effects = DragDropEffects.Copy;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -12,22 +13,28 @@ using Database.Commands;
 using ErrorManager;
 using GRF.System;
 using GRF.Threading;
-using SDE.Tools.DatabaseEditor.Engines;
+using SDE.ApplicationConfiguration;
+using SDE.Tools.DatabaseEditor.Engines.DatabaseEngine;
+using SDE.Tools.DatabaseEditor.Generic.Core;
 using SDE.Tools.DatabaseEditor.Generic.DbLoaders;
 using SDE.Tools.DatabaseEditor.Generic.Lists;
 using TokeiLibrary;
 using TokeiLibrary.Shortcuts;
 using TokeiLibrary.WPF;
 using TokeiLibrary.WPF.Styles.ListView;
-using Utilities;
-using Utilities.CommandLine;
 using Utilities.Extension;
+using Extensions = SDE.Others.Extensions;
 
 namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 	public class GDbTabWrapper<TKey, TValue> : GDbTab where TValue : Tuple {
 		private readonly object _lock = new object();
 		public bool ItemsEventsDisabled;
 		private TValue _currentSelectedItem;
+		private bool _isDeployed;
+
+		public GenericDatabase GenericDatabase {
+			get { return (GenericDatabase) Database; }
+		}
 
 		public GTabSettings<TKey, TValue> Settings { get; private set; }
 		public GSearchEngine<TKey, TValue> SearchEngine { get; private set; }
@@ -39,25 +46,24 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			get { return _listView; }
 		}
 
-		public override bool IsFiltering {
+		public sealed override bool IsFiltering {
 			get { return SearchEngine.IsFiltering; }
 			set { base.IsFiltering = value; }
 		}
-		public override DbAttribute DisplayAttribute {
+		public sealed override DbAttribute DisplayAttribute {
 			get { return Settings.AttDisplay; }
 		}
-		public override DbAttribute IdAttribute {
+		public sealed override DbAttribute IdAttribute {
 			get { return Settings.AttId; }
 		}
 
 		public Table<TKey, TValue> Table { get; set; }
 
 		public void Initialize(GTabSettings<TKey, TValue> settings) {
-			var res = WpfUtilities.FindDirectParentControl<TabControl>(this);
-			Z.F(res);
 			Settings = settings;
 			_unclickableBorder.Init(_cbSubMenu);
 			Database = settings.ClientDatabase;
+			DbComponent = GenericDatabase.GetDb<TKey>(settings.DbData);
 			Table = Settings.Table;
 			Header = Settings.TabName;
 			Style = TryFindResource(settings.Style) as Style ?? Style;
@@ -65,14 +71,14 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			SearchEngine.Init(_gridSearchContent, _searchTextBox, this);
 
 			if (Settings.SearchEngine.SetupImageDataGetter != null) {
-				Others.Extensions.GenerateListViewTemplate(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+				Extensions.GenerateListViewTemplate(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 			        new ListViewDataTemplateHelper.GeneralColumnInfo {Header = Settings.AttId.DisplayName, DisplayExpression = "[" + Settings.AttId.Index + "]", SearchGetAccessor = Settings.AttId.AttributeName, FixedWidth = Settings.AttIdWidth, TextAlignment = TextAlignment.Right, ToolTipBinding = "[" + Settings.AttId.Index + "]"},
 			        new ListViewDataTemplateHelper.ImageColumnInfo {Header = "", DisplayExpression = "DataImage", SearchGetAccessor = Settings.AttId.AttributeName, FixedWidth = 26, MaxHeight = 24},
 			        new ListViewDataTemplateHelper.RangeColumnInfo {Header = Settings.AttDisplay.DisplayName, DisplayExpression = "[" + Settings.AttDisplay.Index + "]", SearchGetAccessor = Settings.AttDisplay.AttributeName, IsFill = true, ToolTipBinding = "[" + Settings.AttDisplay.Index + "]", MinWidth = 100, TextWrapping = TextWrapping.Wrap }
 			    }, new DatabaseItemSorter(Settings.AttributeList), new string[] { "Deleted", "Red", "Modified", "Green", "Added", "Blue", "Normal", "Black" }, "generateStyle", "false");
 			}
 			else {
-				Others.Extensions.GenerateListViewTemplate(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+				Extensions.GenerateListViewTemplate(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 			        new ListViewDataTemplateHelper.GeneralColumnInfo {Header = Settings.AttId.DisplayName, DisplayExpression = "[" + Settings.AttId.Index + "]", SearchGetAccessor = Settings.AttId.AttributeName, FixedWidth = Settings.AttIdWidth, TextAlignment = TextAlignment.Right, ToolTipBinding = "[" + Settings.AttId.Index + "]"},
 			        new ListViewDataTemplateHelper.RangeColumnInfo {Header = Settings.AttDisplay.DisplayName, DisplayExpression = "[" + Settings.AttDisplay.Index + "]", SearchGetAccessor = Settings.AttDisplay.AttributeName, IsFill = true, ToolTipBinding = "[" + Settings.AttDisplay.Index + "]", MinWidth = 100, TextWrapping = TextWrapping.Wrap }
 			    }, new DatabaseItemSorter(Settings.AttributeList), new string[] { "Deleted", "Red", "Modified", "Green", "Added", "Blue", "Normal", "Black" }, "generateStyle", "false");
@@ -81,25 +87,12 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 #if SDE_DEBUG
 			CLHelper.WA = CLHelper.CP(-10);
 #endif
-			Settings.DisplayablePropertyMaker.Deploy(this, Settings);
+			if (!Settings.CanBeDelayed || Settings.AttributeList.Attributes.Any(p => p.IsSkippable))
+				_deployTabControls();
 #if SDE_DEBUG
 			CLHelper.WA = ", deploy time : " + CLHelper.CS(-10) + CLHelper.CD(-10) + "ms";
 #endif
 			_initTableEvents();
-			_initMenus();
-
-			_searchTextBox.GotFocus += new RoutedEventHandler(_searchTextBox_GotFocus);
-			_searchTextBox.LostFocus += new RoutedEventHandler(_searchTextBox_LostFocus);
-			_listView.PreviewMouseRightButtonUp += new MouseButtonEventHandler(_listView_PreviewMouseRightButtonUp);
-			_listView.SelectionChanged += _listView_SelectionChanged;
-
-			Loaded += delegate {
-				TabControl parent = WpfUtilities.FindParentControl<TabControl>(this);
-
-				if (parent != null) {
-					parent.SelectionChanged += new SelectionChangedEventHandler(_parent_SelectionChanged);
-				}
-			};
 
 			if (Settings.ContextMenu != null) {
 				if (Header is Control)
@@ -114,10 +107,60 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				Settings.DisplayablePropertyMaker.OnTabVisible(this);
 			}
 
+			Loaded += delegate {
+				TabControl parent = WpfUtilities.FindParentControl<TabControl>(this);
+
+				if (parent != null) {
+					parent.SelectionChanged += new SelectionChangedEventHandler(_parent_SelectionChanged);
+				}
+			};
+
+			_listView.PreviewMouseDown += delegate {
+				_listView.Focus();
+			};
+
+			ApplicationShortcut.Link(ApplicationShortcut.Paste, () => ImportFromFile("clipboard"), _listView);
+			ApplicationShortcut.Link(ApplicationShortcut.Cut, () => _miCut_Click(null, null), _listView);
 		}
 
-		public Table<T, ReadableTuple<T>> GetTable<T>(ServerDBs db) {
+		private void _deployTabControls() {
+			if (!_isDeployed) {
+				Settings.DisplayablePropertyMaker.Deploy(this, Settings);
+
+				_initMenus();
+
+				_searchTextBox.GotFocus += new RoutedEventHandler(_searchTextBox_GotFocus);
+				_searchTextBox.LostFocus += new RoutedEventHandler(_searchTextBox_LostFocus);
+				WpfUtils.DisableContextMenuIfEmpty(_listView);
+				_listView.SelectionChanged += _listView_SelectionChanged;
+				KeyUp += _gDbTabWrapper_KeyUp;
+
+				_isDeployed = true;
+			}
+		}
+
+		private void _gDbTabWrapper_KeyUp(object sender, KeyEventArgs e) {
+			if (e.Key == Key.Tab) {
+				var focusedControl = Keyboard.FocusedElement;
+				TextBox box = focusedControl as TextBox;
+
+				if (box != null) {
+					box.SelectAll();
+					e.Handled = true;
+				}
+			}
+		}
+
+		public Table<T, ReadableTuple<T>> GetTable<T>(ServerDbs db) {
 			return ((GenericDatabase) Database).GetTable<T>(db);
+		}
+
+		public MetaTable<T> GetMetaTable<T>(ServerDbs db) {
+			return ((GenericDatabase)Database).GetMetaTable<T>(db);
+		}
+
+		public AbstractDb<T> GetDb<T>(ServerDbs source) {
+			return ((GenericDatabase) Database).GetDb<T>(source);
 		}
 
 		#region Init methods
@@ -141,24 +184,37 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			}
 
 			_miDelete.Click += _menuItemDeleteItem_Click;
-			_miCopyTo.Click += new RoutedEventHandler(_menuItemCopyItemTo_Click);
-			_miShowSelected.Click += new RoutedEventHandler(_menuItemKeepSelectedItemsOnly_Click);
-			_buttonOpenSubMenu.Click += new RoutedEventHandler(_buttonOpenSubMenu_Click);
-			_miChangeId.Click += new RoutedEventHandler(_miChangeId_Click);
+			_miCopyTo.Click += _menuItemCopyItemTo_Click;
+			_miShowSelected.Click += _menuItemKeepSelectedItemsOnly_Click;
+			_buttonOpenSubMenu.Click += _buttonOpenSubMenu_Click;
+			_miChangeId.Click += _miChangeId_Click;
+			_miSelectInNotepad.Click += _miSelectInNotepad_Click;
+			_miCut.Click += _miCut_Click;
 
 			if (!Settings.CanChangeId) {
 				_miChangeId.Visibility = Visibility.Collapsed;
 			}
 		}
+
+		private void _miCut_Click(object sender, RoutedEventArgs e) {
+			try {
+				ApplicationShortcut.Execute(ApplicationShortcut.Copy, List);
+				_deleteItems();
+			}
+			catch (Exception err) {
+				ErrorHandler.HandleException(err);
+			}
+		}
+
 		private void _initTableEvents() {
-			Table.TupleRemoved += new Table<TKey, TValue>.TableEventHandler(_clientItemDatabase_TupleRemoved);
-			Table.TupleAdded += new Table<TKey, TValue>.TableEventHandler(_clientItemDatabase_TupleAdded);
-			Table.TupleModified += new Table<TKey, TValue>.TableEventHandler(_clientItemDatabase_TupleModified);
-			Table.Commands.PreviewCommandRedo += new AbstractCommand<ITableCommand<TKey, TValue>>.AbstractCommandsEventHandler(_commands_PreviewCommandRedo);
-			Table.Commands.PreviewCommandUndo += new AbstractCommand<ITableCommand<TKey, TValue>>.AbstractCommandsEventHandler(_commands_PreviewCommandRedo);
-			Table.Commands.CommandRedo += new AbstractCommand<ITableCommand<TKey, TValue>>.AbstractCommandsEventHandler(_commands_CommandRedo);
-			Table.Commands.CommandUndo += new AbstractCommand<ITableCommand<TKey, TValue>>.AbstractCommandsEventHandler(_commands_CommandRedo);
-			Database.Reloaded += new BaseGenericDatabase.ClientDatabaseEventHandler(_database_Reloaded);
+			Table.TupleRemoved += _clientItemDatabase_TupleRemoved;
+			Table.TupleAdded += _clientItemDatabase_TupleAdded;
+			Table.TupleModified += _clientItemDatabase_TupleModified;
+			Table.Commands.PreviewCommandRedo += _commands_PreviewCommandRedo;
+			Table.Commands.PreviewCommandUndo += _commands_PreviewCommandRedo;
+			Table.Commands.CommandRedo += _commands_CommandRedo;
+			Table.Commands.CommandUndo += _commands_CommandRedo;
+			Database.Reloaded += _database_Reloaded;
 		}
 
 		#endregion
@@ -166,6 +222,37 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 		#region UI events
 		private void _miChangeId_Click(object sender, RoutedEventArgs e) {
 			ChangeId();
+		}
+		private void _miSelectInNotepad_Click(object sender, RoutedEventArgs e) {
+			try {
+				TValue item = _listView.SelectedItem as TValue;
+
+				if (item != null) {
+					string displayId = item.GetValue<string>(Settings.AttId);
+					string path;
+
+					if ((path = AllLoaders.DetectPath(Settings.DbData)) != null) {
+						string[] lines = File.ReadAllLines(path);
+
+						string line = lines.FirstOrDefault(p => p.StartsWith(displayId + ","));
+						
+						if (line == null)
+							line = lines.FirstOrDefault(p => p.StartsWith(displayId + "\t"));
+
+						if (line == null)
+							line = lines.FirstOrDefault(p => p.Contains("Id: " + displayId));
+
+						if (line == null)
+							line = lines.FirstOrDefault(p => p.StartsWith(displayId));
+
+						if (line != null)
+							GTabsMaker.SelectInNotepadpp(path, (lines.ToList().IndexOf(line) + 1).ToString(CultureInfo.InvariantCulture));
+					}
+				}
+			}
+			catch (Exception err) {
+				ErrorHandler.HandleException(err);
+			}
 		}
 		private void _menuItemCopyItemTo_Click(object sender, RoutedEventArgs e) {
 			CopyItemTo();
@@ -241,6 +328,8 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 		}
 		private void _parent_SelectionChanged(object sender, SelectionChangedEventArgs e) {
 			if (e.AddedItems.Count > 0 && e.AddedItems[0] is GDbTab && ReferenceEquals(e.AddedItems[0], this)) {
+				_deployTabControls();
+
 				if (DelayedReload) {
 					SearchEngine.Filter(this);
 					DelayedReload = false;
@@ -259,23 +348,9 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 		private void _buttonOpenSubMenu_Click(object sender, RoutedEventArgs e) {
 			_cbSubMenu.IsDropDownOpen = true;
 		}
-		private void _listView_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e) {
-			try {
-				object item = _listView.InputHitTest(e.GetPosition(_listView));
-
-				if (item is ScrollViewer) {
-					e.Handled = true;
-				}
-			}
-			catch (Exception err) {
-				ErrorHandler.HandleException(err);
-			}
-		}
 		#endregion
 
 		#region Database events
-
-
 		private void _commands_CommandRedo(object sender, ITableCommand<TKey, TValue> command) {
 			_listView.UpdateAndEnable();
 
@@ -333,8 +408,9 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 		}
 		private void _database_Reloaded(object sender) {
 			this.Dispatch(delegate {
-				if (((Grid)Content).IsVisible)
+				if (((Grid)Content).IsVisible) {
 					SearchEngine.Filter(this);
+				}
 				else {
 					DelayedReload = true;
 				}
@@ -420,6 +496,39 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				ErrorHandler.HandleException(err);
 			}
 		}
+		public override void ImportFromFile(string fileDefault = null) {
+			try {
+				string file = fileDefault ?? PathRequest.OpenFileCde("filter", "All db files|*.conf;*.txt");
+
+				if (file == "clipboard") {
+					if (!Clipboard.ContainsText())
+						return;
+
+					file = TemporaryFilesManager.GetTemporaryFilePath("clipboard_{0:0000}.txt");
+					File.WriteAllText(file, Clipboard.GetText());
+				}
+
+				if (file != null) {
+					try {
+						Table.Commands.BeginEdit(new GroupCommand<TKey, TValue>());
+
+						GenericDatabase gdb = (GenericDatabase)Database;
+						gdb.GetDb<TKey>(Settings.DbData).LoadDb(file);
+					}
+					catch {
+						Table.Commands.CancelEdit();
+					}
+					finally {
+						Table.Commands.EndEdit();
+					}
+
+					_listView_SelectionChanged(this, null);
+				}
+			}
+			catch (Exception err) {
+				ErrorHandler.HandleException(err);
+			}
+		}
 		public override void AddNewItemRaw() {
 			try {
 				string defaultValue = Clipboard.ContainsText() ? Clipboard.GetText() : "";
@@ -450,6 +559,9 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 						GenericDatabase gdb = (GenericDatabase)Database;
 						gdb.GetDb<TKey>(Settings.DbData).LoadDb(tempPath);
+					}
+					catch {
+						Table.Commands.CancelEdit();
 					}
 					finally {
 						Table.Commands.EndEdit();
@@ -528,12 +640,13 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				if (Table.ContainsKey(id)) {
 					if (WindowProvider.ShowDialog("An item with this ID already exists. Would you like to replace it?", "ID already exists", MessageBoxButton.YesNoCancel) == MessageBoxResult.Yes) {
 						try {
-							//Table.Commands.BeginEdit(new GroupCommand<TKey, TValue>());
+							Table.Commands.BeginEdit(new GroupCommand<TKey, TValue>());
+							Table.Commands.StoreAndExecute(new DeleteTuple<TKey, TValue>(id));
 							Table.Commands.StoreAndExecute(new ChangeTupleKey<TKey, TValue>(item.GetValue<TKey>(Settings.AttributeList.PrimaryAttribute), id, _changeKeyCallback));
 							_listView.ScrollToCenterOfView(_listView.SelectedItem);
 						}
 						finally {
-							//Table.Commands.EndEdit();
+							Table.Commands.EndEdit();
 						}
 					}
 
@@ -696,9 +809,5 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			}
 		}
 		#endregion
-
-		public AbstractDb<T> GetDb<T>(ServerDBs source) {
-			return ((GenericDatabase) Database).GetDb<T>(source);
-		}
 	}
 }

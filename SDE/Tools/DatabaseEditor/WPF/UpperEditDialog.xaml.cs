@@ -44,7 +44,6 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 			_boxes.ForEach(_addEvents);
 
 			WindowStartupLocation = WindowStartupLocation.CenterOwner;
-			ShowInTaskbar = true;
 		}
 
 		public string Text {

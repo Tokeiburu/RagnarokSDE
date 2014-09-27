@@ -9,22 +9,27 @@ using Database;
 using Database.Commands;
 using ErrorManager;
 using ICSharpCode.AvalonEdit;
-using SDE.Tools.DatabaseEditor.Engines;
-using SDE.Tools.DatabaseEditor.Engines.Commands;
-using SDE.Tools.DatabaseEditor.Generic.CustomControls;
-using SDE.Tools.DatabaseEditor.Generic.Lists.FormatConverters;
+using SDE.Tools.DatabaseEditor.Engines.DatabaseEngine;
+using SDE.Tools.DatabaseEditor.Generic.UI.CustomControls;
+using SDE.Tools.DatabaseEditor.Generic.UI.FormatConverters;
 using SDE.Tools.DatabaseEditor.Services;
 using TokeiLibrary;
 using TokeiLibrary.Shortcuts;
 using Utilities;
-using Utilities.CommandLine;
 using Utilities.Extension;
 
 namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
+	/// <summary>
+	/// Handles the instantiation of fields to edit the attributes of a table.
+	/// </summary>
+	/// <typeparam name="TKey">The type of the key.</typeparam>
+	/// <typeparam name="TValue">The type of the value.</typeparam>
 	public class DisplayableProperty<TKey, TValue> where TValue : Tuple {
+		#region Delegates
+
 		public delegate void DisplayableDelegate(object sender);
 
-		public DisplayableDelegate OnTabVisible;
+		#endregion
 
 		private readonly List<ICustomControl<TKey, TValue>> _customProperties = new List<ICustomControl<TKey, TValue>>();
 
@@ -44,9 +49,11 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 		// These are actions to take when a new item is being selected
 		private readonly List<Action<TValue>> _updateActions = new List<Action<TValue>>();
+		public DisplayableDelegate OnTabVisible;
 
 		// These are property fields that will get resetted
 		public int Spacing = 5;
+		public int ZIndex = 0;
 
 		public List<Tuple<DbAttribute, FrameworkElement>> Updates {
 			get { return _update; }
@@ -145,6 +152,10 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			};
 		}
 
+		public void AddDeployAction(Action<Grid> deployAction) {
+			_deployCommands.Add(deployAction);
+		}
+
 		public void SetRow(int row, GridLength height) {
 			_deployCommands.Add(new Action<Grid>(g => {
 				while (g.RowDefinitions.Count - 1 < row) {
@@ -161,6 +172,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			element.Margin = new Thickness(3);
 			element.SetValue(Grid.RowProperty, gridRow);
 			element.SetValue(Grid.ColumnProperty, gridColumn);
+			element.TabIndex = ZIndex++;
 			_deployControls.Add(new Tuple<FrameworkElement, FrameworkElement>(element, parent));
 			return element;
 		}
@@ -240,7 +252,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 						try {
 							if (tab.List.SelectedItem != null) {
-								tab.Table.Commands.StoreAndExecute(new ChangeTupleProperty<TKey, TValue>((TValue) tab.List.SelectedItem, x.Item1, element.Text));
+								tab.Table.Commands.Set((TValue) tab.List.SelectedItem, x.Item1, element.Text);
 							}
 						}
 						catch (Exception err) {
@@ -257,7 +269,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 						try {
 							if (tab.List.SelectedItem != null)
-								tab.Table.Commands.StoreAndExecute(new ChangeTupleProperty<TKey, TValue>((TValue) tab.List.SelectedItem, x.Item1, true));
+								tab.Table.Commands.Set((TValue) tab.List.SelectedItem, x.Item1, true);
 						}
 						catch (Exception err) {
 							ErrorHandler.HandleException(err);
@@ -268,9 +280,8 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 						if (tab.ItemsEventsDisabled) return;
 
 						try {
-							if (tab.List.SelectedItem != null) {
-								tab.Table.Commands.StoreAndExecute(new ChangeTupleProperty<TKey, TValue>((TValue) tab.List.SelectedItem, x.Item1, false));
-							}
+							if (tab.List.SelectedItem != null)
+								tab.Table.Commands.Set((TValue) tab.List.SelectedItem, x.Item1, false);
 						}
 						catch (Exception err) {
 							ErrorHandler.HandleException(err);
@@ -317,7 +328,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 						try {
 							if (tab.List.SelectedItem != null) {
-								tab.Table.Commands.StoreAndExecute(new ChangeTupleProperty<TKey, TValue>((TValue) tab.List.SelectedItem, x.Item1, values[element.SelectedIndex]));
+								tab.Table.Commands.Set((TValue) tab.List.SelectedItem, x.Item1, values[element.SelectedIndex]);
 							}
 						}
 						catch (Exception err) {
@@ -359,7 +370,15 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 		public void Reset() {
 			foreach (FrameworkElement element in _resetFields) {
 				if (element is TextBox) {
-					((TextBox) element).Text = "";
+					TextBox box = (TextBox) element;
+					try {
+						box.Text = "";
+						box.UndoLimit = 0;
+						box.UndoLimit = int.MaxValue;
+					}
+					catch {
+						Z.F();
+					}
 				}
 				else if (element is TextEditor) {
 					((TextEditor)element).Text = "";
@@ -416,8 +435,6 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 				obj.Initialize(attribute, row, column, this, parent as Grid);
 				_formattedProperties.Add(obj);
 			}
-			else {
-			}
 		}
 
 		private bool _isType<T>(Type dataType) {
@@ -469,17 +486,17 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 					if (command is ChangeTupleProperty<TKey, TValue>) {
 						ChangeTupleProperty<TKey, TValue> changeCommand = (ChangeTupleProperty<TKey, TValue>) command;
-						IGenericDbCommand last = ((GenericDatabase)tab.Database).Commands.Last();
+						IGenericDbCommand last = tab.GenericDatabase.Commands.Last();
 
 						if (last != null) {
-							if (last is CommandsHolder.GenericDbCommand<TKey>) {
-								CommandsHolder.GenericDbCommand<TKey> nLast = (CommandsHolder.GenericDbCommand<TKey>)last;
+							if (last is GenericDbCommand<TKey>) {
+								GenericDbCommand<TKey> nLast = (GenericDbCommand<TKey>)last;
 
 								if (ReferenceEquals(nLast.Table, tab.Table)) {
 									// The last command of the table is being edited
 
 									if (changeCommand.Tuple != tuple || changeCommand.Attribute.Index != attribute.Index) {
-										//tab.Table.Commands.StoreAndExecute(new ChangeTupleProperty<TKey, TValue>(tuple, attribute, text));
+										//tab.Table.Commands.Set(tuple, attribute, text);
 									}
 									else {
 										changeCommand.NewValue = text;
@@ -487,7 +504,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 										if (changeCommand.NewValue.ToString() == changeCommand.OldValue.ToString()) {
 											nLast.Undo();
-											((GenericDatabase)tab.Database).Commands.RemoveCommands(1);
+											tab.GenericDatabase.Commands.RemoveCommands(1);
 											tab.Table.Commands.RemoveCommands(1);
 										}
 
@@ -497,10 +514,10 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 							}
 						}
 
-						tab.Table.Commands.StoreAndExecute(new ChangeTupleProperty<TKey, TValue>(tuple, attribute, text));
+						tab.Table.Commands.Set(tuple, attribute, text);
 					}
 					else {
-						tab.Table.Commands.StoreAndExecute(new ChangeTupleProperty<TKey, TValue>(tuple, attribute, text));
+						tab.Table.Commands.Set(tuple, attribute, text);
 					}
 				}
 			}
@@ -511,10 +528,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 
 		public Grid AddGrid(int row, int col, int rowSpan, int colSpan) {
 			Grid element = new Grid();
-			element.SetValue(Grid.RowProperty, row);
-			element.SetValue(Grid.RowSpanProperty, rowSpan);
-			element.SetValue(Grid.ColumnProperty, col);
-			element.SetValue(Grid.ColumnSpanProperty, colSpan);
+			WpfUtilities.SetGridPosition(element, row, rowSpan, col, colSpan);
 			_deployControls.Add(new Tuple<FrameworkElement,FrameworkElement>(element, null));
 			return element;
 		}

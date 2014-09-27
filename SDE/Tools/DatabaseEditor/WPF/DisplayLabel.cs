@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using SDE.Tools.DatabaseEditor.Generic.Core;
 using SDE.Tools.DatabaseEditor.Generic.DbLoaders;
 using SDE.Tools.DatabaseEditor.Generic.Lists;
 using TokeiLibrary;
@@ -11,7 +12,7 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 	public class DisplayLabel : Label {
 		public static DependencyProperty DisplayTextProperty = DependencyProperty.Register("DisplayText", typeof(string), typeof(DisplayLabel), new PropertyMetadata(new PropertyChangedCallback(OnDisplayTextChanged)));
 		private readonly BaseDb _db;
-		private readonly ServerDBs _dbSource;
+		private readonly ServerDbs _dbSource;
 		private bool _isLoaded;
 
 		private Brush _stateBrush = Brushes.Black;
@@ -19,7 +20,8 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 		private string _toString;
 
 		public DisplayLabel() {
-			Margin = new Thickness(0, -3, 0, -3);
+			FocusVisualStyle = null;
+			Margin = new Thickness(-4, -4, 0, -4);
 			Padding = new Thickness(0);
 
 			FontSize = 12;
@@ -59,7 +61,7 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 			};
 		}
 
-		public DisplayLabel(ServerDBs dbSource, BaseDb db) : this() {
+		public DisplayLabel(ServerDbs dbSource, BaseDb db) : this() {
 			_dbSource = dbSource;
 			_db = db;
 			_toString = dbSource.Filename;
@@ -100,6 +102,27 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 		public string DisplayText {
 			get { return (string)GetValue(DisplayTextProperty); }
 			set { SetValue(DisplayTextProperty, value); }
+		}
+
+		public void ResetEnabled() {
+			_stateBrush = Brushes.Black;
+			_stateInactiveBrush = new SolidColorBrush(Color.FromArgb(255, 98, 98, 98));
+
+			Grid presenter = WpfUtilities.FindParentControl<Grid>(this);
+
+			if (presenter == null)
+				return;
+
+			if (!(presenter.Children[2] is TextBox))
+				return;
+
+			TextBox box = (TextBox)presenter.Children[2];
+			if (box.Text == "Visible") {
+				Foreground = _stateBrush;
+			}
+			else {
+				Foreground = _stateInactiveBrush;
+			}
 		}
 
 		public static void OnDisplayTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {

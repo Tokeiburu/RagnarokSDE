@@ -1,43 +1,42 @@
 ﻿using System.IO;
+using System.Linq;
 using ErrorManager;
 using GRF.IO;
 using GRF.System;
-using SDE.Tools.DatabaseEditor.Engines;
+using SDE.Tools.DatabaseEditor.Generic.Core;
 using SDE.Tools.DatabaseEditor.Generic.Lists;
 using Utilities;
 using Utilities.Extension;
 
 namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 	public static class AllLoaders {
-		private static readonly TkDictionary<string, string> _backups = new TkDictionary<string, string>();
+		private static readonly TkDictionary<string, string> _storedFiles = new TkDictionary<string, string>();
 
 		static AllLoaders() {
-			TemporaryFilesManager.UniquePattern("sdb_backup_{0:0000}.dat");
+			TemporaryFilesManager.UniquePattern("sdb_store_{0:0000}.dat");
 		}
 
-		public static string LatestFile { get; set; }
 
-		public static void BackupFile(string path) {
+		public static void StoreFile(string path) {
 			if (path == null)
 				return;
 
 			if (File.Exists(path)) {
-				string temp = TemporaryFilesManager.GetTemporaryFilePath("sdb_backup_{0:0000}.dat");
-				_backups[path] = temp;
+				string temp = TemporaryFilesManager.GetTemporaryFilePath("sdb_store_{0:0000}.dat");
+				_storedFiles[path] = temp;
 				File.Copy(path, temp);
-				//BackupEngine.Instance.Backup(path);
 			}
 			else {
-				_backups[path] = null;
+				_storedFiles[path] = null;
 			}
 		}
 
-		public static void ClearBackups() {
-			_backups.Clear();
+		public static void ClearStoredFiles() {
+			_storedFiles.Clear();
 		}
 
-		public static void UpdateBackups() {
-			foreach (var pair in _backups) {
+		public static void UpdateStoredFiles() {
+			foreach (var pair in _storedFiles) {
 				if (File.Exists(pair.Key)) {
 					if (GrfPath.Delete(pair.Value)) {
 						File.Copy(pair.Key, pair.Value);
@@ -46,11 +45,11 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 			}
 		}
 
-		public static string GetBackupFile(string path) {
+		public static string GetStoredFile(string path) {
 			if (path == null)
 				return null;
 
-			return _backups[path];
+			return _storedFiles[path];
 		}
 
 		public static bool GenericErrorHandler(ref int numError, object item) {
@@ -64,6 +63,11 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 			return false;
 		}
 
+		/// <summary>
+		/// Goes up in the parent folder until the path is found.
+		/// </summary>
+		/// <param name="db">The sub path to find.</param>
+		/// <returns>The path found.</returns>
 		public static string DetectPathAll(string db) {
 			try {
 				string path = SdeFiles.ServerDbPath.Filename;
@@ -85,65 +89,79 @@ namespace SDE.Tools.DatabaseEditor.Generic.DbLoaders {
 
 		private static string _getInParentPath(string fileInput) {
 			string path = Path.GetDirectoryName(SdeFiles.ServerDbPath.Filename);
-
 			string[] files = fileInput.GetExtension() == null ? new string[] {fileInput + ".txt", fileInput + ".conf"} : new string[] {fileInput};
-
-			foreach (string file in files) {
-				var fullpath = Path.Combine(path, file);
-				if (File.Exists(fullpath)) {
-					return fullpath;
-				}
-			}
-
-			return null;
+			return files.Select(file => Path.Combine(path, file)).FirstOrDefault(File.Exists);
 		}
 
 		private static string _getInCurrentPath(string fileInput) {
 			string path = SdeFiles.ServerDbPath.Filename;
-
 			string[] files = fileInput.GetExtension() == null ? new string[] {fileInput + ".txt", fileInput + ".conf"} : new string[] {fileInput};
-
-			foreach (string file in files) {
-				var fullpath = Path.Combine(path, file);
-				if (File.Exists(fullpath)) {
-					return fullpath;
-				}
-			}
-
-			return null;
+			return files.Select(file => Path.Combine(path, file)).FirstOrDefault(File.Exists);
 		}
 
 		public static string DetectPath(string toString) {
-			string path = _getInParentPath(toString);
+			if (File.Exists(toString))
+				return toString;
+
+			string path = _getInCurrentPath(toString);
 
 			if (path != null)
 				return path;
 
-			path = _getInCurrentPath(toString);
+			path = _getInParentPath(toString);
 			return path;
 		}
 
-		public static string DetectPath(ServerDBs toString, bool allowAlernative = true) {
-			string path = _getInParentPath(toString);
+		public static string DetectPath(ServerDbs toString, bool allowAlernative = true) {
+			if (File.Exists(toString))
+				return toString;
 
-			if (path != null)
+			string path = _getInCurrentPath(toString);
+
+			if (path != null) {
+				toString.UseSubPath = true;
 				return path;
+			}
 
-			path = _getInCurrentPath(toString);
+			path = _getInParentPath(toString);
 
 			if (path == null && toString.AlternativeName != null && allowAlernative) {
 				return DetectPath(toString.AlternativeName);
 			}
 
+			toString.UseSubPath = false;
 			return path;
 		}
 
+		/// <summary>
+		/// Gets the type of the server of the currently loaded DB.
+		/// </summary>
+		/// <returns>The current server type</returns>
 		public static ServerType GetServerType() {
-			return DetectPath(ServerDBs.Items).GetExtension() == ".conf" ? ServerType.Hercules : ServerType.RAthena;
+			return DetectPath(ServerDbs.Items).IsExtension(".conf") ? ServerType.Hercules : ServerType.RAthena;
 		}
 
+		/// <summary>
+		/// Gets the type of the file based on the path.
+		/// </summary>
+		/// <param name="path">The path.</param>
+		/// <returns>The file type</returns>
 		public static FileType GetFileType(string path) {
 			return path.IsExtension(".conf") ? FileType.Conf : FileType.Txt;
+		}
+
+		/// <summary>
+		/// Determines if the current server is renewal or not.
+		/// </summary>
+		/// <returns></returns>
+		public static bool GetIsRenewal() {
+			string path = DetectPath(ServerDbs.Items);
+
+			string parent = Path.GetDirectoryName(path);
+
+			if (parent != null && parent.EndsWith("pre-re"))
+				return false;
+			return true;
 		}
 	}
 }

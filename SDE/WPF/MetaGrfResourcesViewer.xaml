@@ -6,7 +6,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
-        <ListView Foreground="Black" AllowDrop="True" Name="_itemsResources" Margin="3" PreviewMouseRightButtonUp="_itemsResources_PreviewMouseRightButtonUp" DragEnter="_itemsResources_DragEnter" Drop="_itemsResources_Drop">
+        <ListView Foreground="Black" AllowDrop="True" Name="_itemsResources" Margin="3" DragEnter="_itemsResources_DragEnter" Drop="_itemsResources_Drop">
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Name="_menuItemsDelete" Header="Delete" Click="_menuItemsDelete_Click" >

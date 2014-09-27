@@ -46,7 +46,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;SDE_DEBUG</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -76,6 +76,7 @@
     <Reference Include="ICSharpCode.AvalonEdit">
       <HintPath>Files\ICSharpCode.AvalonEdit.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationFramework.Aero" />
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
@@ -106,79 +107,84 @@
     <Compile Include="Core\Avalon\RegexSearchStrategy.cs" />
     <Compile Include="Core\VirtualFileDataObject.cs" />
     <Compile Include="Main.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\Backup.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\BackupEngine.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\BackupInfo.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\Parsers\DbSqlWriter.cs" />
+    <Compile Include="Tools\DatabaseEditor\Engines\BackupsEngine\Backup.cs" />
+    <Compile Include="Tools\DatabaseEditor\Engines\BackupsEngine\BackupEngine.cs" />
+    <Compile Include="Tools\DatabaseEditor\Engines\BackupsEngine\BackupInfo.cs" />
+    <Compile Include="Tools\DatabaseEditor\Engines\DatabaseEngine\GenericDbCommand.cs" />
+    <Compile Include="Tools\DatabaseEditor\Engines\DbMaker.cs" />
+    <Compile Include="Tools\DatabaseEditor\Engines\TabNavigationEngine\SelectionChanged.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\IndexProviders\NullIndexProvider.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\IndexProviders\GroupIndexProvider.cs" />
+    <Compile Include="Tools\DatabaseEditor\WPF\SplashDialog.xaml.cs">
+      <DependentUpon>SplashDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Tools\DatabaseEditor\Writers\DbSqlWriter.cs" />
     <Compile Include="Tools\DatabaseEditor\Engines\Parsers\SqlParserHeaders.cs" />
     <Compile Include="Tools\DatabaseEditor\Engines\Parsers\SqlParser.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\Writers\LineStream.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\Writers\LineStreamReader.cs" />
+    <Compile Include="Tools\DatabaseEditor\Writers\LineStream.cs" />
+    <Compile Include="Tools\DatabaseEditor\Writers\LineStreamReader.cs" />
+    <Compile Include="Tools\DatabaseEditor\Engines\Parsers\ISettable.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\MetaTable.cs" />
     <Compile Include="Tools\DatabaseEditor\Generic\TabsMakerCore\GSearchEngineFilter.cs" />
-    <Compile Include="Tools\DatabaseEditor\Objects\Jobs\Job.cs" />
-    <Compile Include="Others\ViewItems\SDERecentFiles.cs" />
-    <Compile Include="Others\ViewItems\GrfShellFile.cs" />
+    <Compile Include="Tools\DatabaseEditor\Jobs\Job.cs" />
+    <Compile Include="Others\SdeRecentFiles.cs" />
     <Compile Include="Others\ViewItems\DebugItemView.cs" />
-    <Compile Include="Tools\DatabaseEditor\Objects\Items\ItemClass.cs" />
-    <Compile Include="Tools\DatabaseEditor\Objects\Items\ItemHelper.cs" />
     <Compile Include="Tools\DatabaseEditor\SdeFiles.cs" />
-    <Compile Include="Tools\DatabaseEditor\Objects\Jobs\JobList.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\Commands\CommandsHolder.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\DatabaseItemSorter.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\Commands\INagivationCommand.cs" />
+    <Compile Include="Tools\DatabaseEditor\Jobs\JobList.cs" />
+    <Compile Include="Tools\DatabaseEditor\Engines\DatabaseEngine\CommandsHolder.cs" />
+    <Compile Include="Tools\DatabaseEditor\Engines\DatabaseEngine\DatabaseItemSorter.cs" />
+    <Compile Include="Tools\DatabaseEditor\Engines\TabNavigationEngine\INagivationCommand.cs" />
     <Compile Include="Tools\DatabaseEditor\Engines\Parsers\DebugStreamReader.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\ExportMode.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\GenericDatabase.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\Commands\IGenericDbCommand.cs" />
+    <Compile Include="Tools\DatabaseEditor\Engines\DatabaseEngine\GenericDatabase.cs" />
+    <Compile Include="Tools\DatabaseEditor\Engines\DatabaseEngine\IGenericDbCommand.cs" />
     <Compile Include="Tools\DatabaseEditor\Engines\Parsers\ItemGroupParser.cs" />
     <Compile Include="Tools\DatabaseEditor\Engines\Parsers\ItemParser.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\Parsers\Parser.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\Parsers\Nouse.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\Commands\SelectionChanged.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\TabNavigationEngine.cs" />
+    <Compile Include="Tools\DatabaseEditor\Engines\Parsers\ParserHelper.cs" />
+    <Compile Include="Tools\DatabaseEditor\Engines\Parsers\NoUse.cs" />
+    <Compile Include="Tools\DatabaseEditor\Engines\TabNavigationEngine\TabNavigation.cs" />
     <Compile Include="Tools\DatabaseEditor\Engines\Parsers\TextFileHelper.cs" />
     <Compile Include="Tools\DatabaseEditor\Engines\Parsers\Trade.cs" />
     <Compile Include="Others\Extensions.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Lists\FormatConverters\CustomItemGroupDisplaySub.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Lists\FormatConverters\CustomComboIdProperty.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Lists\FormatConverters\CustomItemGroupDisplay.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\CustomControls\CustomLinkedImage.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Lists\FormatConverters\CustomProperties.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\CustomControls\CustomQueryViewerMobDroppedBy.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\CustomControls\CustomQueryViewerMobMvp.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\CustomControls\CustomQueryViewerMobOther.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\CustomControls\CustomQueryViewerMobSkills.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Lists\FormatConverters\CustomPreviewProperty.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\CustomControls\ICustomControl.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\AbstractDb.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\UI\FormatConverters\CustomItemGroupDisplaySub.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\UI\FormatConverters\CustomComboIdProperty.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\UI\FormatConverters\CustomItemGroupDisplay.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\UI\CustomControls\CustomLinkedImage.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\UI\FormatConverters\CustomProperties.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\UI\CustomControls\CustomQueryViewerMobDroppedBy.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\UI\CustomControls\CustomQueryViewerMobMvp.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\UI\CustomControls\CustomQueryViewerMobOther.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\UI\CustomControls\CustomQueryViewerMobSkills.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\UI\FormatConverters\CustomPreviewProperty.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\UI\CustomControls\ICustomControl.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\Core\AbstractDb.cs" />
     <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\AllLoaders.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\BaseDb.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\BaseGenericDatabase.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\DbLoadersItemGroup.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\Databases.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\DbHolder.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\Core\BaseDb.cs" />
+    <Compile Include="Tools\DatabaseEditor\Engines\DatabaseEngine\BaseGenericDatabase.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\DbLoaderMethodsItemGroup.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\Core\Databases.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\Core\DbHolder.cs" />
     <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\DbLoaderErrorHandler.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\DbLoaders.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\Writers\DbWriters.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\DebugDbItem.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\Writers\DbWritersItemGroup.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Lists\FormatConverters\ElementalFormat.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\FileType.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Lists\FormatConverters\IFormatConverter.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\Writers\IntLineStream.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\ServerType.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\Writers\StringLineStream.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\TabGenerator.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\DbLoaderMethods.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\DbWriters\DbWriterMethods.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\Core\DebugDbItem.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\DbWriters\DbWriterMethodsItemGroup.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\UI\FormatConverters\ElementalFormat.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\Core\FileType.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\UI\FormatConverters\IFormatConverter.cs" />
+    <Compile Include="Tools\DatabaseEditor\Writers\IntLineStream.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\Core\ServerType.cs" />
+    <Compile Include="Tools\DatabaseEditor\Writers\StringLineStream.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\TabsMakerCore\TabGenerator.cs" />
     <Compile Include="Tools\DatabaseEditor\Generic\IndexProviders\DefaultIndexProvider.cs" />
     <Compile Include="Tools\DatabaseEditor\Generic\IndexProviders\IIndexProvider.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\IndexProviders\QuerryIndexProvider.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\IndexProviders\QueryIndexProvider.cs" />
     <Compile Include="Tools\DatabaseEditor\Generic\IndexProviders\SpecifiedIndexProvider.cs" />
     <Compile Include="Tools\DatabaseEditor\Generic\IndexProviders\SpecifiedRangeIndexProvider.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Lists\ClientProperties.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Lists\DbAttributeHelpers\ComboBinding.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Lists\DbAttributeHelpers\ValueConverters.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\Lists\ClientAttributes.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\Lists\Bindings.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\Core\ValueConverters.cs" />
     <Compile Include="Tools\DatabaseEditor\Generic\Lists\ServerAttributes.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Lists\ServerDBs.cs" />
+    <Compile Include="Tools\DatabaseEditor\Generic\Lists\ServerDbs.cs" />
     <Compile Include="Tools\DatabaseEditor\Generic\Lists\ServerEnumTypes.cs" />
     <Compile Include="Tools\DatabaseEditor\Generic\TabsMakerCore\DisplayableProperty.cs" />
     <Compile Include="Tools\DatabaseEditor\Generic\TabsMakerCore\GDbTab.xaml.cs">
@@ -257,6 +263,7 @@
       <DependentUpon>UpperEditDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Others\ViewItems\TkPathView.cs" />
+    <Compile Include="Others\ViewItems\BackupView.cs" />
     <Compile Include="WPF\Converters.cs" />
     <Compile Include="WPF\DebuggerDialog.xaml.cs">
       <DependentUpon>DebuggerDialog.xaml</DependentUpon>
@@ -293,7 +300,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="app.manifest" />
     <EmbeddedResource Include="CustomHighlighting.xshd" />
     <EmbeddedResource Include="Imf.xshd" />
@@ -311,6 +320,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Tools\DatabaseEditor\SDEditor.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Tools\DatabaseEditor\WPF\SplashDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -489,7 +502,7 @@
     <Resource Include="Resources\replaceAll.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\treeList.png" />
+    <Resource Include="Resources\treeList.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Files\Encryption.dll" />
@@ -506,6 +519,18 @@
     <EmbeddedResource Include="Files\Compressed\TokeiLibrary.dll" />
     <EmbeddedResource Include="Files\Compressed\Utilities.dll" />
     <EmbeddedResource Include="Files\Compressed\zlib.net.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\sdeAboutBackground.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\cut.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\notepad.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\splash.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

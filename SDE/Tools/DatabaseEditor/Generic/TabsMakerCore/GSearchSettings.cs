@@ -4,17 +4,21 @@ using Database;
 using Utilities;
 
 namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
+	/// <summary>
+	/// This class saves the search settings to the current ConfigAsker
+	/// associated with the project.
+	/// </summary>
 	public class GSearchSettings {
-		public const string TupleAdded = "TupleAdded";
-		public const string TupleModified = "TupleModified";
-		public const string TupleRange = "TupleRange";
-		public const string Mode = "Mode";
-
 		#region Delegates
 
 		public delegate void SearchSettingsEventHandler(object sender);
 
 		#endregion
+
+		public const string TupleAdded = "Tuple added";
+		public const string TupleModified = "Tuple modified";
+		public const string TupleRange = "Tuple range";
+		public const string Mode = "Mode";
 
 		private readonly ConfigAsker _configAsker;
 		private readonly string _settingsGroupName;
@@ -28,8 +32,8 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 			get { return _configAsker; }
 		}
 		public bool this[DbAttribute attribute] {
-			get { return this[attribute.AttributeName]; }
-			set { this[attribute.AttributeName] = value; }
+			get { return this[attribute.DisplayName]; }
+			set { this[attribute.DisplayName] = value; }
 		}
 		public bool this[string attribute] {
 			get {
@@ -44,7 +48,7 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 		public event SearchSettingsEventHandler Modified;
 
 		public bool Link(CheckBox box, DbAttribute attribute, bool? defaultValue = null) {
-			return Link(box, attribute.AttributeName, defaultValue);
+			return Link(box, attribute.DisplayName, defaultValue);
 		}
 
 		public bool Link(CheckBox box, string attribute, bool? defaultValue = null) {
@@ -72,11 +76,11 @@ namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
 		}
 
 		public void Set(DbAttribute mode, object value) {
-			Set(mode.AttributeName, value);
+			Set(mode.DisplayName, value);
 		}
 
 		public string Get(DbAttribute mode) {
-			return Get(mode.AttributeName);
+			return Get(mode.DisplayName);
 		}
 
 		public string Get(string mode) {

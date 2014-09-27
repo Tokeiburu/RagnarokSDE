@@ -4,13 +4,18 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using Database;
+using ErrorManager;
 using SDE.Tools.DatabaseEditor.Generic;
+using SDE.Tools.DatabaseEditor.Generic.Core;
 using SDE.Tools.DatabaseEditor.Generic.DbLoaders;
 using SDE.Tools.DatabaseEditor.Generic.Lists;
 using Utilities;
 using Utilities.Extension;
 
 namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
+	/// <summary>
+	/// Parser for Hercules's item entries
+	/// </summary>
 	public class ItemParser {
 		public string AegisName = "";
 		public string Atk = "";
@@ -23,10 +28,10 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 		public string Gender = "2";
 		public string Id = "-1";
 		public string Job = "";
-		public string Loc = "0";
+		public string Loc = "";
 		public string Matk = "";
 		public string Name = "";
-		public Nouse Nouse = new Nouse();
+		public NoUse Nouse = new NoUse();
 		public string OnEquipScript = "";
 		public string OnUnequipScript = "";
 		public string Range = "";
@@ -44,7 +49,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 		public string Weight = "0";
 
 		public ItemParser(string element) {
-			List<string> lines = element.Split('¤').ToList();
+			List<string> lines = element.Split(TextFileHelper.SplitCharacter).ToList();
 
 			for (int index = 0; index < lines.Count; index++) {
 				string line = lines[index];
@@ -53,13 +58,13 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 				if (indexId < 0)
 					continue;
 
-				string id = line.Substring(0, indexId + 2);
+				string identifier = line.Substring(0, indexId + 2);
 
-				switch (id) {
+				switch (identifier) {
 					case "Id: ":
-						Id = line.Replace("Id: ", "");
+						Id = line.Replace(identifier, "");
 
-						// The .conf is actually not well written
+						// The .conf is actually quite confusing
 						// Overriding values are not setup for some reason and the parser
 						// has to guess and fix the issues.
 						int ival;
@@ -78,14 +83,10 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 								Gender = "1";
 						}
 						break;
-					case "Name: ":
-						Name = line.Replace("Name: ", "").Trim('\"');
-						break;
-					case "AegisName: ":
-						AegisName = line.Replace("AegisName: ", "").Trim('\"');
-						break;
+					case "Name: ": Name = line.Replace("Name: ", "").Trim('\"'); break;
+					case "AegisName: ": AegisName = line.Replace("AegisName: ", "").Trim('\"'); break;
 					case "Type: ":
-						Type = line.Replace("Type: ", "");
+						Type = line.Replace(identifier, "");
 
 						// Refine: Refineable            (boolean, defaults to true)
 						// ^ the most confusing line I've ever read, this is not true.
@@ -94,124 +95,47 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 							Refineable = "true";
 						}
 						break;
-					case "Sell: ":
-						Sell = line.Replace("Sell: ", "");
-						break;
-					case "Buy: ":
-						Buy = line.Replace("Buy: ", "");
-						break;
-					case "Weight: ":
-						Weight = line.Replace("Weight: ", "");
-						break;
-					case "Atk: ":
-						Atk = line.Replace("Atk: ", "");
-						break;
-					case "Matk: ":
-						Matk = line.Replace("Matk: ", "");
-						break;
-					case "Range: ":
-						Range = line.Replace("Range: ", "");
-						break;
+					case "Sell: ": Sell = line.Replace(identifier, ""); break;
+					case "Buy: ": Buy = line.Replace(identifier, ""); break;
+					case "Weight: ": Weight = line.Replace(identifier, ""); break;
+					case "Atk: ": Atk = line.Replace(identifier, ""); break;
+					case "Matk: ": Matk = line.Replace(identifier, ""); break;
+					case "Range: ": Range = line.Replace(identifier, ""); break;
 					case "Def: ":
-						Def = line.Replace("Def: ", "");
+						Def = line.Replace(identifier, "");
 
 						if (Def.Length > 0 && Def[0] == '-')
 							Def = "0";
 
 						break;
-					case "Stack: ":
-						Stack = line.Replace("Stack: ", "");
-						break;
-					case "Sprite: ":
-						Sprite = line.Replace("Sprite: ", "");
-						break;
-					case "Slots: ":
-						Slots = line.Replace("Slots: ", "");
-						break;
-					case "Job: ":
-						Job = line.Replace("Job: ", "");
-						break;
-					case "Upper: ":
-						Upper = line.Replace("Upper: ", "");
-						break;
-					case "Gender: ":
-						Gender = line.Replace("Gender: ", "");
-						break;
-					case "Loc: ":
-						Loc = line.Replace("Loc: ", "");
-						break;
-					case "WeaponLv: ":
-						WeaponLv = line.Replace("WeaponLv: ", "");
-						break;
-					case "EquipLv: ":
-						EquipLv = line.Replace("EquipLv: ", "");
-						break;
-					case "Refine: ":
-						Refineable = line.Replace("Refine: ", "");
-						break;
-					case "View: ":
-						View = line.Replace("View: ", "");
-						break;
-					case "BindOnEquip: ":
-						BindOnEquip = line.Replace("BindOnEquip: ", "");
-						break;
-					case "BuyingStore: ":
-						BuyingStore = line.Replace("BuyingStore: ", "");
-						break;
-					case "Delay: ":
-						Delay = line.Replace("Delay: ", "");
-						break;
+					case "Stack: ": Stack = line.Replace(identifier, ""); break;
+					case "Sprite: ": Sprite = line.Replace(identifier, ""); break;
+					case "Slots: ": Slots = line.Replace(identifier, ""); break;
+					case "Job: ": Job = line.Replace(identifier, ""); break;
+					case "Upper: ": Upper = line.Replace(identifier, ""); break;
+					case "Gender: ": Gender = line.Replace(identifier, ""); break;
+					case "Loc: ": Loc = line.Replace(identifier, ""); break;
+					case "WeaponLv: ": WeaponLv = line.Replace(identifier, ""); break;
+					case "EquipLv: ": EquipLv = line.Replace(identifier, ""); break;
+					case "Refine: ": Refineable = line.Replace(identifier, ""); break;
+					case "View: ": View = line.Replace(identifier, ""); break;
+					case "BindOnEquip: ": BindOnEquip = line.Replace(identifier, ""); break;
+					case "BuyingStore: ": BuyingStore = line.Replace(identifier, ""); break;
+					case "Delay: ": Delay = line.Replace(identifier, ""); break;
 					case "Trade: ":
 						index++;
 						line = lines[index];
 
+						StringBuilder builderTrade = new StringBuilder();
+						builderTrade.AppendLineUnix();
+
 						while (line != "}" && line != null) {
-							indexId = line.IndexOf(": ", StringComparison.Ordinal);
-
-							if (indexId < 0) {
-								index++;
-								line = index >= lines.Count ? null : lines[index];
-								continue;
-							}
-
-							id = line.Substring(0, indexId + 2);
-
-							switch (id) {
-								case "override: ":
-									Trade.Override = line.Replace("override: ", "");
-									break;
-								case "nodrop: ":
-									Trade.Nodrop = line.Replace("nodrop: ", "");
-									break;
-								case "notrade: ":
-									Trade.Notrade = line.Replace("notrade: ", "");
-									break;
-								case "partneroverride: ":
-									Trade.Partneroverride = line.Replace("partneroverride: ", "");
-									break;
-								case "noselltonpc: ":
-									Trade.Noselltonpc = line.Replace("noselltonpc: ", "");
-									break;
-								case "nocart: ":
-									Trade.Nocart = line.Replace("nocart: ", "");
-									break;
-								case "nostorage: ":
-									Trade.Nostorage = line.Replace("nostorage: ", "");
-									break;
-								case "nogstorage: ":
-									Trade.Nogstorage = line.Replace("nogstorage: ", "");
-									break;
-								case "nomail: ":
-									Trade.Nomail = line.Replace("nomail: ", "");
-									break;
-								case "noauction: ":
-									Trade.Noauction = line.Replace("noauction: ", "");
-									break;
-							}
-
+							builderTrade.AppendLineUnix(line);
 							index++;
 							line = lines[index];
 						}
+
+						Trade.Set(builderTrade.ToString());
 						break;
 					case "Nouse: ":
 						index++;
@@ -226,30 +150,20 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 								continue;
 							}
 
-							id = line.Substring(0, indexId + 2);
+							identifier = line.Substring(0, indexId + 2);
 
-							switch (id) {
-								case "override: ":
-									Nouse.Override = line.Replace("override: ", "");
-									break;
-								case "sitting: ":
-									Nouse.Sitting = line.Replace("sitting: ", "");
-									break;
+							switch (identifier) {
+								case "override: ": Nouse.Override = line.Replace(identifier, ""); break;
+								case "sitting: ": Nouse.Sitting = line.Replace(identifier, ""); break;
 							}
 
 							index++;
 							line = lines[index];
 						}
 						break;
-					case "Script: ":
-						Script = _readScript(ref index, lines);
-						break;
-					case "OnEquipScript: ":
-						OnEquipScript = _readScript(ref index, lines);
-						break;
-					case "OnUnequipScript: ":
-						OnUnequipScript = _readScript(ref index, lines);
-						break;
+					case "Script: ": Script = _readScript(ref index, lines).Trim(' '); break;
+					case "OnEquipScript: ": OnEquipScript = _readScript(ref index, lines).Trim(' '); break;
+					case "OnUnequipScript: ": OnUnequipScript = _readScript(ref index, lines).Trim(' '); break;
 				}
 			}
 		}
@@ -282,7 +196,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 		}
 
 		public static string ToHerculesEntry(BaseDb db, int itemId) {
-			var dbItems = db.Get<int>(ServerDBs.Items);
+			var dbItems = db.GetMeta<int>(ServerDbs.Items);
 
 			StringBuilder builder = new StringBuilder();
 
@@ -305,11 +219,11 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 				_trySetIfDefaultEmpty(tuple, builder, ServerItemAttributes.NumberOfSlots, "0");
 				_trySetIfDefaultEmptyAddHex(tuple, builder, ServerItemAttributes.ApplicableJob, "");
 				_trySetIfDefaultEmptyUpper(tuple, builder, ServerItemAttributes.Upper);
-				_trySetIfDefaultEmpty(tuple, builder, ServerItemAttributes.Gender, "2");
+				_trySetGender(tuple, builder, ServerItemAttributes.Gender, "2");
 				_trySetIfDefaultLocation(tuple, builder, ServerItemAttributes.Location);
 				_trySetIfDefaultEmpty(tuple, builder, ServerItemAttributes.WeaponLevel, "0");
 				_trySetIfDefaultEmpty(tuple, builder, ServerItemAttributes.EquipLevel, "0");
-				_trySetIfDefaultBoolean(tuple, builder, ServerItemAttributes.Refineable, true);
+				_trySetIfRefineable(tuple, builder, ServerItemAttributes.Refineable, true);
 				_trySetIfDefaultEmpty(tuple, builder, ServerItemAttributes.ClassNumber, "0");
 				_trySetIfDefaultBoolean(tuple, builder, ServerItemAttributes.BindOnEquip, false);
 				_trySetIfDefaultBoolean(tuple, builder, ServerItemAttributes.BuyingStore, false);
@@ -318,7 +232,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 				var trade = tuple.GetRawValue(ServerItemAttributes.Trade.Index) as Trade;
 				if (trade != null && trade.NeedPrinting()) builder.AppendLineUnix(trade.ToWriteString());
 
-				var nouse = tuple.GetRawValue(ServerItemAttributes.Nouse.Index) as Nouse;
+				var nouse = tuple.GetRawValue(ServerItemAttributes.NoUse.Index) as NoUse;
 				if (nouse != null && nouse.NeedPrinting()) builder.AppendLineUnix(nouse.ToWriteString());
 
 				_trySetIfDefaultEmptyBracket(tuple, builder, ServerItemAttributes.Stack, "");
@@ -342,7 +256,10 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 			string val = tuple.GetValue<string>(attribute);
 
 			if (val != "" && val != defaultValue && val != "-1") {
-				builder.AppendLineUnix("\t" + attribute.AttributeName + ": " + val);
+				builder.Append("\t");
+				builder.Append(attribute.AttributeName);
+				builder.Append(": ");
+				builder.AppendLineUnix(val);
 			}
 		}
 
@@ -350,7 +267,10 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 			string val = tuple.GetValue<string>(attribute);
 
 			if (val != "" && val != "7" && val != "63") {
-				builder.AppendLineUnix("\t" + attribute.AttributeName + ": " + val);
+				builder.Append("\t");
+				builder.Append(attribute.AttributeName);
+				builder.Append(": ");
+				builder.AppendLineUnix(val);
 			}
 		}
 
@@ -358,7 +278,10 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 			string val = tuple.GetValue<string>(attribute);
 
 			if (val != "" && val != "0") {
-				builder.AppendLineUnix("\t" + attribute.AttributeName + ": " + val);
+				builder.Append("\t");
+				builder.Append(attribute.AttributeName);
+				builder.Append(": ");
+				builder.AppendLineUnix(val);
 			}
 		}
 
@@ -366,7 +289,33 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 			string val = tuple.GetValue<string>(attribute);
 
 			if (val != "" && val != defaultValue) {
-				builder.AppendLineUnix("\t" + attribute.AttributeName + ": <\"" + Format(val, 2, true) + "\">");
+				builder.Append("\t");
+				builder.Append(attribute.AttributeName);
+				builder.Append(": <\"");
+				builder.Append(Format(val, 2, true));
+				builder.AppendLineUnix("\">");
+			}
+		}
+
+		private static void _trySetGender(ReadableTuple<int> tuple, StringBuilder builder, DbAttribute attribute, string defaultValue) {
+			int key = tuple.GetKey<int>();
+			string val = tuple.GetValue<string>(attribute);
+
+			if (key >= 1950 && key < 2000) {
+				if (val == "0")
+					return;
+			}
+
+			if (key == 2635) {
+				if (val == "0")
+					return;
+			}
+
+			if (val != "" && val != defaultValue && val != "-1") {
+				builder.Append("\t");
+				builder.Append(attribute.AttributeName);
+				builder.Append(": ");
+				builder.AppendLineUnix(val);
 			}
 		}
 
@@ -374,7 +323,11 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 			string val = tuple.GetValue<string>(attribute);
 
 			if (val != "" && val != defaultValue) {
-				builder.AppendLineUnix("\t" + attribute.AttributeName + ": [" + val + "]");
+				builder.Append("\t");
+				builder.Append(attribute.AttributeName);
+				builder.Append(": [");
+				builder.Append(val);
+				builder.AppendLineUnix("]");
 			}
 		}
 
@@ -482,7 +435,31 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 			bool val = tuple.GetValue<bool>(attribute);
 
 			if (val != defaultValue) {
-				builder.AppendLineUnix("\t" + attribute.AttributeName + ": " + val.ToString().ToLower());
+				builder.Append("\t");
+				builder.Append(attribute.AttributeName);
+				builder.Append(": ");
+				builder.AppendLineUnix(val.ToString().ToLower());
+			}
+		}
+
+		private static void _trySetIfRefineable(ReadableTuple<int> tuple, StringBuilder builder, DbAttribute attribute, bool defaultValue) {
+			int type = tuple.GetValue<int>(ServerItemAttributes.Type);
+			bool val = tuple.GetValue<bool>(attribute);
+
+			if (type != 4 && type != 5) {
+				if (val) {
+					// This is not supposed to be allowed, but... we'll let it slide
+					DbLoaderErrorHandler.Handle("The refineable status on the item ID [" + tuple.GetKey<int>() + "] has been set to true but the item type is not an equipment. This is suspicious.", ErrorLevel.Warning);
+					builder.AppendLineUnix("\t" + attribute.AttributeName + ": true");
+				}
+				return;
+			}
+
+			if (val != defaultValue) {
+				builder.Append("\t");
+				builder.Append(attribute.AttributeName);
+				builder.Append(": ");
+				builder.AppendLineUnix(val.ToString().ToLower());
 			}
 		}
 
@@ -490,7 +467,10 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 			string val = "0x" + tuple.GetValue<string>(attribute);
 
 			if (val != "" && val != defaultValue && val.Length > 2 && val.ToLower() != "0xffffffff") {
-				builder.AppendLineUnix("\t" + attribute.AttributeName + ": " + val);
+				builder.Append("\t");
+				builder.Append(attribute.AttributeName);
+				builder.Append(": ");
+				builder.AppendLineUnix(val);
 			}
 		}
 
@@ -503,7 +483,10 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 				string sval = "0x" + ival.ToString("X").ToLower();
 
 				if (val != defaultValue) {
-					builder.AppendLineUnix("\t" + attribute.AttributeName + ": " + sval);
+					builder.Append("\t");
+					builder.Append(attribute.AttributeName);
+					builder.Append(": ");
+					builder.AppendLineUnix(sval);
 				}
 			}
 			else {
@@ -512,7 +495,10 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 		}
 
 		private static void _trySet(ReadableTuple<int> tuple, StringBuilder builder, DbAttribute attribute) {
-			builder.AppendLineUnix("\t" + attribute.AttributeName + ": " + tuple.GetValue<string>(attribute));
+			builder.Append("\t");
+			builder.Append(attribute.AttributeName);
+			builder.Append(": ");
+			builder.AppendLineUnix(tuple.GetValue<string>(attribute));
 		}
 	}
 }

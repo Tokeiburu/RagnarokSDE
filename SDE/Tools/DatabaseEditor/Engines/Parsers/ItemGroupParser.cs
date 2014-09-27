@@ -3,20 +3,28 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using ErrorManager;
 using SDE.Tools.DatabaseEditor.Generic;
+using SDE.Tools.DatabaseEditor.Generic.Core;
 using SDE.Tools.DatabaseEditor.Generic.DbLoaders;
-using SDE.Tools.DatabaseEditor.Generic.DbLoaders.Writers;
+using SDE.Tools.DatabaseEditor.Generic.DbWriters;
 using SDE.Tools.DatabaseEditor.Generic.Lists;
 using Utilities;
 using Utilities.Extension;
 
 namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
+	/// <summary>
+	/// Reads an ItemGroup from a raw input (from the TextFileHelper).
+	/// </summary>
 	public class ItemGroupParser {
 		public string Id;
 		public List<Tuple<string, string>> Quantities = new List<Tuple<string, string>>();
 
-		public ItemGroupParser(string element) {
-			List<string> lines = element.Split(new char[] { '¤' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+		public bool Init<TKey>(DbDebugItem<TKey> debug, string element) {
+			Id = null;
+			Quantities.Clear();
+
+			List<string> lines = element.Split(new char[] { TextFileHelper.SplitCharacter }, StringSplitOptions.RemoveEmptyEntries).ToList();
 
 			if (lines.Count > 0)
 				Id = lines[0];
@@ -29,8 +37,9 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 					if (line[lineIndex] == '(') {
 						int end = line.IndexOf(')', lineIndex + 1);
 
-						if (end < 0)
-							throw new Exception("Couln't find the parenthesis end branch.");
+						if (end < 0) {
+							return debug.ReportIdExceptionWithError("Couln't find the parenthesis end branch.", Id);
+						}
 
 						string actualVal = line.Substring(lineIndex + 1, end - lineIndex - 1);
 						_add(actualVal);
@@ -41,8 +50,9 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 					else if (line[lineIndex] == '\"') {
 						int end = line.IndexOf('\"', lineIndex + 1);
 
-						if (end < 0)
-							throw new Exception("Couln't find the parenthesis end branch.");
+						if (end < 0) {
+							return debug.ReportIdExceptionWithError("Couln't find the parenthesis end branch.", Id);
+						}
 
 						string actualVal = line.Substring(lineIndex + 1, end - lineIndex - 1);
 						_add(actualVal);
@@ -51,6 +61,8 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 					lineIndex++;
 				}
 			}
+
+			return true;
 		}
 
 		private void _add(string val) {
@@ -64,22 +76,21 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 			}
 		}
 
-		public static string ToHerculesDbEntry(BaseDb gdb, int groupId) {
-			var dbItems = gdb.Get<int>(ServerDBs.Items);
-
-			List<string> aegisNames = dbItems.FastItems.Select(p => p.GetStringValue(ServerItemAttributes.AegisName.Index)).ToList();
-			List<string> names = dbItems.FastItems.Select(p => p.GetStringValue(ServerItemAttributes.Name.Index)).ToList();
-
-			return ToHerculesDbEntry(gdb, groupId, aegisNames, names);
-		}
-
+		/// <summary>
+		/// Converts a group from an ItemGroup to a Hercules entry
+		/// </summary>
+		/// <param name="gdb">The base db.</param>
+		/// <param name="groupId">The group id.</param>
+		/// <param name="aegisNames">The aegis names.</param>
+		/// <param name="names">The names.</param>
+		/// <returns>A string for an ItemGroup entry converted to Hercules's format</returns>
 		public static string ToHerculesDbEntry(BaseDb gdb, int groupId, List<string> aegisNames, List<string> names) {
 			StringBuilder builder = new StringBuilder();
-			var dbItems = gdb.Get<int>(ServerDBs.Items);
-			var dbGroups = gdb.Get<int>(ServerDBs.ItemGroups);
+			var dbItems = gdb.GetMeta<int>(ServerDbs.Items);
+			var dbGroups = gdb.Get<int>(ServerDbs.ItemGroups);
 
 			if (groupId < 500) {
-				var dbConstants = gdb.Get<string>(ServerDBs.Constants);
+				var dbConstants = gdb.Get<string>(ServerDbs.Constants);
 				string sId = groupId.ToString(CultureInfo.InvariantCulture);
 				// The current db is from rAthena
 
@@ -90,7 +101,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 					constant = tuple.GetKey<string>().Substring(3);
 				}
 				else {
-					var res = DbWriters.Constants.Where(p => p.Value == groupId).ToList();
+					var res = DbWriterMethods.Constants.Where(p => p.Value == groupId).ToList();
 
 					if (res.Count > 0) {
 						constant = res[0].Key;
@@ -99,7 +110,7 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 
 				if (constant != null) {
 					string originalConstantValue = constant;
-					ReadableTuple<int> tupleItem = null;
+					ReadableTuple<int> tupleItem;
 
 					// Attempts to retrieve the item based on the script
 					tupleItem = dbItems.FastItems.FirstOrDefault(p => p.GetValue<string>(ServerItemAttributes.Script).IndexOf("getrandgroupitem(IG_" + originalConstantValue + ")", StringComparison.OrdinalIgnoreCase) > -1);
@@ -167,26 +178,19 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 
 					foreach (var pair in table) {
 						tupleItem = dbItems.TryGetTuple(pair.Key);
+						string name = tupleItem == null ? "ID" + pair.Key : tupleItem.GetValue<string>(ServerItemAttributes.AegisName);
 
-						if (tupleItem != null) {
-							if (pair.Value.GetValue<string>(ServerItemGroupSubAttributes.Rate) == "1") {
-								builder.Append("\t\"");
-								builder.Append(tupleItem.GetValue<string>(ServerItemAttributes.AegisName));
-								builder.AppendLine("\",");
-							}
-							else {
-								builder.Append("\t(\"");
-								builder.Append(tupleItem.GetValue<string>(ServerItemAttributes.AegisName));
-								builder.Append("\",");
-								builder.Append(pair.Value.GetValue<string>(ServerItemGroupSubAttributes.Rate));
-								builder.AppendLine("),");
-							}
+						if (pair.Value.GetValue<string>(ServerItemGroupSubAttributes.Rate) == "1") {
+							builder.Append("\t\"");
+							builder.Append(name);
+							builder.AppendLine("\",");
 						}
 						else {
-							builder.Append("\t\"");
-							builder.Append(pair.Key);
-							builder.Append(",");
-							builder.AppendLine(pair.Value.GetValue<string>(ServerItemGroupSubAttributes.Rate));
+							builder.Append("\t(\"");
+							builder.Append(name);
+							builder.Append("\",");
+							builder.Append(pair.Value.GetValue<string>(ServerItemGroupSubAttributes.Rate));
+							builder.AppendLine("),");
 						}
 					}
 
@@ -207,30 +211,26 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 
 					foreach (var pair in table) {
 						tuple = dbItems.TryGetTuple(pair.Key);
+						string name = tuple == null ? "ID" + pair.Key : tuple.GetValue<string>(ServerItemAttributes.AegisName);
 
-						if (tuple != null) {
-							if (pair.Value.GetValue<string>(ServerItemGroupSubAttributes.Rate) == "1") {
-								builder.Append("\t\"");
-								builder.Append(tuple.GetValue<string>(ServerItemAttributes.AegisName));
-								builder.AppendLine("\",");
-							}
-							else {
-								builder.Append("\t(\"");
-								builder.Append(tuple.GetValue<string>(ServerItemAttributes.AegisName));
-								builder.Append("\",");
-								builder.Append(pair.Value.GetValue<string>(ServerItemGroupSubAttributes.Rate));
-								builder.AppendLine("),");
-							}
+						if (pair.Value.GetValue<string>(ServerItemGroupSubAttributes.Rate) == "1") {
+							builder.Append("\t\"");
+							builder.Append(name);
+							builder.AppendLine("\",");
 						}
 						else {
-							builder.Append("\t\"");
-							builder.Append(pair.Key);
-							builder.Append(",");
-							builder.AppendLine(pair.Value.GetValue<string>(ServerItemGroupSubAttributes.Rate));
+							builder.Append("\t(\"");
+							builder.Append(name);
+							builder.Append("\",");
+							builder.Append(pair.Value.GetValue<string>(ServerItemGroupSubAttributes.Rate));
+							builder.AppendLine("),");
 						}
 					}
 
 					builder.Append(")");
+				}
+				else {
+					DbLoaderErrorHandler.Handle("Failed to retrieve the item ID associated with the group ID.", groupId.ToString(CultureInfo.InvariantCulture), ErrorLevel.Critical);
 				}
 			}
 

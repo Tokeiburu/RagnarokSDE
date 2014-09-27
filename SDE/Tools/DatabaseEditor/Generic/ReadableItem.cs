@@ -1,8 +1,14 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Database;
+using ErrorManager;
+using SDE.Tools.DatabaseEditor.Generic.DbLoaders;
+using Utilities.Extension;
 
 namespace SDE.Tools.DatabaseEditor.Generic {
+	/// <summary>
+	/// Tuple view item (to be displayed in a list view)
+	/// </summary>
+	/// <typeparam name="TKey">The type of the key.</typeparam>
 	public class ReadableTuple<TKey> : Tuple, INotifyPropertyChanged {
 		public ReadableTuple(TKey key, AttributeList list) : base(key, list) { }
 
@@ -30,9 +36,22 @@ namespace SDE.Tools.DatabaseEditor.Generic {
 		}
 
 		public override void SetValue(DbAttribute attribute, object value) {
-			bool sameValue = GetValue(attribute.Index).ToString() == value.ToString();
+			bool sameValue;
 
-			base.SetValue(attribute, value);
+			try {
+				sameValue = GetValue(attribute.Index).ToString() == value.ToString();
+			}
+			catch {
+				sameValue = false;
+			}
+
+			try {
+				base.SetValue(attribute, value);
+			}
+			catch {
+				DbLoaderErrorHandler.Handle(("Failed to set or parse the value for [" + GetKey<TKey>() + "] at '" + attribute.DisplayName + "'. Value entered is : " + (value ?? "")).RemoveBreakLines(), ErrorLevel.NotSpecified);
+				base.SetValue(attribute, attribute.Default);
+			}
 
 			if (!sameValue) {
 				Modified = true;

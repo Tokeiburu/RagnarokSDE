@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using Database;
 using ErrorManager;
-using SDE.WPF;
 using TokeiLibrary;
 using TokeiLibrary.WPF;
 using TokeiLibrary.WPF.Styles.ListView;
@@ -14,18 +11,6 @@ using TokeiLibrary.WPF.Styles.ListView;
 namespace SDE.Others {
 	public static class Extensions {
 		private static readonly Dictionary<RangeListView, object> _defaultSearches = new Dictionary<RangeListView, object>();
-
-		public static List<T> RemoveAt<T>(this IEnumerable<T> list, int indexToRemove) {
-			List<T> items = list.ToList();
-			items.RemoveAt(indexToRemove);
-			return items;
-		}
-
-		public static List<T> RemoveAt<T>(this IEnumerable<T> list, DbAttribute attribute) {
-			List<T> items = list.ToList();
-			items.RemoveAt(attribute.Index);
-			return items;
-		}
 
 		public static DefaultComparer<T> BindDefaultSearch<T>(RangeListView lv, string id) {
 			if (!_defaultSearches.ContainsKey(lv)) {
@@ -37,6 +22,17 @@ namespace SDE.Others {
 			return comparer;
 		}
 
+		public static void InsertIntoList<T>(RangeListView lv, T item, IList<T> allItems) {
+			if (!_defaultSearches.ContainsKey(lv)) {
+				_defaultSearches[lv] = new DefaultComparer<T>();
+			}
+
+			DefaultComparer<T> comparer = (DefaultComparer<T>)_defaultSearches[lv];
+			var index = allItems.ToList().BinarySearch(item, comparer);
+			if (index < 0) index = ~index;
+			allItems.Insert(index, item);
+		}
+
 		public static void SetMinimalSize(Window window) {
 			window.Loaded += delegate {
 				window.MinHeight = window.ActualHeight;
@@ -44,7 +40,7 @@ namespace SDE.Others {
 			};
 		}
 
-		public static bool GetValue(string text, out int ival) {
+		public static bool GetIntFromFloatValue(string text, out int ival) {
 			float fval;
 
 			if (Int32.TryParse(text, out ival)) {
@@ -71,33 +67,7 @@ namespace SDE.Others {
 
 		public static void GenerateListViewTemplate(ListView list, ListViewDataTemplateHelper.GeneralColumnInfo[] columnInfos, ListViewCustomComparer sorter, IList<string> triggers,  params string[] extraCommands) {
 			Gen1(list);
-
 			ListViewDataTemplateHelper.GenerateListViewTemplateNew(list, columnInfos, sorter, triggers, extraCommands);
-			GridView grid = (GridView)list.View;
-
-			if (grid.Columns.Count > 0 && columnInfos.Any(p => p.IsFill)) {
-				Style style = list.ItemContainerStyle;
-				GridViewColumn lastColumn = null;
-
-				for (int i = 0; i < columnInfos.Length; i++) {
-					if (columnInfos[i].IsFill) {
-						lastColumn = grid.Columns[i];
-						break;
-					}
-				}
-
-				if (lastColumn == null) {
-					return;
-				}
-
-				style.Setters.Add(new Setter(
-										FrameworkElement.WidthProperty,
-										new Binding("ActualWidth") {
-											Source = lastColumn,
-											Converter = new ListViewWItemWidthConverter(list.BorderThickness),
-											ConverterParameter = list
-										}));
-			}
 		}
 
 		public static void Gen1(ListView list) {
@@ -121,23 +91,17 @@ namespace SDE.Others {
 			}
 		}
 
-		public static void Gen2(ListView list) {
-			try {
-				Style style = list.ItemContainerStyle;
-				GridView grid = (GridView)list.View;
-				var lastColumn = grid.Columns.Last();
+		public static int ParseToInt(string text) {
+			int value;
 
-				style.Setters.Add(new Setter(
-					FrameworkElement.WidthProperty,
-					new Binding("ActualWidth") {
-						Source = lastColumn,
-						Converter = new ListViewWItemWidthConverter(),
-						ConverterParameter = list
-					}));
+			if ((text.StartsWith("0x") || text.StartsWith("0X")) && text.Length > 2) {
+				value = Convert.ToInt32(text, 16);
 			}
-			catch (Exception err) {
-				ErrorHandler.HandleException(err);
+			else {
+				Int32.TryParse(text, out value);
 			}
+
+			return value;
 		}
 	}
 }

@@ -1,19 +1,23 @@
 using System;
 using System.Text;
-using SDE.Tools.DatabaseEditor.Generic.Lists.DbAttributeHelpers;
 using Utilities.Extension;
 
 namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
+	[Flags]
+	public enum TradeFlag {
+		Nodrop = 1 << 0,
+		Notrade = 1 << 1,
+		Partneroverride = 1 << 2,
+		Noselltonpc = 1 << 3,
+		Nocart = 1 << 4,
+		Nostorage = 1 << 5,
+		Nogstorage = 1 << 6,
+		Nomail = 1 << 7,
+		Noauction = 1 << 8
+	}
+
 	public class Trade : ISettable {
-		public string Noauction = "false";
-		public string Nocart = "false";
-		public string Nodrop = "false";
-		public string Nogstorage = "false";
-		public string Nomail = "false";
-		public string Noselltonpc = "false";
-		public string Nostorage = "false";
-		public string Notrade = "false";
-		public string Partneroverride = "false";
+		public TradeFlag Flag { get; set; }
 		private string _override = "100";
 
 		#region ISettable Members
@@ -25,16 +29,21 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 
 		public void Set(object obj) {
 			string el1 = obj.ToString();
-			Noauction = Parser.GetVal(el1, "noauction", "false");
-			Nocart = Parser.GetVal(el1, "nocart", "false");
-			Nodrop = Parser.GetVal(el1, "nodrop", "false");
-			Nogstorage = Parser.GetVal(el1, "nogstorage", "false");
-			Nomail = Parser.GetVal(el1, "nomail", "false");
-			Noselltonpc = Parser.GetVal(el1, "noselltonpc", "false");
-			Nostorage = Parser.GetVal(el1, "nostorage", "false");
-			Notrade = Parser.GetVal(el1, "notrade", "false");
-			Override = Parser.GetVal(el1, "\noverride", "100");
-			Partneroverride = Parser.GetVal(el1, "partneroverride", "false");
+			Flag = 0;
+			Flag |= ParserHelper.GetVal(el1, "noauction", "false") == "true" ? TradeFlag.Noauction : 0;
+			Flag |= ParserHelper.GetVal(el1, "nocart", "false") == "true" ? TradeFlag.Nocart : 0;
+			Flag |= ParserHelper.GetVal(el1, "nodrop", "false") == "true" ? TradeFlag.Nodrop : 0;
+			Flag |= ParserHelper.GetVal(el1, "nogstorage", "false") == "true" ? TradeFlag.Nogstorage : 0;
+			Flag |= ParserHelper.GetVal(el1, "nomail", "false") == "true" ? TradeFlag.Nomail : 0;
+			Flag |= ParserHelper.GetVal(el1, "noselltonpc", "false") == "true" ? TradeFlag.Noselltonpc : 0;
+			Flag |= ParserHelper.GetVal(el1, "nostorage", "false") == "true" ? TradeFlag.Nostorage : 0;
+			Flag |= ParserHelper.GetVal(el1, "notrade", "false") == "true" ? TradeFlag.Notrade : 0;
+			Flag |= ParserHelper.GetVal(el1, "partneroverride", "false") == "true" ? TradeFlag.Partneroverride : 0;
+			Override = ParserHelper.GetVal(el1, "\noverride", "100");
+		}
+
+		public int GetInt() {
+			return (int) Flag;
 		}
 
 		#endregion
@@ -47,15 +56,15 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 				builder.AppendLineUnix("override: " + Override);
 			}
 
-			if (Nodrop != "false") builder.AppendLineUnix("nodrop: true");
-			if (Notrade != "false") builder.AppendLineUnix("notrade: true");
-			if (Partneroverride != "false") builder.AppendLineUnix("partneroverride: true");
-			if (Noselltonpc != "false") builder.AppendLineUnix("noselltonpc: true");
-			if (Nocart != "false") builder.AppendLineUnix("nocart: true");
-			if (Nostorage != "false") builder.AppendLineUnix("nostorage: true");
-			if (Nogstorage != "false") builder.AppendLineUnix("nogstorage: true");
-			if (Nomail != "false") builder.AppendLineUnix("nomail: true");
-			if (Noauction != "false") builder.AppendLineUnix("noauction: true");
+			if ((Flag & TradeFlag.Noauction) == TradeFlag.Noauction) builder.AppendLineUnix("noauction: true");
+			if ((Flag & TradeFlag.Nocart) == TradeFlag.Nocart) builder.AppendLineUnix("nocart: true");
+			if ((Flag & TradeFlag.Nodrop) == TradeFlag.Nodrop) builder.AppendLineUnix("nodrop: true");
+			if ((Flag & TradeFlag.Nogstorage) == TradeFlag.Nogstorage) builder.AppendLineUnix("nogstorage: true");
+			if ((Flag & TradeFlag.Nomail) == TradeFlag.Nomail) builder.AppendLineUnix("nomail: true");
+			if ((Flag & TradeFlag.Noselltonpc) == TradeFlag.Noselltonpc) builder.AppendLineUnix("noselltonpc: true");
+			if ((Flag & TradeFlag.Nostorage) == TradeFlag.Nostorage) builder.AppendLineUnix("nostorage: true");
+			if ((Flag & TradeFlag.Notrade) == TradeFlag.Notrade) builder.AppendLineUnix("notrade: true");
+			if ((Flag & TradeFlag.Partneroverride) == TradeFlag.Partneroverride) builder.AppendLineUnix("partneroverride: true");
 
 			builder.Append("}");
 			return builder.ToString();
@@ -69,15 +78,15 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 				builder.AppendLineUnix("\t\toverride: " + Override);
 			}
 
-			if (Nodrop != "false") builder.AppendLineUnix("\t\tnodrop: true");
-			if (Notrade != "false") builder.AppendLineUnix("\t\tnotrade: true");
-			if (Partneroverride != "false") builder.AppendLineUnix("\t\tpartneroverride: true");
-			if (Noselltonpc != "false") builder.AppendLineUnix("\t\tnoselltonpc: true");
-			if (Nocart != "false") builder.AppendLineUnix("\t\tnocart: true");
-			if (Nostorage != "false") builder.AppendLineUnix("\t\tnostorage: true");
-			if (Nogstorage != "false") builder.AppendLineUnix("\t\tnogstorage: true");
-			if (Nomail != "false") builder.AppendLineUnix("\t\tnomail: true");
-			if (Noauction != "false") builder.AppendLineUnix("\t\tnoauction: true");
+			if ((Flag & TradeFlag.Noauction) == TradeFlag.Noauction) builder.AppendLineUnix("\t\tnoauction: true");
+			if ((Flag & TradeFlag.Nocart) == TradeFlag.Nocart) builder.AppendLineUnix("\t\tnocart: true");
+			if ((Flag & TradeFlag.Nodrop) == TradeFlag.Nodrop) builder.AppendLineUnix("\t\tnodrop: true");
+			if ((Flag & TradeFlag.Nogstorage) == TradeFlag.Nogstorage) builder.AppendLineUnix("\t\tnogstorage: true");
+			if ((Flag & TradeFlag.Nomail) == TradeFlag.Nomail) builder.AppendLineUnix("\t\tnomail: true");
+			if ((Flag & TradeFlag.Noselltonpc) == TradeFlag.Noselltonpc) builder.AppendLineUnix("\t\tnoselltonpc: true");
+			if ((Flag & TradeFlag.Nostorage) == TradeFlag.Nostorage) builder.AppendLineUnix("\t\tnostorage: true");
+			if ((Flag & TradeFlag.Notrade) == TradeFlag.Notrade) builder.AppendLineUnix("\t\tnotrade: true");
+			if ((Flag & TradeFlag.Partneroverride) == TradeFlag.Partneroverride) builder.AppendLineUnix("\t\tpartneroverride: true");
 
 			builder.Append("\t}");
 			return builder.ToString();
@@ -85,15 +94,15 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 
 		public bool NeedPrinting() {
 			if (Override != "100") return true;
-			if (Nodrop != "false") return true;
-			if (Notrade != "false") return true;
-			if (Partneroverride != "false") return true;
-			if (Noselltonpc != "false") return true;
-			if (Nocart != "false") return true;
-			if (Nostorage != "false") return true;
-			if (Nogstorage != "false") return true;
-			if (Nomail != "false") return true;
-			if (Noauction != "false") return true;
+			if ((Flag & TradeFlag.Noauction) == TradeFlag.Noauction) return true;
+			if ((Flag & TradeFlag.Nocart) == TradeFlag.Nocart) return true;
+			if ((Flag & TradeFlag.Nodrop) == TradeFlag.Nodrop) return true;
+			if ((Flag & TradeFlag.Nogstorage) == TradeFlag.Nogstorage) return true;
+			if ((Flag & TradeFlag.Nomail) == TradeFlag.Nomail) return true;
+			if ((Flag & TradeFlag.Noselltonpc) == TradeFlag.Noselltonpc) return true;
+			if ((Flag & TradeFlag.Nostorage) == TradeFlag.Nostorage) return true;
+			if ((Flag & TradeFlag.Notrade) == TradeFlag.Notrade) return true;
+			if ((Flag & TradeFlag.Partneroverride) == TradeFlag.Partneroverride) return true;
 
 			return false;
 		}
@@ -104,30 +113,8 @@ namespace SDE.Tools.DatabaseEditor.Engines.Parsers {
 			int val;
 
 			if (Int32.TryParse(el1, out val)) {
-				if ((val & (1 << 0)) == (1 << 0)) Nodrop = "true";
-				if ((val & (1 << 1)) == (1 << 1)) Notrade = "true";
-				if ((val & (1 << 2)) == (1 << 2)) Partneroverride = "true";
-				if ((val & (1 << 3)) == (1 << 3)) Noselltonpc = "true";
-				if ((val & (1 << 4)) == (1 << 4)) Nocart = "true";
-				if ((val & (1 << 5)) == (1 << 5)) Nostorage = "true";
-				if ((val & (1 << 6)) == (1 << 6)) Nogstorage = "true";
-				if ((val & (1 << 7)) == (1 << 7)) Nomail = "true";
-				if ((val & (1 << 8)) == (1 << 8)) Noauction = "true";
+				Flag = (TradeFlag) val;
 			}
-		}
-
-		public int GetInt() {
-			int val = 0;
-			if (Nodrop == "true") val |= (1 << 0);
-			if (Notrade == "true") val |= (1 << 1);
-			if (Partneroverride == "true") val |= (1 << 2);
-			if (Noselltonpc == "true") val |= (1 << 3);
-			if (Nocart == "true") val |= (1 << 4);
-			if (Nostorage == "true") val |= (1 << 5);
-			if (Nogstorage == "true") val |= (1 << 6);
-			if (Nomail == "true") val |= (1 << 7);
-			if (Noauction == "true") val |= (1 << 8);
-			return val;
 		}
 	}
 }

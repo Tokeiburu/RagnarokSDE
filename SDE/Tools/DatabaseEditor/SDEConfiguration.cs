@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using SDE.ApplicationConfiguration;
 using Utilities;
 
@@ -16,6 +17,11 @@ namespace SDE.Tools.DatabaseEditor {
 		public static ConfigAsker ConfigAsker {
 			get { return _configAsker ?? (_configAsker = new ConfigAsker(Path.Combine(Methods.ApplicationPath, "config.txt"))); }
 			set { _configAsker = value; }
+		}
+
+		public static List<string> CustomTabs {
+			get { return Methods.StringToList(ConfigAsker["[Server database editor - Custom tables]", ""]); }
+			set { ConfigAsker["[Server database editor - Custom tables]"] = Methods.ListToString(value); }
 		}
 
 		public static string AppLastPath {

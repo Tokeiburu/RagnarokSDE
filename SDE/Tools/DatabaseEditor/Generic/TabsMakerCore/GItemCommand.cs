@@ -5,6 +5,11 @@ using Database;
 using Database.Commands;
 
 namespace SDE.Tools.DatabaseEditor.Generic.TabsMakerCore {
+	/// <summary>
+	/// Custom menu item to add to a tab's list view
+	/// </summary>
+	/// <typeparam name="TKey">The type of the key.</typeparam>
+	/// <typeparam name="TValue">The type of the value.</typeparam>
 	public class GItemCommand<TKey, TValue> where TValue : Tuple {
 		#region Delegates
 

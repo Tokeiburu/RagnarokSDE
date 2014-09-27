@@ -10,13 +10,13 @@ using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using SDE.Core.Avalon;
+using SDE.Others;
 using SDE.Tools.DatabaseEditor.Engines.Parsers;
 using TokeiLibrary;
-using TokeiLibrary.WPF;
 using TokeiLibrary.WPF.Styles;
 using TokeiLibrary.WPF.Styles.ListView;
 using Utilities;
-using Extensions = SDE.Others.Extensions;
+using Extensions = TokeiLibrary.WPF.Extensions;
 
 namespace SDE.Tools.DatabaseEditor.WPF {
 	/// <summary>
@@ -28,7 +28,7 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 
 		public ScriptEditDialog(string text) : base("Script edit", "cde.ico", SizeToContent.Manual, ResizeMode.CanResize) {
 			InitializeComponent();
-			Extensions.SetMinimalSize(this);
+			Others.Extensions.SetMinimalSize(this);
 
 			AvalonLoader.Load(_textEditor);
 			AvalonLoader.SetSyntax(_textEditor, "Script");
@@ -44,7 +44,7 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 			lv.SelectionMode = SelectionMode.Single;
 
 			//Image
-			Extensions.GenerateListViewTemplate(lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			Others.Extensions.GenerateListViewTemplate(lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 				new ListViewDataTemplateHelper.ImageColumnInfo { Header = "", DisplayExpression = "Image", TextAlignment = TextAlignment.Center, FixedWidth = 22, MaxHeight = 22, SearchGetAccessor = "Commands"},
 				new ListViewDataTemplateHelper.GeneralColumnInfo {Header = "Commands", DisplayExpression = "Text", TextAlignment = TextAlignment.Left, IsFill = true, ToolTipBinding = "Description"}
 			}, null, new string[] { }, "generateHeader", "false");
@@ -53,7 +53,6 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 			_completionWindow = null;
 
 			WindowStartupLocation = WindowStartupLocation.CenterOwner;
-			ShowInTaskbar = true;
 		}
 
 		public string Text {
@@ -114,7 +113,7 @@ namespace SDE.Tools.DatabaseEditor.WPF {
 
 			_completionWindow.Show();
 			_completionWindow.CompletionList.SelectedItem = _completionWindow.CompletionList.CompletionData.FirstOrDefault(p => String.Compare(p.Text, word, StringComparison.OrdinalIgnoreCase) >= 0);
-			_completionWindow.CompletionList.ListBox.ScrollToCenterOfView(_completionWindow.CompletionList.SelectedItem);
+			Extensions.ScrollToCenterOfView(_completionWindow.CompletionList.ListBox, _completionWindow.CompletionList.SelectedItem);
 		}
 
 		protected override void GRFEditorWindowKeyDown(object sender, KeyEventArgs e) {

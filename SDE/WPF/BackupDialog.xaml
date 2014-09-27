@@ -12,7 +12,7 @@
         </Grid.RowDefinitions>
         
         <Grid Name="_upperGrid">
-            <WPF:RangeListView TextSearch.TextPath="[0]" FocusVisualStyle="{x:Null}" BorderThickness="0" Grid.Row="1" ListView:WpfUtils.IsGridSortable="True" Name="_listView" VirtualizingStackPanel.IsVirtualizing="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <WPF:RangeListView TextSearch.TextPath="Date" FocusVisualStyle="{x:Null}" BorderThickness="0" Grid.Row="1" Name="_listView" VirtualizingStackPanel.IsVirtualizing="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                 <WPF:RangeListView.ContextMenu>
                     <ContextMenu>
                         <MenuItem Name="_miRestore" Header="Restore" Click="_miRestore_Click"  >
