@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Windows;
 using System.Windows.Media.Imaging;
 using ErrorManager;
 using TokeiLibrary;
@@ -11,12 +12,14 @@ namespace SDE.Core.ViewItems {
 	/// </summary>
 	public class DebugItemView {
 		private static readonly Regex _debugItemRegex = new Regex(@"(([^,\r\n ]+): ([^,\r\n]+))", RegexOptions.Compiled);
+		public Exception FullException;
 
-		public DebugItemView(int errorNumber, string exception, ErrorLevel errorLevel) {
+		public DebugItemView(Exception err, int errorNumber, string exception, ErrorLevel errorLevel) {
 			if (exception == null) throw new ArgumentNullException("exception");
 			if (errorNumber < 0) throw new ArgumentOutOfRangeException("errorNumber");
 
 			OriginalException = exception;
+			FullException = err;
 			ErrorNumber = errorNumber;
 			Exception = exception;
 
@@ -44,12 +47,20 @@ namespace SDE.Core.ViewItems {
 					Exception = Exception.Replace(matchGroup + ": " + matchValue, "");
 				}
 			}
-			
-			switch (errorLevel) {
-				case ErrorLevel.Critical: DataImage = ApplicationManager.PreloadResourceImage("error16.png") as BitmapSource; break;
-				case ErrorLevel.Low: DataImage = ApplicationManager.PreloadResourceImage("validity.png") as BitmapSource; break;
-				case ErrorLevel.NotSpecified: DataImage = ApplicationManager.PreloadResourceImage("help.png") as BitmapSource; break;
-				case ErrorLevel.Warning: DataImage = ApplicationManager.PreloadResourceImage("warning16.png") as BitmapSource; break;
+
+			switch(errorLevel) {
+				case ErrorLevel.Critical:
+					DataImage = ApplicationManager.PreloadResourceImage("error16.png");
+					break;
+				case ErrorLevel.Low:
+					DataImage = ApplicationManager.PreloadResourceImage("validity.png");
+					break;
+				case ErrorLevel.NotSpecified:
+					DataImage = ApplicationManager.PreloadResourceImage("help.png");
+					break;
+				case ErrorLevel.Warning:
+					DataImage = ApplicationManager.PreloadResourceImage("warning16.png");
+					break;
 			}
 		}
 
@@ -73,6 +84,16 @@ namespace SDE.Core.ViewItems {
 
 		public override string ToString() {
 			return OriginalException;
+		}
+
+		public void Copy() {
+			if (FullException == null) {
+				MessageBox.Show("No exception has been loaded.");
+				return;
+			}
+
+			Clipboard.SetDataObject(OriginalException + "\r\n\r\n" + ErrorHandler.GenerateOutput(FullException));
+			MessageBox.Show("The exception has been copied to the clipboard.");
 		}
 	}
 }

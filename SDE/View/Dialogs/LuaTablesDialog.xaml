@@ -1,0 +1,34 @@
+﻿<Styles:TkWindow x:Class="SDE.View.Dialogs.LuaTableDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 xmlns:TokeiLibrary="clr-namespace:TokeiLibrary;assembly=TokeiLibrary"
+                 xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary" MinWidth="500" MaxWidth="500">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <StackPanel>
+                <TextBlock Margin="3" TextWrapping="Wrap">
+                    The lua files below are used to link the sprites ingame with the server. The files can be either lua or lub.<LineBreak />
+                </TextBlock>
+                <CheckBox Name="_cbMobTables" Content="Update mob tables when saving" Margin="3" HorizontalAlignment="Left" />
+                <StackPanel Name="_spMob" Margin="0 0 0 5" />
+                <CheckBox Name="_cbAccTables" Content="Update accessory tables when saving (automatically manage View IDs)" Margin="3" HorizontalAlignment="Left" />
+                <StackPanel Name="_spAcc" Margin="0 0 0 5" />
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Row="1" ListView:WpfUtils.IsDraggable="True" Height="50" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+            <DockPanel HorizontalAlignment="Right" Margin="0 0 3 0">
+                <Button Name="_buttonOk" Click="_buttonOk_Click" Content="Ok" Height="25" Margin="3" MinWidth="100" Grid.Column="2" />
+                <Button Name="_buttonCancel" Click="_buttonCancel_Click" Content="Cancel" Height="25" Margin="3" MinWidth="100" />
+            </DockPanel>
+        </Grid>
+    </Grid>
+</Styles:TkWindow>

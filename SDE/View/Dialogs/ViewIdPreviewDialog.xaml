@@ -1,0 +1,48 @@
+﻿<Styles:TkWindow x:Class="SDE.View.Dialogs.ViewIdPreviewDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
+                 xmlns:ActViewer="clr-namespace:SDE.Tools.ActViewer" Width="303" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 xmlns:WpfBugFix="clr-namespace:TokeiLibrary.WpfBugFix;assembly=TokeiLibrary"
+                 xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
+                 d:DesignHeight="240">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <ActViewer:FrameViewer x:Name="_frameViewer" BorderThickness="0 0 1 0" BorderBrush="Black" />
+            <ActViewer:CompactActIndexSelector x:Name="_selector" HorizontalAlignment="Left" VerticalAlignment="Top" />
+            <WpfBugFix:RangeListView Width="150" MaxWidth="150" MinWidth="150" Grid.Column="1" TextSearch.TextPath="Name" Grid.Row="0" FocusVisualStyle="{x:Null}" BorderThickness="0" Name="_listView" VirtualizingStackPanel.IsVirtualizing="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            </WpfBugFix:RangeListView>
+            <Border BorderThickness="0 1 0 0" BorderBrush="Black" Name="_gridSpriteMissing" Visibility="Collapsed" Grid.Row="1" Grid.ColumnSpan="2" MaxHeight="70">
+                <DockPanel>
+                    <Image ListView:WpfUtils.ImagePath="warning16.png" Height="16" Width="16" Margin="3" />
+                    <TextBox BorderThickness="0" VerticalAlignment="Center" Name="_tbSpriteMissing" IsReadOnly="true" TextWrapping="Wrap" Text="Sprite missing!" VerticalScrollBarVisibility="Auto" />
+                </DockPanel>
+            </Border>
+        </Grid>
+        <!--<Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="50" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+            <Grid Margin="0 0 3 0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <DockPanel Grid.Column="2">
+                    <Button Name="_buttonOk" Click="_buttonOk_Click" Content="Copy" Height="25" Margin="3" MinWidth="100" Grid.Column="2" />
+                    <Button Name="_buttonCancel" Click="_buttonCancel_Click" Content="Cancel" Height="25" Margin="3" MinWidth="100" Grid.Column="3" />
+                </DockPanel>
+            </Grid>
+        </Grid>-->
+    </Grid>
+</Styles:TkWindow>

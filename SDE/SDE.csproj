@@ -46,7 +46,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;SDE_DEBUG_</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -61,34 +61,66 @@
     <StartupObject>SDE.GRFEditorMain</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Database">
-      <HintPath>Files\Database.dll</HintPath>
+    <Reference Include="ColorPicker, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Librairies\ColorPicker.dll</HintPath>
     </Reference>
-    <Reference Include="ErrorManager">
-      <HintPath>Files\ErrorManager.dll</HintPath>
+    <Reference Include="Database, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Librairies\Database.dll</HintPath>
     </Reference>
-    <Reference Include="GRF">
-      <HintPath>Files\GRF.dll</HintPath>
+    <Reference Include="ErrorManager, Version=1.2.5494.34248, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Librairies\ErrorManager.dll</HintPath>
     </Reference>
-    <Reference Include="GrfToWpfBridge">
-      <HintPath>Files\GrfToWpfBridge.dll</HintPath>
+    <Reference Include="Ftp">
+      <HintPath>Files\Ftp.dll</HintPath>
+    </Reference>
+    <Reference Include="GRF, Version=1.2.6171.1173, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Librairies\GRF.dll</HintPath>
+    </Reference>
+    <Reference Include="GrfToWpfBridge, Version=1.0.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Librairies\GrfToWpfBridge.dll</HintPath>
     </Reference>
     <Reference Include="ICSharpCode.AvalonEdit">
       <HintPath>Files\ICSharpCode.AvalonEdit.dll</HintPath>
+    </Reference>
+    <Reference Include="IronPython">
+      <HintPath>Files\IronPython.dll</HintPath>
+    </Reference>
+    <Reference Include="Lua">
+      <HintPath>Files\Lua.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Dynamic">
+      <HintPath>Files\Microsoft.Dynamic.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Scripting">
+      <HintPath>Files\Microsoft.Scripting.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Scripting.Core">
+      <HintPath>Files\Microsoft.Scripting.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Org.Mentalis.Security">
+      <HintPath>Files\Org.Mentalis.Security.dll</HintPath>
     </Reference>
     <Reference Include="PresentationFramework.Aero" />
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
-    <Reference Include="TokeiLibrary">
-      <HintPath>Files\TokeiLibrary.dll</HintPath>
+    <Reference Include="Tamir.SharpSSH">
+      <HintPath>Files\Tamir.SharpSSH.dll</HintPath>
     </Reference>
-    <Reference Include="Utilities">
-      <HintPath>Files\Utilities.dll</HintPath>
+    <Reference Include="TokeiLibrary, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Librairies\TokeiLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="Utilities, Version=1.2.6171.1170, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Librairies\Utilities.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WPFToolkit">
+      <HintPath>Files\WPFToolkit.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -100,185 +132,289 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ApplicationConfiguration\SdeAppConfiguration.cs" />
-    <Compile Include="ApplicationConfiguration\SdeErrorHandler.cs" />
     <Compile Include="ApplicationConfiguration\PathRequest.cs" />
+    <Compile Include="ApplicationConfiguration\StackTraceException.cs" />
     <Compile Include="Core\Avalon\AvalonDefaultLoading.cs" />
     <Compile Include="Core\Avalon\AvalonLoader.cs" />
     <Compile Include="Core\Avalon\RegexSearchStrategy.cs" />
+    <Compile Include="Core\ResourceString.cs" />
+    <Compile Include="Editor\Achievement\CheevoGeneratorEngine.cs" />
+    <Compile Include="Editor\Engines\BackupsEngine\BackupThread.cs" />
+    <Compile Include="Editor\Engines\FtpFileManager.cs" />
+    <Compile Include="Editor\Engines\FtpUrlInfo.cs" />
+    <Compile Include="Editor\Engines\LuaEngine\AccessoryTable.cs" />
+    <Compile Include="Editor\Engines\Parsers\Libconfig\LibconfigParser.cs" />
+    <Compile Include="Editor\Engines\Parsers\Libconfig\LibconfigObject.cs" />
+    <Compile Include="Editor\Engines\Parsers\TextLineParser.cs" />
+    <Compile Include="Editor\Engines\RepairEngine\CiError.cs" />
+    <Compile Include="Editor\Engines\RepairEngine\ClientItemsValidation.cs" />
+    <Compile Include="Editor\Engines\RepairEngine\ResourceError.cs" />
+    <Compile Include="Editor\Engines\RepairEngine\ResourceType.cs" />
+    <Compile Include="Editor\Engines\RepairEngine\ResourceValidation.cs" />
+    <Compile Include="Editor\Engines\RepairEngine\TableError.cs" />
+    <Compile Include="Editor\Engines\RepairEngine\ValidationErrors.cs" />
+    <Compile Include="Editor\Engines\ScriptInterpreter.cs" />
+    <Compile Include="Editor\Generic\Parsers\DbIOCheevo.cs" />
+    <Compile Include="Editor\Generic\Parsers\DbIOClientCheevo.cs" />
+    <Compile Include="Editor\Generic\Parsers\DbIOClientItems.cs" />
+    <Compile Include="Editor\Generic\Parsers\DbIOClientQuests.cs" />
+    <Compile Include="Editor\Generic\Parsers\DbIOConstants.cs" />
+    <Compile Include="Editor\Generic\Parsers\DbIOMobSkills.cs" />
+    <Compile Include="Editor\Generic\Parsers\Generic\DbIOFormatting.cs" />
+    <Compile Include="Editor\Generic\Parsers\DbIOItemGroups.cs" />
+    <Compile Include="Editor\Generic\Parsers\DbIOItems.cs" />
+    <Compile Include="Editor\Generic\Parsers\Generic\DbIOMethods.cs" />
+    <Compile Include="Editor\Generic\Parsers\DbIOMobGroups.cs" />
+    <Compile Include="Editor\Generic\Parsers\DbIOMobs.cs" />
+    <Compile Include="Editor\Generic\Parsers\DbIOSkills.cs" />
+    <Compile Include="Editor\Generic\UI\FormatConverters\CustomMobGroupDisplay.cs" />
+    <Compile Include="Editor\Generic\UI\FormatConverters\CustomSubTable.cs" />
+    <Compile Include="SdeStrings.cs" />
+    <Compile Include="Core\Utf8Checker.cs" />
     <Compile Include="Core\VirtualFileDataObject.cs" />
     <Compile Include="Main.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\BackupsEngine\Backup.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\BackupsEngine\BackupEngine.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\BackupsEngine\BackupInfo.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\DatabaseEngine\GenericDbCommand.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\DbMaker.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\TabNavigationEngine\SelectionChanged.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\IndexProviders\NullIndexProvider.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\IndexProviders\GroupIndexProvider.cs" />
-    <Compile Include="Tools\DatabaseEditor\WPF\SplashDialog.xaml.cs">
+    <Compile Include="Tools\ActViewer\BufferedBrushes.cs" />
+    <Compile Include="Tools\ActViewer\CompactActIndexSelector.xaml.cs">
+      <DependentUpon>CompactActIndexSelector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Tools\ActViewer\DrawingComponents\ActDraw.cs" />
+    <Compile Include="Tools\ActViewer\DrawingComponents\DrawingComponent.cs" />
+    <Compile Include="Tools\ActViewer\DrawingComponents\GridLine.cs" />
+    <Compile Include="Tools\ActViewer\DrawingComponents\LayerDraw.cs" />
+    <Compile Include="Tools\ActViewer\DrawingComponents\SelectionDraw.cs" />
+    <Compile Include="Tools\ActViewer\FrameViewer.xaml.cs">
+      <DependentUpon>FrameViewer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Tools\ActViewer\IPreview.cs" />
+    <Compile Include="Tools\ActViewer\PreviewSettingsDialog.xaml.cs">
+      <DependentUpon>PreviewSettingsDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Tools\ActViewer\ZMode.cs" />
+    <Compile Include="Editor\Engines\BackupsEngine\Backup.cs" />
+    <Compile Include="Editor\Engines\BackupsEngine\BackupEngine.cs" />
+    <Compile Include="Editor\Engines\BackupsEngine\BackupInfo.cs" />
+    <Compile Include="Editor\Engines\DatabaseEngine\GenericDbCommand.cs" />
+    <Compile Include="Editor\Engines\RepairEngine\DbValidationEngine.cs" />
+    <Compile Include="Editor\Engines\FtpHelper.cs" />
+    <Compile Include="Editor\Engines\LuaEngine\LuaHelper.cs" />
+    <Compile Include="Editor\Engines\PreviewEngine\IViewIdPreview.cs" />
+    <Compile Include="Editor\Engines\PreviewEngine\PreviewHelper.cs" />
+    <Compile Include="Editor\Engines\RepairEngine\IRepair.cs" />
+    <Compile Include="Editor\Engines\RepairEngine\WeaponViewIdRepair.cs" />
+    <Compile Include="Editor\Engines\SftpDb.cs" />
+    <Compile Include="Editor\Engines\SftpFileManager.cs" />
+    <Compile Include="Editor\Engines\SystemFileManager.cs" />
+    <Compile Include="Editor\Engines\TabNavigationEngine\SelectionChanged.cs" />
+    <Compile Include="Editor\Engines\LuaEngine\Npc.cs" />
+    <Compile Include="Editor\Generic\Parsers\DbIOQuests.cs" />
+    <Compile Include="Editor\Generic\TabsMakerCore\Condition.cs" />
+    <Compile Include="Editor\Generic\TabsMakerCore\DisplayablePropertyHelper.cs" />
+    <Compile Include="Editor\Generic\UI\CustomControls\CustomManagerProperty.cs" />
+    <Compile Include="Editor\Generic\UI\CustomControls\FormattedString.cs" />
+    <Compile Include="Editor\Generic\UI\CustomControls\TextEditorColorControl.xaml.cs">
+      <DependentUpon>TextEditorColorControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Editor\Items\ItemClasses.cs" />
+    <Compile Include="Editor\Items\ItemGeneratorEngine.cs" />
+    <Compile Include="Editor\Items\ItemTypeStructure.cs" />
+    <Compile Include="Editor\Items\ParameterHolder.cs" />
+    <Compile Include="Editor\Generic\UI\CustomControls\CustomDescriptionProperty.cs" />
+    <Compile Include="Editor\Generic\UI\CustomControls\CustomResourceProperty.cs" />
+    <Compile Include="Editor\Generic\UI\CustomControls\PreviewItemInGame.xaml.cs">
+      <DependentUpon>PreviewItemInGame.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Editor\Items\Shop.cs" />
+    <Compile Include="Editor\Jobs\BaseJob.cs" />
+    <Compile Include="Editor\ReplaceTableFields.cs" />
+    <Compile Include="View\Controls\DbSearchPanel.xaml.cs">
+      <DependentUpon>DbSearchPanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\CheevoResourceDialog.xaml.cs">
+      <DependentUpon>CheevoResourceDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\ObjectView\AccessoryItemView.cs" />
+    <Compile Include="View\Controls\ClickSelectTextBox.cs" />
+    <Compile Include="View\Controls\ClickSelectTextBoxEffect.cs" />
+    <Compile Include="View\Dialogs\AccEditDialog.xaml.cs">
+      <DependentUpon>AccEditDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\AddRangeDialog.xaml.cs">
+      <DependentUpon>AddRangeDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\SkillLevelEditDialog.xaml.cs">
+      <DependentUpon>SkillLevelEditDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Controls\ShopItem.xaml.cs">
+      <DependentUpon>ShopItem.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\ShopSimulatorDialog.xaml.cs">
+      <DependentUpon>ShopSimulatorDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\ExplorerDialog.xaml.cs">
+      <DependentUpon>ExplorerDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\LuaTablesDialog.xaml.cs">
+      <DependentUpon>LuaTablesDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\DbDebugDialog.xaml.cs">
+      <DependentUpon>DbDebugDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\IronPythonDialog.xaml.cs">
+      <DependentUpon>IronPythonDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\CopyToDialog.xaml.cs">
+      <DependentUpon>CopyToDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Controls\QuickColorSelector.xaml.cs">
+      <DependentUpon>QuickColorSelector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\ObjectView\ValidationErrorView.cs" />
+    <Compile Include="View\Dialogs\ViewIdPreviewDialog.xaml.cs">
+      <DependentUpon>ViewIdPreviewDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\RateEditDialog.xaml.cs">
+      <DependentUpon>RateEditDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\TimeEditDialog.xaml.cs">
+      <DependentUpon>TimeEditDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\ValidationDialog.xaml.cs">
+      <DependentUpon>ValidationDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\GenericFlagDialog.xaml.cs">
+      <DependentUpon>GenericFlagDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\IInputWindow.cs" />
+    <Compile Include="View\Dialogs\CopyDialog.xaml.cs">
+      <DependentUpon>CopyDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\ItemDescriptionDialog.xaml.cs">
+      <DependentUpon>ItemDescriptionDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\ReplaceDialog.xaml.cs">
+      <DependentUpon>ReplaceDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\FtpLoginDialog.xaml.cs">
+      <DependentUpon>FtpLoginDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\SettingsDialog.xaml.cs">
+      <DependentUpon>SettingsDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\SplashDialog.xaml.cs">
       <DependentUpon>SplashDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Tools\DatabaseEditor\Writers\DbSqlWriter.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\Parsers\SqlParserHeaders.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\Parsers\SqlParser.cs" />
-    <Compile Include="Tools\DatabaseEditor\Writers\LineStream.cs" />
-    <Compile Include="Tools\DatabaseEditor\Writers\LineStreamReader.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\Parsers\ISettable.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\MetaTable.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\TabsMakerCore\GSearchEngineFilter.cs" />
-    <Compile Include="Tools\DatabaseEditor\Jobs\Job.cs" />
+    <Compile Include="Editor\Writers\DbSqlWriter.cs" />
+    <Compile Include="Editor\Engines\Parsers\SqlParserHeaders.cs" />
+    <Compile Include="Editor\Engines\Parsers\SqlParser.cs" />
+    <Compile Include="Editor\Writers\LineStream.cs" />
+    <Compile Include="Editor\Writers\LineStreamReader.cs" />
+    <Compile Include="Editor\Generic\MetaTable.cs" />
+    <Compile Include="Editor\Generic\TabsMakerCore\GSearchEngineFilter.cs" />
+    <Compile Include="Editor\Jobs\Job.cs" />
     <Compile Include="Core\SdeRecentFiles.cs" />
     <Compile Include="Core\ViewItems\DebugItemView.cs" />
-    <Compile Include="Tools\DatabaseEditor\SdeFiles.cs" />
-    <Compile Include="Tools\DatabaseEditor\Jobs\JobList.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\DatabaseEngine\CommandsHolder.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\DatabaseEngine\DatabaseItemSorter.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\TabNavigationEngine\INagivationCommand.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\Parsers\DebugStreamReader.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\DatabaseEngine\GenericDatabase.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\DatabaseEngine\IGenericDbCommand.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\Parsers\ItemGroupParser.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\Parsers\ItemParser.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\Parsers\ParserHelper.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\Parsers\NoUse.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\TabNavigationEngine\TabNavigation.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\Parsers\TextFileHelper.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\Parsers\Trade.cs" />
+    <Compile Include="Editor\Jobs\JobList.cs" />
+    <Compile Include="Editor\Engines\DatabaseEngine\CommandsHolder.cs" />
+    <Compile Include="Editor\Engines\DatabaseEngine\DatabaseItemSorter.cs" />
+    <Compile Include="Editor\Engines\TabNavigationEngine\INagivationCommand.cs" />
+    <Compile Include="Editor\Engines\Parsers\DebugStreamReader.cs" />
+    <Compile Include="Editor\Engines\DatabaseEngine\SdeDatabase.cs" />
+    <Compile Include="Editor\Engines\DatabaseEngine\IGenericDbCommand.cs" />
+    <Compile Include="Editor\Engines\Parsers\ItemGroupParser.cs" />
+    <Compile Include="Editor\Engines\Parsers\ItemParser.cs" />
+    <Compile Include="Editor\Engines\TabNavigationEngine\TabNavigation.cs" />
+    <Compile Include="Editor\Engines\Parsers\TextFileHelper.cs" />
     <Compile Include="Core\Extensions.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\UI\FormatConverters\CustomItemGroupDisplaySub.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\UI\FormatConverters\CustomComboIdProperty.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\UI\FormatConverters\CustomItemGroupDisplay.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\UI\CustomControls\CustomLinkedImage.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\UI\FormatConverters\CustomProperties.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\UI\CustomControls\CustomQueryViewerMobDroppedBy.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\UI\CustomControls\CustomQueryViewerMobMvp.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\UI\CustomControls\CustomQueryViewerMobOther.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\UI\CustomControls\CustomQueryViewerMobSkills.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\UI\FormatConverters\CustomPreviewProperty.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\UI\CustomControls\ICustomControl.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Core\AbstractDb.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\AllLoaders.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Core\BaseDb.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\DatabaseEngine\BaseGenericDatabase.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\DbLoaderMethodsItemGroup.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Core\Databases.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Core\DbHolder.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\DbLoaderErrorHandler.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbLoaders\DbLoaderMethods.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbWriters\DbWriterMethods.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Core\DebugDbItem.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\DbWriters\DbWriterMethodsItemGroup.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\UI\FormatConverters\ElementalFormat.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Core\FileType.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\UI\FormatConverters\IFormatConverter.cs" />
-    <Compile Include="Tools\DatabaseEditor\Writers\IntLineStream.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Core\ServerType.cs" />
-    <Compile Include="Tools\DatabaseEditor\Writers\StringLineStream.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\TabsMakerCore\TabGenerator.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\IndexProviders\DefaultIndexProvider.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\IndexProviders\IIndexProvider.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\IndexProviders\QueryIndexProvider.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\IndexProviders\SpecifiedIndexProvider.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\IndexProviders\SpecifiedRangeIndexProvider.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Lists\ClientAttributes.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Lists\Bindings.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Core\ValueConverters.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Lists\ServerAttributes.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Lists\ServerDbs.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\Lists\ServerEnumTypes.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\TabsMakerCore\DisplayableProperty.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\TabsMakerCore\GDbTab.xaml.cs">
+    <Compile Include="Editor\Generic\UI\FormatConverters\CustomComboIdProperty.cs" />
+    <Compile Include="Editor\Generic\UI\FormatConverters\CustomItemGroupDisplay.cs" />
+    <Compile Include="Editor\Generic\UI\CustomControls\CustomLinkedImage.cs" />
+    <Compile Include="Editor\Generic\UI\FormatConverters\CustomProperties.cs" />
+    <Compile Include="Editor\Generic\UI\CustomControls\QueryItemDroppedBy.cs" />
+    <Compile Include="Editor\Generic\UI\CustomControls\QueryMvpDrops.cs" />
+    <Compile Include="Editor\Generic\UI\CustomControls\QueryNormalDrops.cs" />
+    <Compile Include="Editor\Generic\UI\CustomControls\QueryMobSkills.cs" />
+    <Compile Include="Editor\Generic\UI\FormatConverters\CustomPreviewProperty.cs" />
+    <Compile Include="Editor\Generic\UI\CustomControls\ICustomControl.cs" />
+    <Compile Include="Editor\Generic\Core\AbstractDb.cs" />
+    <Compile Include="Editor\Generic\Core\DbPathLocator.cs" />
+    <Compile Include="Editor\Generic\Core\BaseDb.cs" />
+    <Compile Include="Editor\Generic\Core\Databases.cs" />
+    <Compile Include="Editor\Generic\Core\DbHolder.cs" />
+    <Compile Include="Editor\Generic\Parsers\Generic\DbIOErrorHandler.cs" />
+    <Compile Include="Editor\Generic\Core\DebugDbItem.cs" />
+    <Compile Include="Editor\Generic\UI\FormatConverters\ElementalFormat.cs" />
+    <Compile Include="Editor\Generic\Core\FileType.cs" />
+    <Compile Include="Editor\Generic\UI\FormatConverters\IFormatConverter.cs" />
+    <Compile Include="Editor\Writers\IntLineStream.cs" />
+    <Compile Include="Editor\Writers\StringLineStream.cs" />
+    <Compile Include="Editor\Generic\TabsMakerCore\TabGenerator.cs" />
+    <Compile Include="Editor\Generic\Lists\ClientAttributes.cs" />
+    <Compile Include="Editor\Generic\Lists\Bindings.cs" />
+    <Compile Include="Editor\Generic\Core\ValueConverters.cs" />
+    <Compile Include="Editor\Generic\Lists\ServerAttributes.cs" />
+    <Compile Include="Editor\Generic\Lists\ServerDbs.cs" />
+    <Compile Include="Editor\Generic\Lists\ServerEnumTypes.cs" />
+    <Compile Include="Editor\Generic\TabsMakerCore\DisplayableProperty.cs" />
+    <Compile Include="Editor\Generic\TabsMakerCore\GDbTab.xaml.cs">
       <DependentUpon>GDbTab.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Tools\DatabaseEditor\Generic\TabsMakerCore\GDbTabWrapper.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\TabsMakerCore\GItemCommand.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\TabsMakerCore\GSearchEngine.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\TabsMakerCore\GSearchSettings.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\TabsMakerCore\GTabSettings.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\TabsMakerCore\GTabsMaker.cs" />
-    <Compile Include="Core\MetaGrfHolder.cs" />
-    <Compile Include="Tools\DatabaseEditor\ProjectConfiguration.cs" />
-    <Compile Include="Tools\DatabaseEditor\Generic\ReadableItem.cs" />
-    <Compile Include="Tools\DatabaseEditor\SdeEditor.xaml.cs">
+    <Compile Include="Editor\Generic\TabsMakerCore\GDbTabWrapper.cs" />
+    <Compile Include="Editor\Generic\TabsMakerCore\GItemCommand.cs" />
+    <Compile Include="Editor\Generic\TabsMakerCore\GSearchEngine.cs" />
+    <Compile Include="Editor\Generic\TabsMakerCore\GSearchSettings.cs" />
+    <Compile Include="Editor\Generic\TabsMakerCore\GTabSettings.cs" />
+    <Compile Include="Editor\Generic\TabsMakerCore\GTabsMaker.cs" />
+    <Compile Include="Editor\ProjectConfiguration.cs" />
+    <Compile Include="Editor\Generic\ReadableTuple.cs" />
+    <Compile Include="View\SdeEditor.xaml.cs">
       <DependentUpon>SdeEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Tools\DatabaseEditor\SdeMenu.cs" />
-    <Compile Include="Tools\DatabaseEditor\SdeSettings.cs" />
-    <Compile Include="Tools\DatabaseEditor\Engines\ToolTipsBuilder.cs" />
-    <Compile Include="Tools\DatabaseEditor\WPF\Converters.cs" />
-    <Compile Include="WPF\BackupDialog.xaml.cs">
+    <Compile Include="View\SdeMenu.cs" />
+    <Compile Include="View\SdeSettings.cs" />
+    <Compile Include="Editor\Engines\ToolTipsBuilder.cs" />
+    <Compile Include="View\Converters.cs" />
+    <Compile Include="View\Dialogs\BackupDialog.xaml.cs">
       <DependentUpon>BackupDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Tools\DatabaseEditor\WPF\SkillType3EditDialog.xaml.cs">
-      <DependentUpon>SkillType3EditDialog.xaml</DependentUpon>
+    <Compile Include="View\Controls\DisplayLabel.cs" />
+    <Compile Include="View\Dialogs\DropEditDialog.xaml.cs">
+      <DependentUpon>DropEditDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Tools\DatabaseEditor\WPF\DisplayLabel.cs" />
-    <Compile Include="Tools\DatabaseEditor\WPF\DropEdit.xaml.cs">
-      <DependentUpon>DropEdit.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Tools\DatabaseEditor\WPF\JobEditDialog.xaml.cs">
+    <Compile Include="View\Dialogs\JobEditDialog.xaml.cs">
       <DependentUpon>JobEditDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Tools\DatabaseEditor\WPF\LevelEditDialog.xaml.cs">
+    <Compile Include="View\Dialogs\LevelEditDialog.xaml.cs">
       <DependentUpon>LevelEditDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Tools\DatabaseEditor\WPF\LocationEditDialog.xaml.cs">
-      <DependentUpon>LocationEditDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Tools\DatabaseEditor\WPF\ModeEditDialog.xaml.cs">
-      <DependentUpon>ModeEditDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Tools\DatabaseEditor\WPF\NouseEditDialog.xaml.cs">
+    <Compile Include="View\Dialogs\NouseEditDialog.xaml.cs">
       <DependentUpon>NouseEditDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Tools\DatabaseEditor\WPF\ProgressDialog.xaml.cs">
+    <Compile Include="View\Dialogs\ProgressDialog.xaml.cs">
       <DependentUpon>ProgressDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Tools\DatabaseEditor\WPF\ScriptEditDialog.xaml.cs">
+    <Compile Include="View\Dialogs\ScriptEditDialog.xaml.cs">
       <DependentUpon>ScriptEditDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Tools\DatabaseEditor\WPF\ScriptEditorList.cs" />
-    <Compile Include="Tools\DatabaseEditor\WPF\SelectFromDialog.xaml.cs">
+    <Compile Include="View\Dialogs\ScriptEditorList.cs" />
+    <Compile Include="View\Dialogs\SelectFromDialog.xaml.cs">
       <DependentUpon>SelectFromDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Tools\DatabaseEditor\WPF\SkillDamageDialog.xaml.cs">
-      <DependentUpon>SkillDamageDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Tools\DatabaseEditor\WPF\SkillFlagEditDialog.xaml.cs">
-      <DependentUpon>SkillFlagEditDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Tools\DatabaseEditor\WPF\SkillType2EditDialog.xaml.cs">
-      <DependentUpon>SkillType2EditDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Tools\DatabaseEditor\WPF\SkillTypeEditDialog.xaml.cs">
-      <DependentUpon>SkillTypeEditDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Tools\DatabaseEditor\WPF\TextViewItem.xaml.cs">
+    <Compile Include="View\Controls\TextViewItem.xaml.cs">
       <DependentUpon>TextViewItem.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Tools\DatabaseEditor\WPF\TradeEditDialog.xaml.cs">
+    <Compile Include="View\Dialogs\TradeEditDialog.xaml.cs">
       <DependentUpon>TradeEditDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Tools\DatabaseEditor\WPF\UpperEditDialog.xaml.cs">
-      <DependentUpon>UpperEditDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Core\ViewItems\TkPathView.cs" />
     <Compile Include="Core\ViewItems\BackupView.cs" />
     <Compile Include="WPF\Converters.cs" />
-    <Compile Include="WPF\DebuggerDialog.xaml.cs">
-      <DependentUpon>DebuggerDialog.xaml</DependentUpon>
+    <Compile Include="View\Controls\LeftComboBox.cs" />
+    <Compile Include="View\MultiGrfExplorer.xaml.cs">
+      <DependentUpon>MultiGrfExplorer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="WPF\FancyButton.xaml.cs">
-      <DependentUpon>FancyButton.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="WPF\LeftComboBox.cs" />
-    <Compile Include="WPF\MetaGrfResourcesViewer.xaml.cs">
-      <DependentUpon>MetaGrfResourcesViewer.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="WPF\SearchPanel.xaml.cs">
+    <Compile Include="View\Controls\SearchPanel.xaml.cs">
       <DependentUpon>SearchPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="WPF\ToggleMemoryButton.xaml.cs">
+    <Compile Include="View\Controls\ToggleMemoryButton.xaml.cs">
       <DependentUpon>ToggleMemoryButton.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
@@ -303,115 +439,204 @@
     <None Include="app.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="app.manifest" />
-    <EmbeddedResource Include="CustomHighlighting.xshd" />
-    <EmbeddedResource Include="Imf.xshd" />
-    <EmbeddedResource Include="Lua.xshd" />
+    <None Include="app.manifest">
+      <SubType>Designer</SubType>
+    </None>
+    <EmbeddedResource Include="Core\Avalon\Syntax\CustomHighlighting.xshd" />
+    <EmbeddedResource Include="Core\Avalon\Syntax\Imf.xshd" />
+    <EmbeddedResource Include="Core\Avalon\Syntax\Lua.xshd" />
+    <EmbeddedResource Include="Core\Avalon\Syntax\Python.xshd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Avalon\Syntax\DebugDb.xshd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
-    <EmbeddedResource Include="Script.xshd" />
+    <EmbeddedResource Include="Core\Avalon\Syntax\Script.xshd" />
+    <EmbeddedResource Include="Resources\Compressed\ref_body.act" />
+    <EmbeddedResource Include="Resources\Compressed\ref_body.spr" />
+    <EmbeddedResource Include="Resources\Compressed\ref_head.act" />
+    <EmbeddedResource Include="Resources\Compressed\ref_head.spr" />
+    <EmbeddedResource Include="Resources\Compressed\sdeAboutBackground.jpg" />
+    <EmbeddedResource Include="Resources\def_drag.act" />
+    <EmbeddedResource Include="Resources\def_drag.spr" />
+    <EmbeddedResource Include="Resources\def_head.act" />
+    <EmbeddedResource Include="Resources\def_head.spr" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Tools\DatabaseEditor\Generic\TabsMakerCore\GDbTab.xaml">
+    <Page Include="Tools\ActViewer\CompactActIndexSelector.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Tools\DatabaseEditor\SdeEditor.xaml">
+    <Page Include="Tools\ActViewer\FrameViewer.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Tools\DatabaseEditor\WPF\SplashDialog.xaml">
+    <Page Include="Tools\ActViewer\PreviewSettingsDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="WPF\BackupDialog.xaml">
+    <Page Include="Editor\Generic\TabsMakerCore\GDbTab.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Tools\DatabaseEditor\WPF\SkillType3EditDialog.xaml">
+    <Page Include="Editor\Generic\UI\CustomControls\PreviewItemInGame.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Tools\DatabaseEditor\WPF\DropEdit.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Tools\DatabaseEditor\WPF\JobEditDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Tools\DatabaseEditor\WPF\LevelEditDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Tools\DatabaseEditor\WPF\LocationEditDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Tools\DatabaseEditor\WPF\ModeEditDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Tools\DatabaseEditor\WPF\NouseEditDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Tools\DatabaseEditor\WPF\ProgressDialog.xaml">
+    <Page Include="Editor\Generic\UI\CustomControls\TextEditorColorControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Tools\DatabaseEditor\WPF\ScriptEditDialog.xaml">
+    <Page Include="View\Controls\DbSearchPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Dialogs\CheevoResourceDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Tools\DatabaseEditor\WPF\SelectFromDialog.xaml">
+    <Page Include="View\SdeEditor.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Tools\DatabaseEditor\WPF\SkillDamageDialog.xaml">
+    <Page Include="View\Dialogs\AccEditDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Tools\DatabaseEditor\WPF\SkillFlagEditDialog.xaml">
+    <Page Include="View\Dialogs\AddRangeDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Tools\DatabaseEditor\WPF\SkillType2EditDialog.xaml">
+    <Page Include="View\Dialogs\SkillLevelEditDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Tools\DatabaseEditor\WPF\SkillTypeEditDialog.xaml">
+    <Page Include="View\Controls\ShopItem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Dialogs\ShopSimulatorDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Tools\DatabaseEditor\WPF\TextViewItem.xaml">
+    <Page Include="View\Dialogs\ExplorerDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Tools\DatabaseEditor\WPF\TradeEditDialog.xaml">
+    <Page Include="View\Dialogs\LuaTablesDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Tools\DatabaseEditor\WPF\UpperEditDialog.xaml">
+    <Page Include="View\Dialogs\DbDebugDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="WPF\DebuggerDialog.xaml">
+    <Page Include="View\Dialogs\IronPythonDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="WPF\FancyButton.xaml">
+    <Page Include="View\Dialogs\CopyToDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="WPF\MetaGrfResourcesViewer.xaml">
+    <Page Include="View\Controls\QuickColorSelector.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="WPF\SearchPanel.xaml">
+    <Page Include="View\Dialogs\ViewIdPreviewDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Dialogs\RateEditDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Dialogs\TimeEditDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Dialogs\ValidationDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Dialogs\GenericFlagDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Dialogs\CopyDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Dialogs\ItemDescriptionDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Dialogs\ReplaceDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Dialogs\FtpLoginDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Dialogs\SettingsDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Dialogs\SplashDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Dialogs\BackupDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Dialogs\DropEditDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Dialogs\JobEditDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Dialogs\LevelEditDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Dialogs\NouseEditDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Dialogs\ProgressDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Dialogs\ScriptEditDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Dialogs\SelectFromDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Controls\TextViewItem.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Dialogs\TradeEditDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\MultiGrfExplorer.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Controls\SearchPanel.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -419,7 +644,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="WPF\ToggleMemoryButton.xaml">
+    <Page Include="View\Controls\ToggleMemoryButton.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -431,7 +656,7 @@
     <Resource Include="Resources\add.png" />
     <Resource Include="Resources\archive.png" />
     <Resource Include="Resources\arrow.png" />
-    <Resource Include="Resources\arrowdown.png" />
+    <EmbeddedResource Include="Resources\arrowdown.png" />
     <Resource Include="Resources\arrowup.png" />
     <Resource Include="Resources\background.png" />
     <Resource Include="Resources\backward.png" />
@@ -521,13 +746,123 @@
     <EmbeddedResource Include="Files\Compressed\zlib.net.dll" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\sdeAboutBackground.jpg" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\cut.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\notepad.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\revisionUpdate.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Files\Compressed\Ftp.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\reset.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\collection_bg.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\txt.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\lua.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\copy.png" />
+    <Resource Include="Resources\paste.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Files\Compressed\WPFToolkit.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Files\Compressed\DiffieHellman.dll" />
+    <EmbeddedResource Include="Files\Compressed\Org.Mentalis.Security.dll" />
+    <EmbeddedResource Include="Files\Compressed\Tamir.SharpSSH.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\eye.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\arrowoblique.png" />
+    <EmbeddedResource Include="Resources\pause.png" />
+    <EmbeddedResource Include="Resources\play.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\editor.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\ingame.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\stop.png" />
+    <EmbeddedResource Include="Resources\stop2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Files\Compressed\ColorPicker.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Files\Compressed\IronPython.dll" />
+    <EmbeddedResource Include="Files\Compressed\Microsoft.Dynamic.dll" />
+    <EmbeddedResource Include="Files\Compressed\Microsoft.Scripting.Core.dll" />
+    <EmbeddedResource Include="Files\Compressed\Microsoft.Scripting.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\dos.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\python.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\increment.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Compressed\default.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Compressed\tut_part1.py" />
+    <EmbeddedResource Include="Resources\Compressed\tut_part2.py" />
+    <EmbeddedResource Include="Resources\Compressed\tut_part3.py" />
+    <EmbeddedResource Include="Resources\Compressed\tut_part4.py" />
+    <EmbeddedResource Include="Resources\Compressed\tut_part5.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Compressed\tut_part6.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\sftp.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\file_act.png" />
+    <EmbeddedResource Include="Resources\file_spr.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\spritemaker.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\card.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\def_inv.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\def_illust.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\def_col.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\repair.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\numbers.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\shop_back.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\strings.txt" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\splash.png" />
@@ -540,8 +875,8 @@
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup>
-    <PreBuildEvent>REM cd "$(SolutionDir)SDE\Files\"
-REM start _Compress.bat</PreBuildEvent>
+    <PreBuildEvent>cd "$(SolutionDir)SDE\Files\"
+start _Compress.bat</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

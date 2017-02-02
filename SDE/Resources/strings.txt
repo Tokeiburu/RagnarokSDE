@@ -1,0 +1,520 @@
+__%ItemInfoFunction
+main = function()
+	for ItemID,DESC in pairs(tbl) do
+		result, msg = AddItem(ItemID, DESC.unidentifiedDisplayName, DESC.unidentifiedResourceName, DESC.identifiedDisplayName, DESC.identifiedResourceName, DESC.slotCount, DESC.ClassNum)
+		if not result then
+			return false, msg
+		end
+		for k,v in pairs(DESC.unidentifiedDescriptionName) do
+			result, msg = AddItemUnidentifiedDesc(ItemID, v)
+			if not result then
+				return false, msg
+			end
+		end
+		for k,v in pairs(DESC.identifiedDescriptionName) do
+			result, msg = AddItemIdentifiedDesc(ItemID, v)
+			if not result then
+				return false, msg
+			end
+		end
+	end
+	return true, "good"
+end
+__%AchievementFunction
+function main()
+	for achieveID, achieveInfo in pairs(achievement_tbl) do
+		result, msg = InsertAchieveInfo(achieveID, achieveInfo.title, achieveInfo.content.summary, achieveInfo.content.details, achieveInfo.score)
+		if not result then
+			return false, msg
+		end
+		if nil ~= achieveInfo.resource then
+			for index, resource in ipairs(achieveInfo.resource) do
+				if nil ~= resource.shortcut then
+					shortcut = resource.shortcut
+				else
+					shortcut = -1
+				end
+				if 0 == achieveInfo.UI_Type then
+					result, msg = InsertAchieveResource(achieveID, resource.text, 0, shortcut)
+				elseif 1 == achieveInfo.UI_Type then
+					result, msg = InsertAchieveResource(achieveID, resource.text, resource.count, shortcut)
+				end
+				if not result then
+					return false, msg
+				end
+			end
+		end
+		if nil ~= achieveInfo.reward then
+			if nil ~= achieveInfo.reward.item then
+				result, msg = InsertAchieveRewardItem(achieveID, achieveInfo.reward.item)
+			end
+			if nil ~= achieveInfo.reward.title then
+				result, msg = InsertAchieveRewardTitle(achieveID, achieveInfo.reward.title)
+				if not result then
+					return false, msg
+				end
+			end
+			if nil ~= achieveInfo.reward.buff then
+				result, msg = InsertAchieveRewardBuff(achieveID, achieveInfo.reward.buff)
+				if not result then
+					return false, msg
+				end
+			end
+		end
+		result, msg = InsertAchieveUIType(achieveID, achieveInfo.UI_Type, achieveInfo.group)
+		if not result then
+			return false, msg
+		end
+		result, msg = SetAchieveIDByTab(achieveID, achieveInfo.major, achieveInfo.minor)
+		if not result then
+			return false, msg
+		end
+	end
+	return true, "good"
+end
+__%RAthenaItemDbSqlHeader
+#
+# Table structure for table `{0}`
+#
+
+DROP TABLE IF EXISTS `{0}`;
+CREATE TABLE `{0}` (
+  `id` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `name_english` varchar(50) NOT NULL DEFAULT '',
+  `name_japanese` varchar(50) NOT NULL DEFAULT '',
+  `type` tinyint(2) unsigned NOT NULL DEFAULT '0',
+  `price_buy` mediumint(8) unsigned DEFAULT NULL,
+  `price_sell` mediumint(8) unsigned DEFAULT NULL,
+  `weight` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `attack` smallint(5) unsigned DEFAULT NULL,
+  `defence` smallint(5) unsigned DEFAULT NULL,
+  `range` tinyint(2) unsigned DEFAULT NULL,
+  `slots` tinyint(2) unsigned DEFAULT NULL,
+  `equip_jobs` int(10) unsigned DEFAULT NULL,
+  `equip_upper` tinyint(2) unsigned DEFAULT NULL,
+  `equip_genders` tinyint(1) unsigned DEFAULT NULL,
+  `equip_locations` mediumint(7) unsigned DEFAULT NULL,
+  `weapon_level` tinyint(1) unsigned DEFAULT NULL,
+  `equip_level` tinyint(3) unsigned DEFAULT NULL,
+  `refineable` tinyint(1) unsigned DEFAULT NULL,
+  `view` smallint(5) unsigned DEFAULT NULL,
+  `script` text,
+  `equip_script` text,
+  `unequip_script` text,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM;
+
+
+__%RAthenaItemDbSqlHeaderRenewal
+#
+# Table structure for table `{0}`
+#
+
+DROP TABLE IF EXISTS `{0}`;
+CREATE TABLE `{0}` (
+  `id` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `name_english` varchar(50) NOT NULL DEFAULT '',
+  `name_japanese` varchar(50) NOT NULL DEFAULT '',
+  `type` tinyint(2) unsigned NOT NULL DEFAULT '0',
+  `price_buy` mediumint(8) unsigned DEFAULT NULL,
+  `price_sell` mediumint(8) unsigned DEFAULT NULL,
+  `weight` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `atk:matk` varchar(11) DEFAULT NULL,
+  `defence` smallint(5) unsigned DEFAULT NULL,
+  `range` tinyint(2) unsigned DEFAULT NULL,
+  `slots` tinyint(2) unsigned DEFAULT NULL,
+  `equip_jobs` int(10) unsigned DEFAULT NULL,
+  `equip_upper` tinyint(2) unsigned DEFAULT NULL,
+  `equip_genders` tinyint(1) unsigned DEFAULT NULL,
+  `equip_locations` mediumint(7) unsigned DEFAULT NULL,
+  `weapon_level` tinyint(1) unsigned DEFAULT NULL,
+  `equip_level` varchar(10) DEFAULT NULL,
+  `refineable` tinyint(1) unsigned DEFAULT NULL,
+  `view` smallint(5) unsigned DEFAULT NULL,
+  `script` text,
+  `equip_script` text,
+  `unequip_script` text,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM;
+
+
+__%HerculesItemDbSqlHeader
+-- This file is part of Hercules.
+-- http://herc.ws - http://github.com/HerculesWS/Hercules
+--
+-- Copyright (C) 2013-2016  Hercules Dev Team
+--
+-- Hercules is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+--
+-- This program is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License
+-- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-- NOTE: This file was auto-generated and should never be manually edited,
+--       as it will get overwritten. If you need to modify this file,
+--       please consider modifying the corresponding .conf file inside
+--       the db folder, and then re-run the db2sql plugin.
+
+-- GENERATED FILE DO NOT EDIT --
+
+--
+-- Table structure for table `{0}`
+--
+
+DROP TABLE IF EXISTS `{0}`;
+CREATE TABLE `{0}` (
+  `id` smallint(5) UNSIGNED NOT NULL DEFAULT '0',
+  `name_english` varchar(50) NOT NULL DEFAULT '',
+  `name_japanese` varchar(50) NOT NULL DEFAULT '',
+  `type` tinyint(2) UNSIGNED NOT NULL DEFAULT '0',
+  `price_buy` mediumint(10) DEFAULT NULL,
+  `price_sell` mediumint(10) DEFAULT NULL,
+  `weight` smallint(5) UNSIGNED DEFAULT NULL,
+  `atk` smallint(5) UNSIGNED DEFAULT NULL,
+  `matk` smallint(5) UNSIGNED DEFAULT NULL,
+  `defence` smallint(5) UNSIGNED DEFAULT NULL,
+  `range` tinyint(2) UNSIGNED DEFAULT NULL,
+  `slots` tinyint(2) UNSIGNED DEFAULT NULL,
+  `equip_jobs` bigint(20) UNSIGNED DEFAULT NULL,
+  `equip_upper` tinyint(8) UNSIGNED DEFAULT NULL,
+  `equip_genders` tinyint(2) UNSIGNED DEFAULT NULL,
+  `equip_locations` mediumint(8) UNSIGNED DEFAULT NULL,
+  `weapon_level` tinyint(2) UNSIGNED DEFAULT NULL,
+  `equip_level_min` smallint(5) UNSIGNED DEFAULT NULL,
+  `equip_level_max` smallint(5) UNSIGNED DEFAULT NULL,
+  `refineable` tinyint(1) UNSIGNED DEFAULT NULL,
+  `view` smallint(3) UNSIGNED DEFAULT NULL,
+  `bindonequip` tinyint(1) UNSIGNED DEFAULT NULL,
+  `forceserial` tinyint(1) UNSIGNED DEFAULT NULL,
+  `buyingstore` tinyint(1) UNSIGNED DEFAULT NULL,
+  `delay` mediumint(9) UNSIGNED DEFAULT NULL,
+  `trade_flag` smallint(4) UNSIGNED DEFAULT NULL,
+  `trade_group` smallint(3) UNSIGNED DEFAULT NULL,
+  `nouse_flag` smallint(4) UNSIGNED DEFAULT NULL,
+  `nouse_group` smallint(4) UNSIGNED DEFAULT NULL,
+  `stack_amount` mediumint(6) UNSIGNED DEFAULT NULL,
+  `stack_flag` tinyint(2) UNSIGNED DEFAULT NULL,
+  `sprite` mediumint(6) UNSIGNED DEFAULT NULL,
+  `script` text,
+  `equip_script` text,
+  `unequip_script` text,
+ PRIMARY KEY (`id`)
+) ENGINE=MyISAM;
+
+
+__%RAthenaMobDbSqlHeader
+#
+# Table structure for table `{0}`
+#
+
+DROP TABLE IF EXISTS `{0}`;
+CREATE TABLE `{0}` (
+  `ID` mediumint(9) unsigned NOT NULL default '0',
+  `Sprite` text NOT NULL,
+  `kName` text NOT NULL,
+  `iName` text NOT NULL,
+  `LV` tinyint(6) unsigned NOT NULL default '0',
+  `HP` int(9) unsigned NOT NULL default '0',
+  `SP` mediumint(9) unsigned NOT NULL default '0',
+  `EXP` mediumint(9) unsigned NOT NULL default '0',
+  `JEXP` mediumint(9) unsigned NOT NULL default '0',
+  `Range1` tinyint(4) unsigned NOT NULL default '0',
+  `ATK1` smallint(6) unsigned NOT NULL default '0',
+  `ATK2` smallint(6) unsigned NOT NULL default '0',
+  `DEF` smallint(6) unsigned NOT NULL default '0',
+  `MDEF` smallint(6) unsigned NOT NULL default '0',
+  `STR` smallint(6) unsigned NOT NULL default '0',
+  `AGI` smallint(6) unsigned NOT NULL default '0',
+  `VIT` smallint(6) unsigned NOT NULL default '0',
+  `INT` smallint(6) unsigned NOT NULL default '0',
+  `DEX` smallint(6) unsigned NOT NULL default '0',
+  `LUK` smallint(6) unsigned NOT NULL default '0',
+  `Range2` tinyint(4) unsigned NOT NULL default '0',
+  `Range3` tinyint(4) unsigned NOT NULL default '0',
+  `Scale` tinyint(4) unsigned NOT NULL default '0',
+  `Race` tinyint(4) unsigned NOT NULL default '0',
+  `Element` tinyint(4) unsigned NOT NULL default '0',
+  `Mode` int(11) unsigned NOT NULL default '0',
+  `Speed` smallint(6) unsigned NOT NULL default '0',
+  `aDelay` smallint(6) unsigned NOT NULL default '0',
+  `aMotion` smallint(6) unsigned NOT NULL default '0',
+  `dMotion` smallint(6) unsigned NOT NULL default '0',
+  `MEXP` mediumint(9) unsigned NOT NULL default '0',
+  `MVP1id` smallint(5) unsigned NOT NULL default '0',
+  `MVP1per` smallint(9) unsigned NOT NULL default '0',
+  `MVP2id` smallint(5) unsigned NOT NULL default '0',
+  `MVP2per` smallint(9) unsigned NOT NULL default '0',
+  `MVP3id` smallint(5) unsigned NOT NULL default '0',
+  `MVP3per` smallint(9) unsigned NOT NULL default '0',
+  `Drop1id` smallint(5) unsigned NOT NULL default '0',
+  `Drop1per` smallint(9) unsigned NOT NULL default '0',
+  `Drop2id` smallint(5) unsigned NOT NULL default '0',
+  `Drop2per` smallint(9) unsigned NOT NULL default '0',
+  `Drop3id` smallint(5) unsigned NOT NULL default '0',
+  `Drop3per` smallint(9) unsigned NOT NULL default '0',
+  `Drop4id` smallint(5) unsigned NOT NULL default '0',
+  `Drop4per` smallint(9) unsigned NOT NULL default '0',
+  `Drop5id` smallint(5) unsigned NOT NULL default '0',
+  `Drop5per` smallint(9) unsigned NOT NULL default '0',
+  `Drop6id` smallint(5) unsigned NOT NULL default '0',
+  `Drop6per` smallint(9) unsigned NOT NULL default '0',
+  `Drop7id` smallint(5) unsigned NOT NULL default '0',
+  `Drop7per` smallint(9) unsigned NOT NULL default '0',
+  `Drop8id` smallint(5) unsigned NOT NULL default '0',
+  `Drop8per` smallint(9) unsigned NOT NULL default '0',
+  `Drop9id` smallint(5) unsigned NOT NULL default '0',
+  `Drop9per` smallint(9) unsigned NOT NULL default '0',
+  `DropCardid` smallint(5) unsigned NOT NULL default '0',
+  `DropCardper` smallint(9) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`ID`)
+) ENGINE=MyISAM;
+
+
+__%HerculesMobDbSqlHeader
+-- This file is part of Hercules.
+-- http://herc.ws - http://github.com/HerculesWS/Hercules
+--
+-- Copyright (C) 2013-2016  Hercules Dev Team
+--
+-- Hercules is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+--
+-- This program is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License
+-- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-- NOTE: This file was auto-generated and should never be manually edited,
+--       as it will get overwritten. If you need to modify this file,
+--       please consider modifying the corresponding .conf file inside
+--       the db folder, and then re-run the db2sql plugin.
+
+-- GENERATED FILE DO NOT EDIT --
+
+--
+-- Table structure for table `{0}`
+--
+
+DROP TABLE IF EXISTS `{0}`;
+CREATE TABLE `{0}` (
+  `ID` MEDIUMINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `Sprite` TEXT NOT NULL,
+  `kName` TEXT NOT NULL,
+  `iName` TEXT NOT NULL,
+  `LV` TINYINT(6) UNSIGNED NOT NULL DEFAULT '0',
+  `HP` INT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `SP` MEDIUMINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `EXP` MEDIUMINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `JEXP` MEDIUMINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `Range1` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0',
+  `ATK1` SMALLINT(6) UNSIGNED NOT NULL DEFAULT '0',
+  `ATK2` SMALLINT(6) UNSIGNED NOT NULL DEFAULT '0',
+  `DEF` SMALLINT(6) UNSIGNED NOT NULL DEFAULT '0',
+  `MDEF` SMALLINT(6) UNSIGNED NOT NULL DEFAULT '0',
+  `STR` SMALLINT(6) UNSIGNED NOT NULL DEFAULT '0',
+  `AGI` SMALLINT(6) UNSIGNED NOT NULL DEFAULT '0',
+  `VIT` SMALLINT(6) UNSIGNED NOT NULL DEFAULT '0',
+  `INT` SMALLINT(6) UNSIGNED NOT NULL DEFAULT '0',
+  `DEX` SMALLINT(6) UNSIGNED NOT NULL DEFAULT '0',
+  `LUK` SMALLINT(6) UNSIGNED NOT NULL DEFAULT '0',
+  `Range2` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0',
+  `Range3` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0',
+  `Scale` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0',
+  `Race` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0',
+  `Element` TINYINT(4) UNSIGNED NOT NULL DEFAULT '0',
+  `Mode` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+  `Speed` SMALLINT(6) UNSIGNED NOT NULL DEFAULT '0',
+  `aDelay` SMALLINT(6) UNSIGNED NOT NULL DEFAULT '0',
+  `aMotion` SMALLINT(6) UNSIGNED NOT NULL DEFAULT '0',
+  `dMotion` SMALLINT(6) UNSIGNED NOT NULL DEFAULT '0',
+  `MEXP` MEDIUMINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `MVP1id` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `MVP1per` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `MVP2id` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `MVP2per` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `MVP3id` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `MVP3per` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `Drop1id` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `Drop1per` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `Drop2id` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `Drop2per` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `Drop3id` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `Drop3per` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `Drop4id` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `Drop4per` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `Drop5id` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `Drop5per` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `Drop6id` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `Drop6per` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `Drop7id` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `Drop7per` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `Drop8id` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `Drop8per` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `Drop9id` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `Drop9per` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `DropCardid` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  `DropCardper` SMALLINT(9) UNSIGNED NOT NULL DEFAULT '0',
+  PRIMARY KEY (`ID`)
+) ENGINE=MyISAM;
+
+
+__%HerculesMobSkillDbSqlHeader
+--
+-- Table structure for table `{0}`
+--
+
+DROP TABLE IF EXISTS `{0}`;
+CREATE TABLE IF NOT EXISTS `{0}` (
+  `MOB_ID` SMALLINT(6) NOT NULL,
+  `INFO` TEXT NOT NULL,
+  `STATE` TEXT NOT NULL,
+  `SKILL_ID` SMALLINT(6) NOT NULL,
+  `SKILL_LV` TINYINT(4) NOT NULL,
+  `RATE` SMALLINT(4) NOT NULL,
+  `CASTTIME` MEDIUMINT(9) NOT NULL,
+  `DELAY` INT(9) NOT NULL,
+  `CANCELABLE` TEXT NOT NULL,
+  `TARGET` TEXT NOT NULL,
+  `CONDITION` TEXT NOT NULL,
+  `CONDITION_VALUE` TEXT,
+  `VAL1` MEDIUMINT(9) DEFAULT NULL,
+  `VAL2` MEDIUMINT(9) DEFAULT NULL,
+  `VAL3` MEDIUMINT(9) DEFAULT NULL,
+  `VAL4` MEDIUMINT(9) DEFAULT NULL,
+  `VAL5` MEDIUMINT(9) DEFAULT NULL,
+  `EMOTION` TEXT,
+  `CHAT` TEXT
+) ENGINE=MyISAM;
+
+
+__%RAthenaMobSkillDbSqlHeader
+#
+# Table structure for table `mob_skill_db`
+#
+
+DROP TABLE IF EXISTS `mob_skill_db`;
+CREATE TABLE IF NOT EXISTS `mob_skill_db` (
+  `MOB_ID` smallint(6) NOT NULL,
+  `INFO` text NOT NULL,
+  `STATE` text NOT NULL,
+  `SKILL_ID` smallint(6) NOT NULL,
+  `SKILL_LV` tinyint(4) NOT NULL,
+  `RATE` smallint(4) NOT NULL,
+  `CASTTIME` mediumint(9) NOT NULL,
+  `DELAY` int(9) NOT NULL,
+  `CANCELABLE` text NOT NULL,
+  `TARGET` text NOT NULL,
+  `CONDITION` text NOT NULL,
+  `CONDITION_VALUE` text,
+  `VAL1` mediumint(9) DEFAULT NULL,
+  `VAL2` mediumint(9) DEFAULT NULL,
+  `VAL3` mediumint(9) DEFAULT NULL,
+  `VAL4` mediumint(9) DEFAULT NULL,
+  `VAL5` mediumint(9) DEFAULT NULL,
+  `EMOTION` text,
+  `CHAT` text
+) ENGINE=MyISAM;
+
+
+__%Emotions
+e_gasp	0
+e_what	1
+e_ho	2
+e_lv	3
+e_swt	4
+e_ic	5
+e_an	6
+e_ag	7
+e_cash	8
+e_dots	9
+e_scissors	10
+e_rock	11
+e_paper	12
+e_korea	13
+e_lv2	14
+e_thx	15
+e_wah	16
+e_sry	17
+e_heh	18
+e_swt2	19
+e_hmm	20
+e_no1	21
+e_no	22
+e_omg	23
+e_oh	24
+e_X	25
+e_hlp	26
+e_go	27
+e_sob	28
+e_gg	29
+e_kis	30
+e_kis2	31
+e_pif	32
+e_ok	33
+e_mute	34
+e_indonesia	35
+e_bzz	36
+e_rice	37
+e_awsm	38
+e_meh	39
+e_shy	40
+e_pat	41
+e_mp	42
+e_slur	43
+e_com	44
+e_yawn	45
+e_grat	46
+e_hp	47
+e_philippines	48
+e_malaysia	49
+e_singapore	50
+e_brazil	51
+e_flash	52
+e_spin	53
+e_sigh	54
+e_dum	55
+e_loud	56
+e_otl	57
+e_dice1	58
+e_dice2	59
+e_dice3	60
+e_dice4	61
+e_dice5	62
+e_dice6	63
+e_india	64
+e_luv	65
+e_russia	66
+e_virgin	67
+e_mobile	68
+e_mail	69
+e_chinese	70
+e_antenna1	71
+e_antenna2	72
+e_antenna3	73
+e_hum	74
+e_abs	75
+e_oops	76
+e_spit	77
+e_ene	78
+e_panic	79
+e_whisp	80
+e_yut	81
+e_yut2	82
+e_yut3	83
+e_yut4	84
+e_yut5	85
+e_yut6	86
+e_yut7	87
+__%END

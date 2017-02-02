@@ -1,0 +1,73 @@
+﻿<Styles:TkWindow x:Class="SDE.View.Dialogs.CopyDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
+                 xmlns:TokeiLibrary="clr-namespace:TokeiLibrary;assembly=TokeiLibrary"
+                 xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary" Width="250">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <Grid Name="_jobGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <StackPanel>
+                <DockPanel>
+                    <Label Content="Advanced copy..." FontStyle="Italic" VerticalAlignment="Center" />
+                    <CheckBox Name="_cbSelectAll" VerticalAlignment="Center" Content="Select all" Margin="20 0 0 0" HorizontalAlignment="Left" />
+                </DockPanel>
+            </StackPanel>
+            <Grid Name="_gridCopy" Grid.Row="1" Margin="0 10 0 10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+            </Grid>
+        </Grid>
+        <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="50" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+            <Grid Margin="0 0 3 0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <DockPanel Grid.Column="2">
+                    <Button Name="_buttonOk" Click="_buttonOk_Click" Content="Copy" Height="25" Margin="3" MinWidth="100" Grid.Column="2" />
+                    <Button Name="_buttonCancel" Click="_buttonCancel_Click" Content="Cancel" Height="25" Margin="3" MinWidth="100" Grid.Column="3" />
+                </DockPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</Styles:TkWindow>

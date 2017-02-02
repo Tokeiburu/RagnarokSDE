@@ -1,0 +1,327 @@
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using ErrorManager;
+using GRF.Core.GroupedGrf;
+using SDE.Editor;
+using SDE.Editor.Engines;
+using TokeiLibrary.WPF.Styles;
+using Utilities;
+using Utilities.Services;
+
+namespace SDE.View.Controls {
+	/// <summary>
+	/// Interaction logic for TextViewItem.xaml
+	/// </summary>
+	public partial class TextViewItem : UserControl {
+		#region Delegates
+
+		public delegate void TextViewItemEventHandler(object sender, EventArgs e);
+
+		#endregion
+
+		#region TviState enum
+
+		#endregion
+
+		private readonly GetSetSetting _setting;
+		private readonly MultiGrfReader _metaGrf;
+		private static readonly Brush _mouseDragOverBackgroundBrush = FrozenBrush.Freeze(new LinearGradientBrush(Color.FromArgb(80, 147, 255, 141), Color.FromArgb(80, 64, 255, 70), 90));
+		private static readonly Brush _mouseDragOverBorderBrush = FrozenBrush.Freeze(new SolidColorBrush(Color.FromArgb(255, 92, 191, 92)));
+		private static readonly Brush _mouseOverBackgroundBrush = FrozenBrush.Freeze(new LinearGradientBrush(Color.FromArgb(80, 214, 228, 255), Color.FromArgb(80, 111, 176, 255), 90));
+		private static readonly Brush _mouseOverBorderBrush = FrozenBrush.Freeze(new SolidColorBrush(Color.FromArgb(255, 181, 178, 244)));
+		private static readonly Brush _selectBackgroundBrush = FrozenBrush.Freeze(new LinearGradientBrush(Color.FromArgb(140, 214, 228, 255), Color.FromArgb(140, 111, 176, 255), 90));
+		private static readonly Brush _selectBorderBrush = FrozenBrush.Freeze(new SolidColorBrush(Color.FromArgb(255, 153, 150, 227)));
+		private static readonly Brush _defaultBackgroundBrush = FrozenBrush.Freeze(new SolidColorBrush(Colors.Transparent));
+		private static readonly Brush _defaultBorderBrush = FrozenBrush.Freeze(new SolidColorBrush(Colors.Transparent));
+		private string _defaultValue = "";
+		private readonly ToolTip _toolTip;
+		private bool _isSelected;
+
+		public TextViewItem() {
+			InitializeComponent();
+		}
+
+		public TextViewItem(ListView listView, GetSetSetting setting, MultiGrfReader metaGrf) {
+			_setting = setting;
+			_metaGrf = metaGrf;
+			ListView = listView;
+
+			InitializeComponent();
+
+			_tblockDescription.PreviewMouseMove += (e, a) => OnMouseOver(e);
+			_tbText.TextChanged += _tbText_TextChanged;
+			_toolTip = new ToolTip();
+			_tRectangleOverlay.ToolTip = _toolTip;
+
+			MouseEnter += new MouseEventHandler(_tkTreeViewItem_MouseEnter);
+			MouseLeave += new MouseEventHandler(_tkTreeViewItem_MouseLeave);
+
+			try {
+				DefaultValue = ProjectConfiguration.ConfigAsker.RetrieveSetting(() => setting.Value).Default;
+			}
+			catch {
+				DefaultValue = setting.Value;
+			}
+
+			_tbText.SavePathUniqueName = "Server database editor - TVI - " + DefaultValue;
+			_tbText.Text = setting.Value;
+
+			PreviewDragEnter += _dragOver;
+			PreviewDragOver += _dragOver;
+			PreviewDragLeave += _dragLeave;
+			PreviewDrop += (e, a) => { _tbText.OnMainGridDrop(e, a); a.Handled = true; };
+		}
+
+		public ListView ListView { get; set; }
+
+		public Border TVIHeaderBrush {
+			get { return _grid; }
+		}
+
+		public string DefaultValue {
+			get {
+				return _defaultValue;
+			}
+			set {
+				_defaultValue = value;
+			}
+		}
+
+		public bool IsSelected {
+			get {
+				return _isSelected;
+			}
+			set {
+				_isSelected = value;
+
+				try {
+					if (_isSelected) {
+						SetState(TviState.Selected);
+					}
+					else {
+						SetState(TviState.None);
+					}
+				}
+				catch (Exception err) {
+					ErrorHandler.HandleException(err);
+				}
+			}
+		}
+
+		public string Filepath {
+			get { return _setting.Value; }
+		}
+
+		public string Description {
+			set {
+				_tblockDescription.Text = value;
+			}
+		}
+
+		public TextBox TextBoxItem {
+			get { return _tbText.TextBox; }
+		}
+
+		public PathBrowser Browser {
+			get { return _tbText; }
+		}
+
+		private void _dragLeave(object sender, DragEventArgs e) {
+			if (IsSelected) {
+				SetState(TviState.Selected);
+			}
+			else {
+				SetState(TviState.None);
+			}
+			e.Handled = true;
+		}
+
+		private void _dragOver(object sender, DragEventArgs e) {
+			SetState(TviState.DragOver);
+			e.Handled = true;
+		}
+
+		public void SetState(TviState state) {
+			switch (state) {
+				case TviState.Selected:
+					TVIHeaderBrush.Background = _selectBackgroundBrush;
+					TVIHeaderBrush.BorderBrush = _selectBorderBrush;
+					break;
+				case TviState.DragOver:
+					TVIHeaderBrush.Background = _mouseDragOverBackgroundBrush;
+					TVIHeaderBrush.BorderBrush = _mouseDragOverBorderBrush;
+					break;
+				case TviState.MouseOver:
+					TVIHeaderBrush.Background = _mouseOverBackgroundBrush;
+					TVIHeaderBrush.BorderBrush = _mouseOverBorderBrush;
+					break;
+				case TviState.None:
+					TVIHeaderBrush.Background = _defaultBackgroundBrush;
+					TVIHeaderBrush.BorderBrush = _defaultBorderBrush;
+					break;
+			}
+		}
+
+		private void _tkTreeViewItem_MouseLeave(object sender, MouseEventArgs e) {
+			TextViewItem item = sender as TextViewItem;
+
+			if (item != null) {
+				if (!item.IsSelected) {
+					item.SetState(TviState.None);
+				}
+			}
+		}
+		private void _tkTreeViewItem_MouseEnter(object sender, MouseEventArgs e) {
+			TextViewItem item = sender as TextViewItem;
+
+			if (item != null) {
+				if (!item.IsSelected) {
+					item.SetState(TviState.MouseOver);
+				}
+			}
+		}
+
+		private void _tbText_TextChanged(object sender, EventArgs e) {
+			if (_tbText.Text.StartsWith("find:")) {
+				var first = _metaGrf.FileTable.FindEntriesFromFileName(_tbText.Text.Split(new char[] {':'}, 2)[1]).FirstOrDefault();
+
+				if (first != null) {
+					_tbText.Text = first.RelativePath;
+					return;
+				}
+			}
+			_setting.Value = _tbText.Text;
+			CheckValid();
+		}
+
+		private void _generateToolTip() {
+			string toolTip = "File not found.";
+
+			if (Browser.BrowseMode == PathBrowser.BrowseModeType.Folder) {
+				if (Filepath != null && _metaGrf != null && Directory.Exists(Filepath)) {
+					toolTip = Filepath;
+				}
+
+				if (Filepath != null && !FtpHelper.IsSystemFile(Filepath))
+					toolTip = Filepath;
+			}
+			else {
+				if (Filepath != null && _metaGrf != null && _metaGrf.GetData(Filepath) != null) {
+					if (File.Exists(Filepath)) {
+						toolTip = Filepath;
+					}
+					else {
+						TkPath path = _metaGrf.FindTkPath(Filepath);
+
+						if (String.IsNullOrEmpty(path.RelativePath)) {
+							toolTip = path.FilePath;
+						}
+						else {
+							toolTip = path.FilePath + "\r\n" + path.RelativePath;
+						}
+					}
+				}
+			}
+
+			_toolTip.Content = toolTip;
+		}
+
+		public event TextViewItemEventHandler MouseOver;
+
+		public void OnMouseOver(object obj) {
+			TextViewItemEventHandler handler = MouseOver;
+			if (handler != null) handler(obj, null);
+		}
+
+		private void _buttonReset_Click(object sender, RoutedEventArgs e) {
+			_tbText.Text = DefaultValue;
+		}
+
+		public void CheckValid(string path = null) {
+			try {
+				path = path ?? Filepath;
+
+				_generateToolTip();
+
+				if (Browser.BrowseMode == PathBrowser.BrowseModeType.Folder) {
+					if (Directory.Exists(path) || !FtpHelper.IsSystemFile(path)) {
+						if (_tbText != null && _tbText.RecentFiles != null)
+							_tbText.RecentFiles.AddRecentFile(path);
+						_tblockDescription.Foreground = Brushes.Black;
+						_imgError.Visibility = Visibility.Collapsed;
+					}
+					else {
+						_tblockDescription.Foreground = Brushes.Red;
+						_imgError.Visibility = Visibility.Visible;
+					}
+				}
+				else {
+					if (_metaGrf.GetData(path) != null) {
+						if (_tbText != null && _tbText.RecentFiles != null)
+							_tbText.RecentFiles.AddRecentFile(path);
+						_tblockDescription.Foreground = Brushes.Black;
+						_imgError.Visibility = Visibility.Collapsed;
+					}
+					else {
+						_tblockDescription.Foreground = Brushes.Red;
+						_imgError.Visibility = Visibility.Visible;
+					}
+				}
+			}
+			catch (Exception err) {
+				ErrorHandler.HandleException(err);
+			}
+		}
+
+		private void _menuItemsSelect_Click(object sender, RoutedEventArgs e) {
+			try {
+				if (Filepath != null) {
+					if (File.Exists(Filepath) || Directory.Exists(Filepath)) {
+						OpeningService.FilesOrFolders(Filepath);
+						return;
+					}
+				}
+
+				if (Filepath == null || !_metaGrf.FileTable.ContainsFile(Filepath)) {
+					ErrorHandler.HandleException("File path not found.");
+				}
+				else {
+					OpeningService.FilesOrFolders(_metaGrf.FindTkPath(Filepath).FilePath);
+				}
+			}
+			catch (Exception err) {
+				ErrorHandler.HandleException(err);
+			}
+		}
+
+		private void _menuItemsReset_Click(object sender, RoutedEventArgs e) {
+			try {
+				_tbText.Text = DefaultValue;
+			}
+			catch (Exception err) {
+				ErrorHandler.HandleException(err);
+			}
+		}
+
+		public void ForceSet() {
+			TextBoxItem.Text = _setting.Value;
+			CheckValid();
+		}
+
+		public void ForceSetSetting() {
+			_setting.Value = TextBoxItem.Text;
+		}
+	}
+
+	public enum TviState {
+		MouseOver,
+		Selected,
+		DragOver,
+		None
+	}
+}

@@ -1,0 +1,102 @@
+﻿<Styles:TkWindow x:Class="SDE.View.Dialogs.AccEditDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
+                 xmlns:TokeiLibrary="clr-namespace:TokeiLibrary;assembly=TokeiLibrary"
+                 xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
+                 xmlns:Controls="clr-namespace:Microsoft.Windows.Controls;assembly=WPFToolkit" Width="700">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <Grid Name="_jobGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="120" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="You can leave the 'Acc ID' field empty, this value is not necessary." Margin="3" TextWrapping="Wrap" />
+            <Controls:DataGrid x:Name="_dataGrid" Grid.Row="1" Height="250" MinWidth="500" />
+            
+            <StackPanel Grid.Column="1" Grid.RowSpan="2">
+                <Button Name="_buttonAdd" Click="_buttonAdd_Click" HorizontalContentAlignment="Stretch" Margin="3 3 3 0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Image Margin="2,0,0,0" Source="../../../Resources/add.png" Width="16" Height="16" RenderOptions.BitmapScalingMode="NearestNeighbor" Stretch="None" />
+                        <Label VerticalAlignment="Center" Grid.Column="1" Content="Add"  HorizontalAlignment="Center" Padding="0" Margin="3" />
+                    </Grid>
+                </Button>
+                <Button Name="_buttonDelete" Click="_buttonDelete_Click" HorizontalContentAlignment="Stretch" Margin="3 3 3 0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Image Margin="2,0,0,0" Source="../../../Resources/delete.png" Width="16" Height="16" RenderOptions.BitmapScalingMode="NearestNeighbor" Stretch="None" />
+                        <Label VerticalAlignment="Center" Grid.Column="1" Content="Delete"  HorizontalAlignment="Center" Padding="0" Margin="3" />
+                    </Grid>
+                </Button>
+                <Button Name="_buttonAuto" Click="_buttonAuto_Click" HorizontalContentAlignment="Stretch" Margin="3 3 3 0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Image Margin="2,0,0,0" Source="../../../Resources/refresh.png" Width="16" Height="16" RenderOptions.BitmapScalingMode="NearestNeighbor" Stretch="None" />
+                        <Label VerticalAlignment="Center" Grid.Column="1" Content="Auto (minimal)"  HorizontalAlignment="Center" Padding="0" Margin="3" />
+                    </Grid>
+                </Button>
+                <Button Name="_buttonAutoAll" Click="_buttonAutoAll_Click" HorizontalContentAlignment="Stretch" Margin="3 3 3 0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Image Margin="2,0,0,0" Source="../../../Resources/refresh.png" Width="16" Height="16" RenderOptions.BitmapScalingMode="NearestNeighbor" Stretch="None" />
+                        <Label VerticalAlignment="Center" Grid.Column="1" Content="Auto (all)"  HorizontalAlignment="Center" Padding="0" Margin="3" />
+                    </Grid>
+                </Button>
+                <Button Name="_buttonSave" Click="_buttonSave_Click" HorizontalContentAlignment="Stretch" Margin="3 3 3 0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Image Margin="2,0,0,0" Source="../../../Resources/save.png" Width="16" Height="16" RenderOptions.BitmapScalingMode="NearestNeighbor" Stretch="None" />
+                        <Label VerticalAlignment="Center" Grid.Column="1" Content="Save"  HorizontalAlignment="Center" Padding="0" Margin="3" />
+                    </Grid>
+                </Button>
+                <Button Name="_buttonExport" Click="_buttonExport_Click" HorizontalContentAlignment="Stretch" Margin="3 3 3 0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Image Margin="2,0,0,0" Source="../../../Resources/export.png" Width="16" Height="16" RenderOptions.BitmapScalingMode="NearestNeighbor" Stretch="None" />
+                        <Label VerticalAlignment="Center" Grid.Column="1" Content="Export..."  HorizontalAlignment="Center" Padding="0" Margin="3" />
+                    </Grid>
+                </Button>
+                <Styles:TkProgressBar Margin="3" x:Name="_progressBar" />
+            </StackPanel>
+        </Grid>
+        <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="50" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+            <Grid Margin="0 0 3 0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <DockPanel Grid.Column="2">
+                    <Button Name="_buttonCancel" Click="_buttonCancel_Click" Content="Close" Margin="3" MinWidth="100" Height="25" Grid.Column="3" />
+                </DockPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</Styles:TkWindow>

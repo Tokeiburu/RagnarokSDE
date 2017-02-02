@@ -1,0 +1,36 @@
+﻿<Styles:TkWindow x:Class="SDE.View.Dialogs.RateEditDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
+                 xmlns:TokeiLibrary="clr-namespace:TokeiLibrary;assembly=TokeiLibrary"
+                 xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
+                 xmlns:Sliders="clr-namespace:ColorPicker.Sliders;assembly=ColorPicker">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        
+        <Grid Name="_upperGrid" Width="280">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <Sliders:SliderColor VerticalAlignment="Center" Height="30" x:Name="_gpRate" Margin="4 6 4 6" />
+            <StackPanel Grid.Row="1">
+                <CheckBox Name="_cbInc1" Content="Increment by 1%" Margin="3" />
+                <CheckBox Name="_cbInc5" Content="Increment by 5%" Margin="3" />
+            </StackPanel>
+        </Grid>
+        <Grid Name="_footerGrid" ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="50" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+            <DockPanel HorizontalAlignment="Right" Margin="0 0 3 0">
+                <Button Name="_buttonOk" Click="_buttonOk_Click" Content="Ok" Height="25" Margin="3" MinWidth="100" Grid.Column="2" />
+                <Button Name="_buttonCancel" Click="_buttonCancel_Click" Content="Cancel" Height="25" Margin="3" MinWidth="100" />
+            </DockPanel>
+        </Grid>
+    </Grid>
+</Styles:TkWindow>

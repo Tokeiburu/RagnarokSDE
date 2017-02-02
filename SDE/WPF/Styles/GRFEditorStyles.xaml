@@ -9,19 +9,19 @@
     <Style TargetType="{x:Type TabItem}">
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
     </Style>
-    
+
     <Style x:Key="ButtonStyledXP" TargetType="{x:Type Button}" BasedOn="{x:Null}">
         <Setter Property="Padding" Value="3"/>
         <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="Template" Value="{DynamicResource ButtonTemplateXP}" />
     </Style>
-    
+
     <Style x:Key="ButtonStyled" TargetType="{x:Type Button}" BasedOn="{x:Null}">
         <Setter Property="Padding" Value="3"/>
         <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="Template" Value="{DynamicResource ButtonTemplate}" />
     </Style>
-    
+
     <LinearGradientBrush x:Key="MouseOverBrush" EndPoint="0.5,1" StartPoint="0.5,0">
         <GradientStop Color="#E8F5FC" Offset="0" />
         <GradientStop Color="#E0F2FB" Offset="0.318" />
@@ -130,6 +130,26 @@
             <Trigger Property="IsDefault" Value="True">
                 <Setter Property="Opacity" TargetName="DefaultBorder" Value="1" />
             </Trigger>
+            <!--<Trigger Property="IsFocused" Value="True">
+                <Trigger.EnterActions>
+                    <BeginStoryboard x:Name="FocusedOn_BeginStoryboard" Storyboard="{StaticResource FocusedOn2}" />
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                    <BeginStoryboard x:Name="FocusedOff_BeginStoryboard" Storyboard="{StaticResource FocusedOff2}" />
+                    <StopStoryboard BeginStoryboardName="FocusedOn_BeginStoryboard" />
+                </Trigger.ExitActions>
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="true">
+
+                <Trigger.ExitActions>
+                    <BeginStoryboard x:Name="FocusedOff_BeginStoryboard1" Storyboard="{StaticResource FocusedOff}" />
+                </Trigger.ExitActions>
+                <Trigger.EnterActions>
+                    <BeginStoryboard x:Name="FocusedOn_BeginStoryboard1" Storyboard="{StaticResource FocusedOn}" />
+                    <StopStoryboard BeginStoryboardName="FocusedOn_BeginStoryboard1" />
+                </Trigger.EnterActions>
+
+            </Trigger>-->
             <Trigger Property="IsMouseOver" Value="true">
                 <Trigger.ExitActions>
                     <BeginStoryboard Storyboard="{StaticResource HoverOff}" x:Name="HoverOff_BeginStoryboard" />
@@ -175,14 +195,16 @@
     </ControlTemplate>
 
     <Style x:Key="TabControlStyled" TargetType="{x:Type TabControl}">
+        <Setter Property="Background" Value="{DynamicResource TabItemBackground}" />
         <Setter Property="BorderThickness" Value="1,0,0,0" />
-        <Setter Property="BorderBrush" Value="#CED6E3" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TabControlBorder}" />
         <Setter Property="Padding" Value="4 0 0 0" />
         <Setter Property="TabStripPlacement" Value="Left" />
     </Style>
 
     <Style x:Key="TabItemStyled" TargetType="{x:Type TabItem}">
-        <Setter Property="Background" Value="White" />
+        <Setter Property="Background" Value="{DynamicResource TabItemBackground}" />
+        <!--<Setter Property="ListView:WpfUtils.IsMouseEffectOn" Value="True" />-->
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TabItem}">
@@ -194,25 +216,28 @@
                             </Border>
                         </Border>
                         <Canvas Name="Canva" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 10.5 0">
-                            <Path Stroke="#CED6E3" StrokeThickness="1" Data="M 0,0 12,12 12,-12 0,0 12,12" Fill="White" />
-                            <Path Stroke="White" StrokeThickness="1" Data="M 12,16 12,-16" Fill="White" />
+                            <Path Stroke="{DynamicResource TabControlBorder}" StrokeThickness="1" Data="M 0,0 12,12 12,-12 0,0 12,12" Fill="{DynamicResource TabItemBackground}" />
+                            <Path Stroke="{DynamicResource TabItemBackground}" StrokeThickness="1" Data="M 12,16 12,-16" Fill="{DynamicResource TabItemBackground}" />
                         </Canvas>
                     </Grid>
                     <ControlTemplate.Triggers>
+                        <Trigger SourceName="Border" Property="IsMouseOver" Value="False">
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
                         <Trigger SourceName="Border" Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Border" Property="Background" Value="#F3F5F8" />
-                            <Setter TargetName="Border" Property="BorderBrush" Value="#CED6E3" />
+                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource TabItemMouseOverBackground}" />
+                            <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource TabItemMouseOverBorder}" />
                             <Setter Property="Cursor" Value="Hand" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Panel.ZIndex" Value="100" />
-                            <Setter TargetName="Border" Property="Background" Value="#E9ECF2" />
-                            <Setter TargetName="Border" Property="BorderBrush" Value="#CED6E3" />
-                            <Setter TargetName="ContentSite" Property="TextElement.Foreground" Value="Black" />
+                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource TabItemSelectedBackground}" />
+                            <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource TabItemSelectedBorder}" />
+                            <Setter TargetName="ContentSite" Property="TextElement.Foreground" Value="{DynamicResource TabItemTextSelectedForeground}" />
                             <Setter TargetName="Canva" Property="Visibility" Value="Visible" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="False">
-                            <Setter TargetName="ContentSite" Property="TextElement.Foreground" Value="#626262" />
+                            <Setter TargetName="ContentSite" Property="TextElement.Foreground" Value="{DynamicResource TabItemTextNormalForeground}" />
                             <Setter TargetName="Canva" Property="Visibility" Value="Hidden" />
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -220,9 +245,9 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <Style x:Key="TabItemStyledLess" TargetType="{x:Type TabItem}">
-        <Setter Property="Background" Value="White" />
+        <Setter Property="Background" Value="{DynamicResource TabItemBackground}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TabItem}">
@@ -234,27 +259,30 @@
                             </Border>
                         </Border>
                         <Canvas Name="Canva" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 10.5 0">
-                            <Path Stroke="#CED6E3" StrokeThickness="1" Data="M 0,0 12,12 12,-12 0,0 12,12" Fill="White" />
-                            <Path Stroke="White" StrokeThickness="1" Data="M 12,16 12,-16" Fill="White" />
+                            <Path Stroke="{DynamicResource TabControlBorder}" StrokeThickness="1" Data="M 0,0 12,12 12,-12 0,0 12,12" Fill="{DynamicResource TabItemBackground}" />
+                            <Path Stroke="{DynamicResource TabItemBackground}" StrokeThickness="1" Data="M 12,16 12,-16" Fill="{DynamicResource TabItemBackground}" />
                         </Canvas>
                         <TextBox Name="Dummy" Visibility="Collapsed" />
                     </Grid>
                     <ControlTemplate.Triggers>
+                        <Trigger SourceName="Border" Property="IsMouseOver" Value="False">
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
                         <Trigger SourceName="Border" Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Border" Property="Background" Value="#F3F5F8" />
-                            <Setter TargetName="Border" Property="BorderBrush" Value="#CED6E3" />
+                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource TabItemMouseOverBackground}" />
+                            <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource TabItemMouseOverBorder}" />
                             <Setter Property="Cursor" Value="Hand" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Panel.ZIndex" Value="100" />
-                            <Setter TargetName="Border" Property="Background" Value="#E9ECF2" />
-                            <Setter TargetName="Border" Property="BorderBrush" Value="#CED6E3" />
-                            <Setter TargetName="ContentSite" Property="TextElement.Foreground" Value="Black" />
+                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource TabItemSelectedBackground}" />
+                            <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource TabItemSelectedBorder}" />
+                            <Setter TargetName="ContentSite" Property="TextElement.Foreground" Value="{DynamicResource TabItemTextSelectedForeground}" />
                             <Setter TargetName="Canva" Property="Visibility" Value="Visible" />
                             <Setter TargetName="Dummy" Property="Text" Value="Visible" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="False">
-                            <Setter TargetName="ContentSite" Property="TextElement.Foreground" Value="#626262" />
+                            <Setter TargetName="ContentSite" Property="TextElement.Foreground" Value="{DynamicResource TabItemTextNormalForeground}" />
                             <Setter TargetName="Canva" Property="Visibility" Value="Hidden" />
                             <Setter TargetName="Dummy" Property="Text" Value="Hidden" />
                         </Trigger>
@@ -263,4 +291,129 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Style x:Key="TabItemStyledLess1" TargetType="{x:Type TabItem}">
+        <Setter Property="Background" Value="{DynamicResource TabItemBackground}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TabItem}">
+                    <Grid>
+                        <Border x:Name="Border" Margin="0,0,51,0" Background="Transparent" BorderBrush="Transparent" BorderThickness="1,1,1,1">
+                            <Border Name="SubBorder" Margin="5 5 0 5">
+                                <ContentPresenter x:Name="ContentSite" TextElement.FontSize="13" VerticalAlignment="Center" ContentSource="Header" Margin="5 0 3 0" RecognizesAccessKey="False">
+                                </ContentPresenter>
+                            </Border>
+                        </Border>
+                        <Canvas Name="Canva" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 10.5 0">
+                            <Path Stroke="{DynamicResource TabControlBorder}" StrokeThickness="1" Data="M 0,0 12,12 12,-12 0,0 12,12" Fill="{DynamicResource TabItemBackground}" />
+                            <Path Stroke="{DynamicResource TabItemBackground}" StrokeThickness="1" Data="M 12,16 12,-16" Fill="{DynamicResource TabItemBackground}" />
+                        </Canvas>
+                        <TextBox Name="Dummy" Visibility="Collapsed" />
+                        <Border x:Name="OutterBorder" BorderBrush="Transparent" BorderThickness="1,1,0,1" IsHitTestVisible="False" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger SourceName="Border" Property="IsMouseOver" Value="False">
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                        <Trigger SourceName="Border" Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource TabItemMouseOverBackground}" />
+                            <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource TabItemMouseOverBorder}" />
+                            <Setter TargetName="OutterBorder" Property="BorderBrush" Value="{DynamicResource TabItemMouseOverBorder}" />
+                            <Setter Property="Cursor" Value="Hand" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Panel.ZIndex" Value="100" />
+                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource TabItemSelectedBackground}" />
+                            <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource TabItemSelectedBorder}" />
+                            <Setter TargetName="OutterBorder" Property="BorderBrush" Value="{DynamicResource TabItemSelectedBorder}" />
+                            <Setter TargetName="ContentSite" Property="TextElement.Foreground" Value="{DynamicResource TabItemTextSelectedForeground}" />
+                            <Setter TargetName="Canva" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="Dummy" Property="Text" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="False">
+                            <Setter TargetName="ContentSite" Property="TextElement.Foreground" Value="{DynamicResource TabItemTextNormalForeground}" />
+                            <Setter TargetName="Canva" Property="Visibility" Value="Hidden" />
+                            <Setter TargetName="Dummy" Property="Text" Value="Hidden" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+    <Style x:Key="TabItemStyledLess2" TargetType="{x:Type TabItem}">
+        <Setter Property="Background" Value="{DynamicResource TabItemBackground}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TabItem}">
+                    <Grid Margin="0 -20 0 0">
+                        <Grid HorizontalAlignment="Right">
+                            <Border Width="52" x:Name="Border" Margin="0,0,0,0" BorderBrush="Transparent" BorderThickness="1,1,0,1">
+                                <Border Name="SubBorder" Margin="5 5 0 5">
+                                    <ContentPresenter x:Name="ContentSite" TextElement.FontSize="13" VerticalAlignment="Center" ContentSource="Header" Margin="5 0 15 0" RecognizesAccessKey="False">
+                                    </ContentPresenter>
+                                </Border>
+                            </Border>
+                            <Canvas Name="Canva" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 10.5 0">
+                                <Path Stroke="{DynamicResource TabControlBorder}" StrokeThickness="1" Data="M 0,0 12,12 12,-12 0,0 12,12" Fill="{DynamicResource TabItemBackground}" />
+                                <Path Stroke="{DynamicResource TabItemBackground}" StrokeThickness="1" Data="M 12,16 12,-16" Fill="{DynamicResource TabItemBackground}" />
+                            </Canvas>
+                            <TextBox Name="Dummy" Visibility="Collapsed" />
+                        </Grid>
+                        <Border x:Name="OutterBorder" BorderBrush="Transparent" BorderThickness="1,1,0,1" IsHitTestVisible="False" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger SourceName="Border" Property="IsMouseOver" Value="False">
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                        <Trigger SourceName="Border" Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource TabItemMouseOverBackground}" />
+                            <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource TabItemMouseOverBorder}" />
+                            <Setter TargetName="OutterBorder" Property="BorderBrush" Value="{DynamicResource TabItemMouseOverBorder}" />
+                            <Setter Property="Cursor" Value="Hand" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Panel.ZIndex" Value="100" />
+                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource TabItemSelectedBackground}" />
+                            <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource TabItemSelectedBorder}" />
+                            <Setter TargetName="OutterBorder" Property="BorderBrush" Value="{DynamicResource TabItemSelectedBorder}" />
+                            <Setter TargetName="ContentSite" Property="TextElement.Foreground" Value="{DynamicResource TabItemTextSelectedForeground}" />
+                            <Setter TargetName="Canva" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="Dummy" Property="Text" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="False">
+                            <Setter TargetName="ContentSite" Property="TextElement.Foreground" Value="{DynamicResource TabItemTextNormalForeground}" />
+                            <Setter TargetName="Canva" Property="Visibility" Value="Hidden" />
+                            <Setter TargetName="Dummy" Property="Text" Value="Hidden" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <SolidColorBrush x:Key="TabControlBackground" Color="#F7F9FD"/>
+    <SolidColorBrush x:Key="TabControlBorder" Color="#CED6E3"/>
+    <SolidColorBrush x:Key="TabItemBackground" Color="White"/>
+    <SolidColorBrush x:Key="TabItemMouseOverBackground" Color="#F3F5F8"/>
+    <SolidColorBrush x:Key="TabItemMouseOverBorder" Color="#CED6E3"/>
+    <SolidColorBrush x:Key="TabItemSelectedBackground" Color="#E9ECF2"/>
+    <SolidColorBrush x:Key="TabItemSelectedBorder" Color="#CED6E3"/>
+    <SolidColorBrush x:Key="TabItemTextSelectedForeground" Color="Black"/>
+    <SolidColorBrush x:Key="TabItemTextNormalForeground" Color="#626262"/>
+    <SolidColorBrush x:Key="SeperatorBrush" Color="#E3E9F1"/>
+
+
+    <SolidColorBrush x:Key="TextForeground" Color="Black"/>
+    <SolidColorBrush x:Key="FancyButtonHeaderForeground" Color="#0577C1"/>
+    <SolidColorBrush x:Key="FancyButtonDisabledBackgroundBrush" Color="#81F3F3F3"/>
+    <SolidColorBrush x:Key="FancyButtonDisabledBorderBrush" Color="#81F3F3F3"/>
+
+    <SolidColorBrush x:Key="FancyButtonMouseOverBackgroundBrush" Color="#F3F6FB"/>
+    <SolidColorBrush x:Key="FancyButtonMouseOverBorderBrush" Color="#DDE4EE"/>
+
+    <SolidColorBrush x:Key="FancyButtonPressedBackgroundBrush" Color="#E3EAF6"/>
+    <SolidColorBrush x:Key="FancyButtonPressedBorderBrush" Color="#C9D5E5"/>
+
+    <SolidColorBrush x:Key="UIDialogBackground" Color="#FFF0F0F0"/>
 </ResourceDictionary>

@@ -1,0 +1,43 @@
+﻿<UserControl x:Class="SDE.View.Controls.TextViewItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary" Padding="0"
+             xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
+             xmlns:view="clr-namespace:SDE.View"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="50" >
+    <UserControl.Resources>
+        <view:WidthAdjusterConverter x:Key="widthConverter" />
+    </UserControl.Resources>
+    <Border BorderThickness="1" Name="_grid" Width="{Binding ElementName=_grid, Converter={StaticResource widthConverter}, ConverterParameter=3}" CornerRadius="2" >
+        <Border.ContextMenu>
+            <ContextMenu>
+                <MenuItem Name="_menuItemsReset" ListView:WpfUtils.ImagePath="refresh.png" Header="Reset value" Click="_menuItemsReset_Click" />
+                <MenuItem Name="_menuItemsSelect" ListView:WpfUtils.ImagePath="arrowdown.png" Header="Select in explorer" Click="_menuItemsSelect_Click" />
+            </ContextMenu>
+        </Border.ContextMenu>
+        <Grid Margin="1.5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition />
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Image Visibility="Collapsed"  ListView:WpfUtils.ImagePath="warning16.png" HorizontalAlignment="Left" Name="_imgError" Width="16" Height="16" Stretch="None" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                <TextBlock Name="_tblockDescription" Text="" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="3" />
+            </Grid>
+            <Rectangle Name="_tRectangleOverlay" Fill="Transparent" Grid.Column="0" Grid.ColumnSpan="2"  />
+            <Styles:PathBrowser x:Name="_tbText" Grid.Column="3" UseSavePath="True" Filter="Common Files (*.txt;*.lua;*.lub)|*.txt;*.lua;*.lub|Text Files (*.txt)|*.txt|Lua Files (*.lua)|*.lua|Lub Files (*.lub)|*.lub" BrowseMode="File" SavePathUniqueName="Server database editor - TVI - Browse" />
+            <Button Name="_buttonSftp" Visibility="Collapsed" ListView:WpfUtils.ImagePath="sftp.png" Grid.Row="1" Grid.Column="4" Height="25" Width="25" HorizontalAlignment="Right" Margin="0 0 3 0" />
+            <Button Name="_buttonReset" ListView:WpfUtils.ImagePath="reset.png" Click="_buttonReset_Click" Grid.Row="1" Grid.Column="5" Height="25" Width="25" HorizontalAlignment="Right" />
+        </Grid>
+    </Border>
+</UserControl>

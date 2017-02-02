@@ -1,0 +1,25 @@
+﻿<UserControl x:Class="SDE.Editor.Generic.UI.CustomControls.PreviewItemInGame"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Border BorderBrush="#FF7D7DFF" Height="124" CornerRadius="3" BorderThickness="2" Width="284" >
+        <Grid Height="120" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <Image HorizontalAlignment="Left" Source="../../../../../Resources/collection_bg.png" RenderOptions.BitmapScalingMode="NearestNeighbor" VerticalAlignment="Top" SnapsToDevicePixels="True" Stretch="None" />
+            <Image Name="_itemImage" HorizontalAlignment="Left" RenderOptions.BitmapScalingMode="NearestNeighbor" VerticalAlignment="Top" SnapsToDevicePixels="True" Stretch="None" Margin="10 11 0 0" />
+            <ScrollViewer Width="180" Height="76" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="90 34 0 0">
+                <RichTextBox IsReadOnly="True" Name="_rtbItemDescription" BorderThickness="0" HorizontalAlignment="Left" VerticalAlignment="Top" >
+                    <RichTextBox.Resources>
+                        <Style TargetType="{x:Type Paragraph}">
+                            <Setter Property="Margin" Value="0"/>
+                        </Style>
+                    </RichTextBox.Resources>
+                </RichTextBox>
+            </ScrollViewer>
+            <Label Content="{Binding Path=Box.Text, RelativeSource={RelativeSource  AncestorType={x:Type UserControl}}}" HorizontalAlignment="Left" Foreground="White" VerticalAlignment="Top" Margin="91 1 0 0" FontSize="12" />
+            <Label Name="_cardName" Content="{Binding Path=Box.Text, RelativeSource={RelativeSource  AncestorType={x:Type UserControl}}}"  HorizontalAlignment="Left" Foreground="Black" VerticalAlignment="Top" Margin="90 2 0 0" FontSize="12" />
+        </Grid>
+    </Border>
+</UserControl>

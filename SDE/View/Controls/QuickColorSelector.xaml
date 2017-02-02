@@ -1,0 +1,18 @@
+﻿<UserControl x:Class="SDE.View.Controls.QuickColorSelector"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="auto" />
+        </Grid.ColumnDefinitions>
+        <Border Name="_border" CornerRadius="2" Margin="3" BorderBrush="Black" BorderThickness="1" Background="White">
+            <Grid Margin="1" Name="_grid">
+                <Rectangle MouseLeftButtonUp="_previewPanelBg_MouseLeftButtonUp" Name="_previewPanelBg" Fill="{Binding ElementName=_scrollViewer, Path=Background}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            </Grid>
+        </Border>
+        <Border IsHitTestVisible="False" Name="_borderEnabled" CornerRadius="2" Margin="3" BorderBrush="Transparent" BorderThickness="0" Background="Transparent" />
+        <Styles:FancyButton Visibility="Collapsed" Grid.Column="1" Name="_reset" Click="_reset_Click" Width="18" Height="18" ImagePath="reset.png" Margin="0 0 3 0" />
+    </Grid>
+</UserControl>

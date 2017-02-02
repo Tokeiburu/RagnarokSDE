@@ -11,40 +11,32 @@ using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using ICSharpCode.AvalonEdit.Rendering;
+using SDE.Editor.Engines.LuaEngine;
 
 namespace SDE.Core.Avalon {
 	public class AvalonLoader {
 		static AvalonLoader() {
-			IHighlightingDefinition customHighlighting;
-			using (Stream s = typeof(App).Assembly.GetManifestResourceStream("SDE.CustomHighlighting.xshd")) {
-				if (s == null)
-					throw new InvalidOperationException("Could not find embedded resource");
-				using (XmlReader reader = new XmlTextReader(s)) {
-					customHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+			string[] syntaxes = {
+				"Custom Highlighting", "SDE.Core.Avalon.Syntax.CustomHighlighting.xshd",
+				"Lua", "SDE.Core.Avalon.Syntax.Lua.xshd",
+				"Imf", "SDE.Core.Avalon.Syntax.Imf.xshd",
+				"Python", "SDE.Core.Avalon.Syntax.Python.xshd",
+				"DebugDb", "SDE.Core.Avalon.Syntax.DebugDb.xshd",
+			};
+
+			for (int i = 0; i < syntaxes.Length; i += 2) {
+				IHighlightingDefinition customHighlighting;
+
+				using (Stream s = typeof(App).Assembly.GetManifestResourceStream(syntaxes[i + 1])) {
+					if (s == null)
+						throw new InvalidOperationException("Could not find embedded resource");
+					using (XmlReader reader = new XmlTextReader(s)) {
+						customHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+					}
 				}
+
+				HighlightingManager.Instance.RegisterHighlighting(syntaxes[i], new[] { ".cool" }, customHighlighting);
 			}
-
-			HighlightingManager.Instance.RegisterHighlighting("Custom Highlighting", new[] { ".cool" }, customHighlighting);
-
-			using (Stream s = typeof(App).Assembly.GetManifestResourceStream("SDE.Lua.xshd")) {
-				if (s == null)
-					throw new InvalidOperationException("Could not find embedded resource");
-				using (XmlReader reader = new XmlTextReader(s)) {
-					customHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
-				}
-			}
-
-			HighlightingManager.Instance.RegisterHighlighting("Lua", new[] { ".cool" }, customHighlighting);
-
-			using (Stream s = typeof(App).Assembly.GetManifestResourceStream("SDE.Imf.xshd")) {
-				if (s == null)
-					throw new InvalidOperationException("Could not find embedded resource");
-				using (XmlReader reader = new XmlTextReader(s)) {
-					customHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
-				}
-			}
-
-			HighlightingManager.Instance.RegisterHighlighting("Imf", new[] { ".cool" }, customHighlighting);
 		}
 
 		public static void Load(TextEditor editor) {
@@ -82,7 +74,35 @@ namespace SDE.Core.Avalon {
 			return true;
 		}
 
-		public static string GetWholeWord(TextDocument document, TextEditor textEditor) {
+		public static string GetWholeWordAdv(TextDocument document, TextEditor textEditor) {
+			string left = GetWholeWord(document, textEditor, LogicalDirection.Backward);
+			string right = GetWholeWord(document, textEditor, LogicalDirection.Forward);
+
+			if (right != left) {
+				if (!LuaHelper.IsLatinOnly(right)) {
+					if (LuaHelper.IsLatinOnly(left))
+						right = left;
+				}
+			}
+
+			return right;
+		}
+
+		public static LogicalDirection GetDirection(TextDocument document, TextEditor textEditor) {
+			string left = GetWholeWord(document, textEditor, LogicalDirection.Backward);
+			string right = GetWholeWord(document, textEditor, LogicalDirection.Forward);
+
+			if (right != left) {
+				if (!LuaHelper.IsLatinOnly(right)) {
+					if (LuaHelper.IsLatinOnly(left))
+						return LogicalDirection.Backward;
+				}
+			}
+
+			return LogicalDirection.Forward;
+		}
+
+		public static string GetWholeWord(TextDocument document, TextEditor textEditor, LogicalDirection direction = LogicalDirection.Forward) {
 			TextArea textArea = textEditor.TextArea;
 			TextView textView = textArea.TextView;
 
@@ -104,26 +124,34 @@ namespace SDE.Core.Avalon {
 
 				if (wordStartVc == -1)
 					wordStartVc = 0;
-				int wordEndVc = line.GetNextCaretPosition(wordStartVc, LogicalDirection.Forward, CaretPositioningMode.WordBorderOrSymbol, textArea.Selection.EnableVirtualSpace);
+				int wordEndVc = line.GetNextCaretPosition(wordStartVc, direction, CaretPositioningMode.WordBorderOrSymbol, textArea.Selection.EnableVirtualSpace);
 				if (wordEndVc == -1)
 					wordEndVc = line.VisualLength;
 
-				if (visualColumn < wordStartVc || visualColumn > wordEndVc)
+				if (visualColumn < wordStartVc || (direction == LogicalDirection.Forward && visualColumn > wordEndVc))
 					return "";
+
+				if (direction == LogicalDirection.Backward && wordStartVc > wordEndVc) {
+					int temp = wordEndVc;
+					wordEndVc = wordStartVc;
+					wordStartVc = temp;
+				}
 
 				int relOffset = line.FirstDocumentLine.Offset;
 				int wordStartOffset = line.GetRelativeOffset(wordStartVc) + relOffset;
 				int wordEndOffset = line.GetRelativeOffset(wordEndVc) + relOffset;
-
 
 				return textEditor.TextArea.Document.GetText(wordStartOffset, wordEndOffset - wordStartOffset);
 			}
-			else {
-				return null;
-			}
+
+			return null;
 		}
 
-		public static ISegment GetWholeWordSegment(TextDocument document, TextEditor textEditor) {
+		public static ISegment GetWholeWordSegmentAdv(TextDocument document, TextEditor textEditor) {
+			return GetWholeWordSegment(document, textEditor, GetDirection(document, textEditor));
+		}
+
+		public static ISegment GetWholeWordSegment(TextDocument document, TextEditor textEditor, LogicalDirection direction = LogicalDirection.Forward) {
 			TextArea textArea = textEditor.TextArea;
 			TextView textView = textArea.TextView;
 
@@ -145,29 +173,33 @@ namespace SDE.Core.Avalon {
 
 				if (wordStartVc == -1)
 					wordStartVc = 0;
-				int wordEndVc = line.GetNextCaretPosition(wordStartVc, LogicalDirection.Forward, CaretPositioningMode.WordBorderOrSymbol, textArea.Selection.EnableVirtualSpace);
+				int wordEndVc = line.GetNextCaretPosition(wordStartVc, direction, CaretPositioningMode.WordBorderOrSymbol, textArea.Selection.EnableVirtualSpace);
 				if (wordEndVc == -1)
 					wordEndVc = line.VisualLength;
 
-				if (visualColumn < wordStartVc || visualColumn > wordEndVc)
+				if (visualColumn < wordStartVc || (direction == LogicalDirection.Forward && visualColumn > wordEndVc))
 					return new SimpleSegment();
+
+				if (direction == LogicalDirection.Backward && wordStartVc > wordEndVc) {
+					int temp = wordEndVc;
+					wordEndVc = wordStartVc;
+					wordStartVc = temp;
+				}
 
 				int relOffset = line.FirstDocumentLine.Offset;
 				int wordStartOffset = line.GetRelativeOffset(wordStartVc) + relOffset;
 				int wordEndOffset = line.GetRelativeOffset(wordEndVc) + relOffset;
 
-
 				return new SimpleSegment(wordStartOffset, wordEndOffset - wordStartOffset);
 			}
-			else {
-				return null;
-			}
+
+			return null;
 		}
 
 		public static void SetSyntax(TextEditor editor, string ext) {
 			if (HighlightingManager.Instance.GetDefinition(ext) == null) {
 				IHighlightingDefinition customHighlighting;
-				using (Stream s = typeof(App).Assembly.GetManifestResourceStream("SDE." + ext + ".xshd")) {
+				using (Stream s = typeof(App).Assembly.GetManifestResourceStream("SDE.Core.Avalon.Syntax." + ext + ".xshd")) {
 					if (s == null)
 						throw new InvalidOperationException("Could not find embedded resource");
 					using (XmlReader reader = new XmlTextReader(s)) {
@@ -175,7 +207,7 @@ namespace SDE.Core.Avalon {
 					}
 				}
 
-				HighlightingManager.Instance.RegisterHighlighting(ext, new[] {".cool"}, customHighlighting);
+				HighlightingManager.Instance.RegisterHighlighting(ext, new[] { ".cool" }, customHighlighting);
 			}
 
 			var def = HighlightingManager.Instance.GetDefinition(ext);

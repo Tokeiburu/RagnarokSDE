@@ -1,0 +1,91 @@
+﻿<Styles:TkWindow x:Class="SDE.View.Dialogs.ItemDescriptionDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
+                 xmlns:TokeiLibrary="clr-namespace:TokeiLibrary;assembly=TokeiLibrary"
+                 xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
+                 xmlns:Jobs="clr-namespace:SDE.Editor.Jobs">
+    <Grid>
+        <StackPanel>
+            <Grid>
+                <StackPanel>
+                    <Grid Name="_mainGrid">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="80" />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="250" />
+                            <ColumnDefinition Width="120" />
+                            <ColumnDefinition Width="130" />
+                        </Grid.ColumnDefinitions>
+                        <ScrollViewer Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" VerticalScrollBarVisibility="Auto" Margin="3">
+                            <RichTextBox IsReadOnly="True" Name="_rtbItemDescription" BorderThickness="0" HorizontalAlignment="Left" VerticalAlignment="Top" >
+                                <RichTextBox.Resources>
+                                    <Style TargetType="{x:Type Paragraph}">
+                                        <Setter Property="Margin" Value="0"/>
+                                    </Style>
+                                </RichTextBox.Resources>
+                            </RichTextBox>
+                        </ScrollViewer>
+                        <Label Content="Description" />
+                        <Label Content="Class" Grid.Row="1" />
+                        <Label Content="Compound on" Grid.Row="2" />
+                        <Label Content="Attack" Grid.Row="3" />
+                        <Label Content="Defense" Grid.Row="4" />
+                        <Label Content="Equipped on" Grid.Row="5" />
+                        <Label Content="Weight" Grid.Row="6" />
+                        <Label Content="Property" Grid.Row="7" />
+                        <Label Content="Weapon Level" Grid.Row="8" />
+                        <Label Content="Required Level" Grid.Row="9" />
+                        <Label Content="Applicable Job" Grid.Row="10" />
+                        <TextBox Name="_tbDescription" TextChanged="_tbDescription_TextChanged" Margin="3" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" MinHeight="75" Grid.Row="0" Grid.Column="1" AcceptsReturn="True" />
+                        <TextBox Name="_tbClass" Margin="3" Grid.Row="1" Grid.Column="1" TextChanged="_tbClass_TextChanged" />
+                        <TextBox Name="_tbCompoundOn" Margin="3" Grid.Row="2" Grid.Column="1" TextChanged="_tbCompoundOn_TextChanged" />
+                        <TextBox Name="_tbAttack" Margin="3" Grid.Row="3" Grid.Column="1" TextChanged="_tbAttack_TextChanged" />
+                        <TextBox Name="_tbDefense" Margin="3" Grid.Row="4" Grid.Column="1" TextChanged="_tbDefense_TextChanged" />
+                        <TextBox Name="_tbEquippedOn" Margin="3" Grid.Row="5" Grid.Column="1" TextChanged="_tbEquippedOn_TextChanged" />
+                        <TextBox Name="_tbWeight" Margin="3" Grid.Row="6" Grid.Column="1" TextChanged="_tbWeight_TextChanged" />
+                        <TextBox Name="_tbProperty" Margin="3" Grid.Row="7" Grid.Column="1" TextChanged="_tbProperty_TextChanged" />
+                        <TextBox Name="_tbWeaponLevel" Margin="3" Grid.Row="8" Grid.Column="1" TextChanged="_tbWeaponLevel_TextChanged" />
+                        <TextBox Name="_tbRequiredLevel" Margin="3" Grid.Row="9" Grid.Column="1" TextChanged="_tbRequiredLevel_TextChanged" />
+                        <TextBox Name="_tbApplicableJob" Height="auto" TextWrapping="Wrap" Margin="3" Grid.Row="10" Grid.Column="1" TextChanged="_tbApplicableJob_TextChanged" />
+
+                        <ComboBox Name="_cbType" Margin="3" Grid.Row="1" Grid.Column="2" SelectionChanged="_cbType_SelectionChanged" />
+                        <ComboBox Name="_cbSubType" Margin="3" Grid.Row="1" Grid.Column="3" SelectionChanged="_cbSubType_SelectionChanged" Visibility="Hidden" />
+                        <ComboBox Name="_cbCompoundOn" Margin="3" Grid.Row="2" Grid.Column="2" SelectionChanged="_cbCompoundOn_SelectionChanged" />
+                        <Grid Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="2">
+                            <DockPanel>
+                                <CheckBox Name="_cbEquipOnLower" Checked="_cbEquipOnLower_Checked" Unchecked="_cbEquipOnLower_Unchecked" Content="Lower" VerticalAlignment="Center" Margin="3" />
+                                <CheckBox Name="_cbEquipOnMiddle" Checked="_cbEquipOnMiddle_Checked" Unchecked="_cbEquipOnMiddle_Unchecked" Content="Middle" VerticalAlignment="Center" Margin="3" />
+                                <CheckBox Name="_cbEquipOnUpper" Checked="_cbEquipOnUpper_Checked" Unchecked="_cbEquipOnUpper_Unchecked" Content="Upper" VerticalAlignment="Center" Margin="3" />
+                            </DockPanel>
+                        </Grid>
+                        <ComboBox Name="_cbProperty" Margin="3" Grid.Row="7" Grid.Column="2" SelectionChanged="_cbProperty_SelectionChanged" />
+                        <ComboBox Name="_cbApplicableJob" Height="22" Margin="3" Grid.Row="10" Grid.Column="2" SelectionChanged="_cbApplicableJob_SelectionChanged" ItemsSource="{x:Static Jobs:Job.Jobs}" />
+                        <TextBox Name="_tbHexApplicableJob" Height="22" Margin="3" Grid.Row="10" Grid.Column="3" TextChanged="_tbHexApplicableJob_TextChanged" />
+                    </Grid>
+                </StackPanel>
+            </Grid>
+            <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="50" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+                <DockPanel HorizontalAlignment="Right" Margin="0 0 3 0">
+                    <Button Name="_buttonApply" Click="_buttonApply_Click" Content="Apply" Height="25" Margin="3" MinWidth="100" />
+                    <Button Name="_buttonOk" Click="_buttonOk_Click" Content="Ok" Height="25" Margin="3" MinWidth="100" />
+                    <Button Name="_buttonCancel" Click="_buttonCancel_Click" Content="Cancel" Height="25" Margin="3" MinWidth="100" />
+                </DockPanel>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</Styles:TkWindow>

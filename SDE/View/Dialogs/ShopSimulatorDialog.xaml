@@ -1,0 +1,147 @@
+﻿<Styles:TkWindow x:Class="SDE.View.Dialogs.ShopSimulatorDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" SnapsToDevicePixels="True"
+              xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
+                 xmlns:TokeiLibrary="clr-namespace:TokeiLibrary;assembly=TokeiLibrary"
+                 xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
+                 xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit" Width="560"
+                 xmlns:ActViewer="clr-namespace:SDE.Tools.ActViewer"
+                 xmlns:WpfBugFix="clr-namespace:TokeiLibrary.WpfBugFix;assembly=TokeiLibrary">
+    <Grid SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="Unspecified">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Name="_gridColumnPrimary" Width="282" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <Border BorderBrush="Black" BorderThickness="1" Height="260" MaxHeight="260" MinHeight="260" FocusVisualStyle="{x:Null}">
+                <WpfBugFix:RangeListView Name="_lvItems" SnapsToDevicePixels="True" Padding="0" BorderThickness="0" RenderOptions.BitmapScalingMode="NearestNeighbor" FocusVisualStyle="{x:Null}">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="Padding" Value="0"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Name="_buttonDelete"  Click="_buttonDelete_Click" Header="Delete" ListView:WpfUtils.ImagePath="delete.png" InputGestureText="Delete" />
+                            <MenuItem Name="_buttonNew" Click="_buttonNew_Click" Header="New item" ListView:WpfUtils.ImagePath="add.png" InputGestureText="Ctrl-N" />
+                            <MenuItem Name="_buttonUp" Click="_buttonUp_Click" Header="Move up" ListView:WpfUtils.ImagePath="arrowup.png" InputGestureText="Ctrl-Up" />
+                            <MenuItem Name="_buttonDown" Click="_buttonDown_Click" Header="Move down" ListView:WpfUtils.ImagePath="arrowdown.png" InputGestureText="Ctrl-Down" />
+                        </ContextMenu>
+                    </ListView.ContextMenu>
+                </WpfBugFix:RangeListView>
+            </Border>
+            <Grid Grid.Column="0" Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.ColumnSpan="3">
+                        <CheckBox Name="_cbColorZeny" Margin="3" Content="Use color for the zeny amount" Grid.ColumnSpan="3" />
+                        <CheckBox Name="_cbDiscount" Margin="3" Content="Use discount" Grid.ColumnSpan="3" />
+                        <CheckBox Name="_cbUseViewId" Margin="3" Content="Always use view ID" Grid.ColumnSpan="3" />
+                    </StackPanel>
+
+                    <Label Margin="3" Padding="0" Content="Item ID" Grid.Row="1" VerticalAlignment="Center" />
+                    <Label Margin="3" Padding="0" Content="Price" Grid.Row="2" VerticalAlignment="Center" />
+
+                    <TextBox Name="_tbItemId" Grid.Row="1" Grid.Column="1" Margin="3" />
+                    <TextBox Name="_tbPrice" Grid.Row="2" Grid.Column="1" Margin="3" />
+
+                    <Button Name="_buttonQueryItem" Grid.Row="1" Grid.Column="2" Height="22" Width="22" Margin="0 3 3 3" Content="..." />
+                    <Button Name="_buttonResetPrice" ListView:WpfUtils.ImagePath="reset.png" Grid.Row="2" Grid.Column="2" Height="22" Width="22" Margin="0 3 3 3" />
+
+                </Grid>
+            </Grid>
+            <Grid Grid.Row="0" Grid.ColumnSpan="1" Grid.Column="1">
+                <ActViewer:FrameViewer x:Name="_frameViewer" />
+                <ActViewer:CompactActIndexSelector x:Name="_actIndexSelected" VerticalAlignment="Top" HorizontalAlignment="Left" />
+            </Grid>
+            <Grid Grid.Row="1" Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Row="1" Grid.Column="0" MinWidth="250" MaxWidth="275">
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Row="1" Content="Shop type" Padding="0" Margin="3" VerticalAlignment="Center" />
+                    <Label Grid.Row="2" Content="Npc position" Padding="0" Margin="3" VerticalAlignment="Center" />
+                    <Label Grid.Row="3" Content="Npc display name" Padding="0" Margin="3" VerticalAlignment="Center" />
+                    <Label Grid.Row="4" Content="Npc view ID" Padding="0" Margin="3" VerticalAlignment="Center" />
+                    <Label Grid.Row="5" Content="Currency" Padding="0" Margin="3" VerticalAlignment="Center" />
+
+                    <ComboBox Name="_comboBoxShopType" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="3">
+                        <ComboBoxItem Content="shop" />
+                        <ComboBoxItem Content="trader" />
+                    </ComboBox>
+
+                    <TextBox Name="_tbNpcPosition" Grid.Row="2" Grid.Column="1" Margin="3" Grid.ColumnSpan="2" />
+                    <TextBox Name="_tbNpcDisplayName" Grid.Row="3" Grid.Column="1" Margin="3" Grid.ColumnSpan="2" />
+                    <TextBox Name="_tbNpcViewId" Grid.Row="4" Grid.Column="1" Margin="3" />
+                    <TextBox Name="_tbNpcShopCurrency" Grid.Row="5" Grid.Column="1" Margin="3" />
+
+                    <Button Name="_buttonViewIdQuery" Grid.Row="4" Grid.Column="2" Width="22" Height="22" Content="..." Margin="0 3 3 3" />
+                    <Button Name="_buttonCurItemQuery" Grid.Row="5" Grid.Column="2" Width="22" Height="22" Content="..." Margin="0 3 3 3" />
+                </Grid>
+            </Grid>
+            <Grid Grid.Row="2" Grid.ColumnSpan="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Label Content="Shop code" Padding="0" Margin="3" Grid.Row="0" />
+                <Border BorderBrush="Black" BorderThickness="1" Grid.Row="1" >
+                    <avalonedit:TextEditor x:Name="_shop" Grid.Column="0" Grid.Row="1" BorderBrush="Black" BorderThickness="1"  Text="Paste your shop code here!"
+					    FontFamily="Consolas" Margin="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden" MinHeight="40" WordWrap="True" />
+                </Border>
+            </Grid>
+        </Grid>
+        <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="50" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+            <Grid Margin="0 0 3 0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <DockPanel Grid.Column="2">
+                    <Button Name="_buttonCancel" Click="_buttonCancel_Click" Content="Close" Height="25" Margin="3" MinWidth="100" Grid.Column="3" />
+                </DockPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</Styles:TkWindow>

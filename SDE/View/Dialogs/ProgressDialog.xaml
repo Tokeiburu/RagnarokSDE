@@ -1,0 +1,11 @@
+﻿<Styles:TkWindow x:Class="SDE.View.Dialogs.ProgressDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" MinWidth="305" SizeToContent="WidthAndHeight">
+    <Grid>
+        <StackPanel Margin="10 0 10 0">
+            <Label Name="_label" Content="Loading components..." Padding="0" Margin="6 10 3 3 " />
+            <Styles:TkProgressBar x:Name="_progressBar" Margin="3 10 3 10" ShowCancelButton="False" />
+        </StackPanel>
+    </Grid>
+</Styles:TkWindow>

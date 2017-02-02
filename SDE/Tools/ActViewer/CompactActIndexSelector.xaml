@@ -1,0 +1,99 @@
+﻿<UserControl x:Class="SDE.Tools.ActViewer.CompactActIndexSelector"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Opacity="0.7" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
+             xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
+             xmlns:controls="clr-namespace:SDE.View.Controls"
+             FontSize="10"
+             mc:Ignorable="d" >
+    <Grid Background="White" >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid Height="auto" VerticalAlignment="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Styles:FancyButton x:Name="_fancyButton3" Tag="3" Click="_fancyButton_Click" Height="16" Width="16" Grid.Row="0" Grid.Column="0" />
+            <Styles:FancyButton x:Name="_fancyButton4" Tag="4" Click="_fancyButton_Click" Height="16" Width="16" Grid.Row="0" Grid.Column="1" />
+            <Styles:FancyButton x:Name="_fancyButton5" Tag="5" Click="_fancyButton_Click" Height="16" Width="16" Grid.Row="0" Grid.Column="2" />
+            <Styles:FancyButton x:Name="_fancyButton2" Tag="2" Click="_fancyButton_Click" Height="16" Width="16" Grid.Row="1" Grid.Column="0" />
+            <Styles:FancyButton x:Name="_fancyButton6" Tag="6" Click="_fancyButton_Click" Height="16" Width="16" Grid.Row="1" Grid.Column="2" />
+            <Styles:FancyButton x:Name="_fancyButton1" Tag="1" Click="_fancyButton_Click" Height="16" Width="16" Grid.Row="2" Grid.Column="0" />
+            <Styles:FancyButton x:Name="_fancyButton0" Tag="0" Click="_fancyButton_Click" Height="16" Width="16" Grid.Row="2" Grid.Column="1" />
+            <Styles:FancyButton x:Name="_fancyButton7" Tag="7" Click="_fancyButton_Click" Height="16" Width="16" Grid.Row="2" Grid.Column="2" />
+            <Styles:FancyButton x:Name="_play"                                            Height="16" Width="16" Grid.Row="1" Grid.Column="1" />
+        </Grid>
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.RowSpan="2">
+                <Styles:FancyButton x:Name="_buttonRenderMode" VerticalAlignment="Top" Tag="3" Click="_buttonRenderMode_Click" Height="16" Width="16" Grid.Row="0" Grid.Column="0">
+                    <Styles:FancyButton.ToolTip>
+                        Render mode is currently set to "Editor".
+                    </Styles:FancyButton.ToolTip>
+                </Styles:FancyButton>
+                <Styles:FancyButton x:Name="_buttonSettings" ImagePath="settings.png" VerticalAlignment="Top" Tag="3" Click="_buttonSettings_Click" Height="16" Width="16" Grid.Row="0" Grid.Column="0" />
+                <Styles:FancyButton x:Name="_buttonExport" ImagePath="forward.png" VerticalAlignment="Top" Tag="3" Click="_buttonExport_Click" Height="16" Width="16" Grid.Row="0" Grid.Column="0" />
+            </StackPanel>
+
+            <TextBlock ToolTipService.ShowDuration="1000000"  VerticalAlignment="Center" Text="Animation" TextAlignment="Center" Margin="3" TextWrapping="Wrap" Grid.Column="1" >
+                                <TextBlock.ToolTip>
+                                    <TextBlock TextAlignment="Left">
+                                        Animations are not part of the Act structure. This simply makes the
+                                    <LineBreak />
+                                        action index selection easier.
+                                    </TextBlock>
+                                </TextBlock.ToolTip>
+                            </TextBlock>
+            <TextBlock Text="Action" Grid.Row="1" VerticalAlignment="Center" Margin="3" TextAlignment="Center" TextWrapping="Wrap" Grid.Column="1" />
+        </Grid>
+        <Grid Grid.Column="2" HorizontalAlignment="Left">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <ComboBox Grid.Row="0" FontSize="12" VerticalAlignment="Center" Name="_comboBoxAnimationIndex" Width="75" HorizontalAlignment="Left" Margin="1" SelectionChanged="_comboBoxAnimationIndex_SelectionChanged" />
+            <ComboBox Grid.Row="1" FontSize="12" VerticalAlignment="Center" Name="_comboBoxActionIndex" Width="75" HorizontalAlignment="Left" Margin="1" SelectionChanged="_comboBoxActionIndex_SelectionChanged" />
+        </Grid>
+
+        <ScrollBar Grid.ColumnSpan="2" Maximum="0" Grid.Row="1" Name="_sbFrameIndex" Orientation="Horizontal" Margin="0 1 0 1" />
+        <Grid Grid.Row="1" Grid.Column="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <Border Margin="3 0 0 0" BorderBrush="Transparent" Name="_borderFrameIndex" BorderThickness="1" VerticalAlignment="Center" CornerRadius="1" >
+                <controls:ClickSelectTextBox Grid.Row="1" Grid.Column="1" x:Name="_tbFrameIndex" BorderThickness="0" Text="0" TextAlignment="Right" VerticalAlignment="Center" />
+            </Border>
+            <TextBox ToolTipService.ShowDuration="1000000" Grid.Row="1" Grid.Column="1" BorderThickness="0" IsHitTestVisible="False" Name="_labelFrameIndex" Text="/ 0 frames" Padding="0" VerticalAlignment="Center">
+                <TextBox.ToolTip>
+                    The index of the frame in the selected action. This index is 0 based.
+                </TextBox.ToolTip>
+            </TextBox>
+        </Grid>
+    </Grid>
+</UserControl>

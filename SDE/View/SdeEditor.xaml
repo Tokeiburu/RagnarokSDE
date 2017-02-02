@@ -1,0 +1,265 @@
+﻿<Styles:TkWindow x:Class="SDE.View.SdeEditor"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary" SnapsToDevicePixels="True"
+                 xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
+                 xmlns:WPF1="clr-namespace:SDE.WPF"
+                 xmlns:MultiGrf="clr-namespace:GrfToWpfBridge.MultiGrf;assembly=GrfToWpfBridge"
+                 xmlns:Application="clr-namespace:GrfToWpfBridge.Application;assembly=GrfToWpfBridge"
+                 xmlns:view="clr-namespace:SDE.View"
+                 xmlns:controls="clr-namespace:SDE.View.Controls"
+                 Height="600" Width="941">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Menu Height="30">
+            <MenuItem>
+                <MenuItem.Header>
+                    <Label Content="File" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="-5 0 -5 0" />
+                </MenuItem.Header>
+                <MenuItem Name="_menuItemNewProject" ListView:WpfUtils.ImagePath="add.png" Click="_menuItemNewProject_Click"  Header="New project" />
+                <MenuItem Name="_menuItemProjectLoadAs" ListView:WpfUtils.ImagePath="newFile.png" Click="_menuItemProjectLoadAs_Click" Header="Load project..." />
+                <MenuItem Name="_menuItemProjectSaveAs" ListView:WpfUtils.ImagePath="empty.png" Click="_menuItemProjectSaveAs_Click" Header="Save project info..." />
+                <MenuItem Name="_menuItemDatabaseSave" ListView:WpfUtils.ImagePath="save.png" Click="_menuItemDatabaseSave_Click" Header="Save database (quick)" InputGestureText="Ctrl-S" />
+                <Separator />
+                <MenuItem Header="Export to db"  ListView:WpfUtils.ImagePath="export.png" >
+                    <MenuItem Name="_menuItemExportDbCurrent"  ListView:WpfUtils.ImagePath="export.png" Click="_menuItemExportDbCurrent_Click" Header="Current" IsEnabled="False" />
+                    <MenuItem Header="rAthena">
+                        <MenuItem Name="_menuItemExportRaRenewal" Click="_menuItemExportRaRenewal_Click" Header="Export project - Renewal" />
+                        <MenuItem Name="_menuItemExportRaPreRenewal" Click="_menuItemExportRaPreRenewal_Click" Header="Export project - Pre-Renewal" />
+                    </MenuItem>
+                    <MenuItem Header="Hercules">
+                        <MenuItem Name="_menuItemExportHercRenewal" Click="_menuItemExportHercRenewal_Click" Header="Export project - Renewal" />
+                        <MenuItem Name="_menuItemExportHercPreRenewal" Click="_menuItemExportHercPreRenewal_Click" Header="Export project - Pre-Renewal" />
+                    </MenuItem>
+                </MenuItem>
+                <MenuItem Header="Export to SQL" ListView:WpfUtils.ImagePath="dbBlack.png" IsEnabled="True" >
+                    <MenuItem Name="_menuItemExportSqlCurrent" ListView:WpfUtils.ImagePath="export.png" Click="_menuItemExportSqlCurrent_Click" Header="Current" IsEnabled="False" />
+                    <MenuItem Header="rAthena">
+                        <MenuItem Name="_menuItemExportSqlRaRenewal" Click="_menuItemExportSqlRaRenewal_Click" Header="Export project - Renewal" />
+                        <MenuItem Name="_menuItemExportSqlRaPreRenewal" Click="_menuItemExportSqlRaPreRenewal_Click" Header="Export project - Pre-Renewal" />
+                    </MenuItem>
+                    <MenuItem Header="Hercules">
+                        <MenuItem Name="_menuItemExportSqlHercRenewal" Click="_menuItemExportSqlHercRenewal_Click" Header="Export project - Renewal" />
+                        <MenuItem Name="_menuItemExportSqlHercPreRenewal" Click="_menuItemExportSqlHercPreRenewal_Click" Header="Export project - Pre-Renewal" />
+                    </MenuItem>
+                </MenuItem>
+                <Separator />
+                <Styles:TkMenuItem Header="Convert client dbs" IconPath="convert.png" >
+                    <Styles:TkMenuItem x:Name="_menuItemConvertClientDbToTxt" IconPath="txt.png" Header="Export to txt files" Click="_menuItemConvertClientDbToTxt_Click" IsEnabled="True" />
+                    <Styles:TkMenuItem x:Name="_menuItemConvertClientDbToLua" IconPath="lua.png" Header="Export to lua files" Click="_menuItemConvertClientDbToLua_Click" IsEnabled="True" />
+                </Styles:TkMenuItem>
+                <Separator />
+                <MenuItem Name="_menuItemRecentProjects" IsEnabled="False" Header="Recent projects">
+                </MenuItem>
+                <Separator />
+                <MenuItem Name="_menuItemAbout" ListView:WpfUtils.ImagePath="help.png" Header="About..." Click="_menuItemAbout_Click" />
+                <MenuItem Name="_menuItemClose" Header="Close" Click="_menuItemClose_Click" />
+            </MenuItem>
+            <MenuItem>
+                <MenuItem.Header>
+                    <Label Content="Edit" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="-5 0 -5 0" />
+                </MenuItem.Header>
+                <MenuItem Name="_menuItemReload" ListView:WpfUtils.ImagePath="refresh.png" Header="Reload database" Click="_menuItemReloadDatabase_Click" />
+                <MenuItem Name="_menuItemReplaceAll" ListView:WpfUtils.ImagePath="convert.png" Header="Replace all..." Click="_menuItemReplaceAll_Click" InputGestureText="Ctrl-H" />
+                <MenuItem Name="_menuItemCopyAll" ListView:WpfUtils.ImagePath="imconvert.png" Header="Copy all..." Click="_menuItemCopyAll_Click" />
+                <Separator />
+                <MenuItem Header="Undo" ListView:WpfUtils.ImagePath="undo.png" InputGestureText="Ctrl-Alt-Z" IsEnabled="{Binding ElementName=_tmbUndo, Path=IsEnabled}" Click="_tbmUndo_Click" />
+                <MenuItem Header="Redo" ListView:WpfUtils.ImagePath="redo.png" InputGestureText="Ctrl-Alt-Y" IsEnabled="{Binding ElementName=_tmbRedo, Path=IsEnabled}" Click="_tbmRedo_Click" />
+                <MenuItem Header="Navigate backward" ListView:WpfUtils.ImagePath="backward.png" InputGestureText="Alt-Z" IsEnabled="{Binding ElementName=_tnbUndo, Path=IsEnabled}" Click="_tnbUndo_Click" />
+                <MenuItem Header="Navigate forward" ListView:WpfUtils.ImagePath="forward.png" InputGestureText="Alt-Y, Alt-X" IsEnabled="{Binding ElementName=_tnbRedo, Path=IsEnabled}" Click="_tnbRedo_Click" />
+                <Separator />
+                <MenuItem Name="_menuItemAddItem" ListView:WpfUtils.ImagePath="add.png" Header="Add entry" Click="_menuItemAddItem_Click" InputGestureText="Ctrl-N" />
+                <Styles:TkMenuItem Name="_menuItemAddItemRage" ListView:WpfUtils.ImagePath="add.png" Header="Add range..." Click="_menuItemAddItemRage_Click" Shortcut="Ctrl-Shift-N" />
+                <MenuItem Name="_menuItemAddItemRaw" ListView:WpfUtils.ImagePath="add.png" Header="Add entry from raw db line" Click="_menuItemAddItemRaw_Click" />
+                <MenuItem Name="_menuItemChangeId" ListView:WpfUtils.ImagePath="properties.png" Header="Change ID..." Click="_menuItemChangeId_Click" InputGestureText="Ctrl-D" />
+                <MenuItem Name="_menuItemCopyItemTo" ListView:WpfUtils.ImagePath="imconvert.png" Header="Copy selected item to..." Click="_menuItemCopyItemTo_Click" InputGestureText="Ctrl-Shift-D" />
+                <MenuItem Name="_menuItemDeleteItem" ListView:WpfUtils.ImagePath="delete.png" Header="Delete item" Click="_menuItemDeleteItem_Click" InputGestureText="Delete" />
+            </MenuItem>
+            <MenuItem>
+                <MenuItem.Header>
+                    <Label Content="Tables" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="-5 0 -5 0" />
+                </MenuItem.Header>
+                <MenuItem Name="_menuItemReplaceFromFile" ListView:WpfUtils.ImagePath="imconvert.png" Header="Import fields from..." Click="_menuItemReplaceFromFile_Click" />
+                <MenuItem Name="_menuItemImportFromFile" ListView:WpfUtils.ImagePath="forward.png" Header="Import a db from file..." Click="_menuItemImportFromFile_Click" />
+                <Separator />
+                <MenuItem Header="Export">
+                    <MenuItem Name="_menuItemExportTradeRestrictions" Header="Generate trade restrictions..." ListView:WpfUtils.ImagePath="export.png" Click="_menuItemExportTradeRestrictions_Click" />
+                </MenuItem>
+                <MenuItem Header="Client Tables">
+                    <MenuItem Name="_menuItemUpdateClientQuests" Header="Update Client Quests" ListView:WpfUtils.ImagePath="notepad.png" Click="_menuItemUpdateClientQuests_Click" />
+                    <!--<MenuItem Name="_menuItemAutocompleteResource" ListView:WpfUtils.ImagePath="revisionUpdate.png" Header="Autocomplete resource" Click="_menuItemEditAccTables_Click" />-->
+                </MenuItem>
+                <Separator />
+                <MenuItem Name="_menuItemEditLuaSettings" ListView:WpfUtils.ImagePath="settings.png" Header="Set lua tables' paths" Click="_menuItemEditLuaSettings_Click" />
+                <MenuItem Name="_menuItemEditAccTables" ListView:WpfUtils.ImagePath="treeList.png" Header="Edit accessory tables" Click="_menuItemEditAccTables_Click" />
+                <MenuItem Name="_menuItemValidate" ListView:WpfUtils.ImagePath="validity.png" Header="Validate table" Click="_menuItemValidate_Click" />
+            </MenuItem>
+            <MenuItem>
+                <MenuItem.Header>
+                    <Label Content="Tools" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="-5 0 -5 0" />
+                </MenuItem.Header>
+                <MenuItem Name="_menuItemScript" ListView:WpfUtils.ImagePath="dos.png" Header="IronPython Script..." Click="_menuItemScript_Click" />
+                <Separator />
+                <MenuItem Name="_menuItemBackups" ListView:WpfUtils.ImagePath="archive.png" Header="Backups manager" Click="_menuItemBackups_Click" />
+                <Separator />
+                <MenuItem Name="_menuItemShopSimulator" ListView:WpfUtils.ImagePath="editor.png" Header="Shop simulator" Click="_menuItemShopSimulator_Click" />
+                <MenuItem Name="_menuItemDebugTables" ListView:WpfUtils.ImagePath="warning16.png" Header="Debug tables" Click="_menuItemDebugTables_Click" />
+                <Separator />
+                <MenuItem Name="_menuItemSettings" ListView:WpfUtils.ImagePath="settings.png" Header="Settings" Click="_menuItemSettings_Click" />
+            </MenuItem>
+        </Menu>
+        <DockPanel Margin="170 0 0 0" HorizontalAlignment="Left">
+            <controls:ToggleMemoryButton x:Name="_tmbUndo" PrimaryButtonImagePath="undo.png" DisplayFormat="Undo {0} action" />
+            <controls:ToggleMemoryButton x:Name="_tmbRedo" PrimaryButtonImagePath="redo.png" DisplayFormat="Redo {0} action" />
+            <controls:ToggleMemoryButton Margin="10 0 0 0" x:Name="_tnbUndo" PrimaryButtonImagePath="backward.png" DisplayFormat="Go back {0} element" />
+            <controls:ToggleMemoryButton x:Name="_tnbRedo" PrimaryButtonImagePath="forward.png" DisplayFormat="Go forward {0} element" />
+        </DockPanel>
+        <Styles:TkProgressBar Name="_progressBar" Width="300" HorizontalAlignment="Right" Margin="0 0 3 0"  />
+        <Border Background="#F7F9FD" Grid.Row="1">
+            <Grid>
+                <TabControl Name="_mainTabControl" Background="White" SelectionChanged="_mainTabControl_SelectionChanged" Style="{DynamicResource TabControlStyled}">
+                    <TabItem Style="{DynamicResource TabItemStyledLess}">
+                        <TabItem.Header>
+                            <controls:DisplayLabel FontWeight="Bold" DisplayText="Settings" />
+                        </TabItem.Header>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="auto" />
+                                        <ColumnDefinition Width="auto" />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition Height="auto" />
+                                    </Grid.RowDefinitions>
+                                    <Label Content="Client encoding" Padding="0" Margin="3" VerticalAlignment="Center">
+                                        <Label.ToolTip>
+                                            <TextBlock>
+                                        Encoding used for the client databases and lua files.
+                                            </TextBlock>
+                                        </Label.ToolTip>
+                                    </Label>
+                                    <Application:EncodingPicker Grid.Column="1" Margin="3" Name="_comboBoxEncoding" IsReadOnly="True" Width="120" HorizontalAlignment="Left" />
+                                    <Label Content="Server encoding" Padding="0" Grid.Row="1" Margin="3" VerticalAlignment="Center">
+                                        <Label.ToolTip>
+                                            <TextBlock>
+                                        Encoding used to read and write the server database files.
+                                            </TextBlock>
+                                        </Label.ToolTip>
+                                    </Label>
+                                    <Application:EncodingPicker Grid.Column="1" Grid.Row="1" Margin="3" Name="_comboBoxEncodingServer" IsReadOnly="True" Width="120" HorizontalAlignment="Left" />
+                                </Grid>
+                            <TextBlock Margin="3" Text="Resource files or folders (drop a GRF or a data folder) : " />
+                            </StackPanel>
+                            <MultiGrf:MetaGrfResourcesViewer Grid.Row="1" x:Name="_metaGrfViewer" Height="100" />
+                            <Grid Name="_gridTextFilesSettings" Grid.Row="2" >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                            </Grid>
+                            <StackPanel Name="_spPaths" Grid.Row="2">
+                                
+                            </StackPanel>
+                            <Grid Grid.Row="4">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <CheckBox Margin="3" Name="_cbClientDbSync" Content="Synchronize with client database files" HorizontalAlignment="Left" />
+                                <DockPanel Grid.Row="1">
+                                    <CheckBox Margin="3 3 15 3" Name="_cbUseLuaFiles" Content="Use lua files" HorizontalAlignment="Left" />
+                                    <Button HorizontalAlignment="Left" Name="_buttonLuaSettings" Click="_menuItemEditLuaSettings_Click">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="auto" />
+                                                <ColumnDefinition />
+                                            </Grid.ColumnDefinitions>
+                                            <Image Grid.Column="0" ListView:WpfUtils.ImagePath="settings.png" />
+                                            <Label Padding="0" Margin="3 0 3 0" VerticalAlignment="Center" Content="Edit lua settings" Grid.Column="1" />
+                                        </Grid>
+                                    </Button>
+                                </DockPanel>
+                                <Grid Name="_gridTextFilesSettingsClient" Grid.Row="2">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition />
+                                        <RowDefinition Height="20" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="4" />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Row="1" Text="Text files" Margin="3" />
+                                    <TextBlock Grid.Row="1" Grid.Column="3" Text="Lua files" Margin="3" />
+                                    <ListView Name="_listItemClientTxtFiles" Grid.Row="2" ScrollViewer.HorizontalScrollBarVisibility="Hidden" Grid.Column="0" Margin="3">
+                                        <ListView.ItemContainerStyle>
+                                            <Style TargetType="ListViewItem">
+                                                <Setter Property="IsSelected" Value="{Binding Content.IsSelected, Mode=TwoWay, RelativeSource={RelativeSource Self}}"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="ListBoxItem">
+                                                            <ContentPresenter/>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </ListView.ItemContainerStyle>
+                                    </ListView>
+                                    <ListView IsEnabled="False" Name="_listItemClientLuaFiles" ScrollViewer.HorizontalScrollBarVisibility="Hidden" Grid.Row="2" Grid.Column="2" Margin="3">
+                                        <ListView.ItemContainerStyle>
+                                            <Style TargetType="ListViewItem">
+                                                <Setter Property="IsSelected" Value="{Binding Content.IsSelected, Mode=TwoWay, RelativeSource={RelativeSource Self}}"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="ListBoxItem">
+                                                            <ContentPresenter/>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </ListView.ItemContainerStyle>
+                                    </ListView>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </TabItem>
+                    <TabItem Style="{DynamicResource TabItemStyledLess}" >
+                        <TabItem.Header>
+                            <controls:DisplayLabel FontWeight="Bold" DisplayText="Error console" />
+                        </TabItem.Header>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <ListView Foreground="Black" AllowDrop="True" Grid.Row="1" Name="_debugList" SelectionMode="Extended" BorderThickness="0" FocusVisualStyle="{x:Null}"
+                            ListView:WpfUtils.IsGridSortable="True" VirtualizingStackPanel.IsVirtualizing="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListView.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Name="_miOpenNotepad" ListView:WpfUtils.ImagePath="treeList.png" Click="_miOpenNotepad_Click" Header="Select in Notepad++" />
+                                        <MenuItem Name="_miOpen" ListView:WpfUtils.ImagePath="arrowdown.png" Click="_miOpen_Click" Header="Open" />
+                                        <MenuItem Name="_miCopy" ListView:WpfUtils.ImagePath="copy.png" Click="_miCopy_Click" Header="Copy exception" />
+                                    </ContextMenu>
+                                </ListView.ContextMenu>
+                            </ListView>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+        </Border>
+    </Grid>
+</Styles:TkWindow>

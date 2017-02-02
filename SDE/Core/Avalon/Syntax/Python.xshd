@@ -1,0 +1,210 @@
+﻿<?xml version="1.0"?>
+  <SyntaxDefinition name="Python" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+    <Color name="Comment" foreground="#008000" />
+    <Color name="String" foreground="#808080" />
+    <Color name="Label" foreground="#000DBA" />
+    <Color name="Orange" foreground="#F2981D" />
+    <Color name="Goto" fontWeight="bold" foreground="DarkBlue" />
+	
+	<!-- This is the main ruleset. -->
+	<RuleSet>
+    <Span color="Comment" begin="//" />
+    <Span color="Comment" begin="#" />
+    <Span color="Orange" multiline="true" begin="&quot;&quot;&quot;" end="&quot;&quot;&quot;" />
+    <!--<Delimiters>:</Delimiters>-->
+    <Span color="String">
+      <Begin>"</Begin>
+      <End>"</End>
+      <RuleSet>
+        <!-- nested span for escape sequences -->
+        <Span begin="\\" end="." />
+      </RuleSet>
+    </Span>
+
+    <Span color="String">
+      <Begin>'</Begin>
+      <End>'</End>
+      <RuleSet>
+        <!-- nested span for escape sequences -->
+        <Span begin="\\" end="." />
+      </RuleSet>
+    </Span>
+    
+    <Keywords foreground="Blue">
+      <Word>and</Word>
+      <Word>as</Word>
+      <Word>assert</Word>
+      <Word>break</Word>
+      <Word>class</Word>
+      <Word>continue</Word>
+      <Word>def</Word>
+      <Word>del</Word>
+      <Word>elif</Word>
+      <Word>else</Word>
+      <Word>except</Word>
+      <Word>exec</Word>
+      <Word>False</Word>
+      <Word>finally</Word>
+      <Word>for</Word>
+      <Word>from</Word>
+      <Word>global</Word>
+      <Word>if</Word>
+      <Word>import</Word>
+      <Word>in</Word>
+      <Word>is</Word>
+      <Word>lambda</Word>
+      <Word>None</Word>
+      <Word>not</Word>
+      <Word>or</Word>
+      <Word>pass</Word>
+      <Word>print</Word>
+      <Word>raise</Word>
+      <Word>return</Word>
+      <Word>triple</Word>
+      <Word>True</Word>
+      <Word>try</Word>
+      <Word>while</Word>
+      <Word>with</Word>
+      <Word>yield</Word>
+    </Keywords>
+
+    <Keywords fontStyle="italic" foreground="#00B000">
+      <Word>item_db_m</Word>
+      <Word>client_items</Word>
+      <Word>mob_skill_db_m</Word>
+      <Word>mob_db_m</Word>
+      <Word>mob_branch</Word>
+      <Word>mob_poring</Word>
+      <Word>mob_boss</Word>
+      <Word>mob_pouch</Word>
+      <Word>mob_classchange</Word>
+      <Word>item_avail</Word>
+      <Word>item_delay</Word>
+      <Word>item_nouse</Word>
+      <Word>item_stack</Word>
+      <Word>item_trade</Word>
+      <Word>item_buyingstore</Word>
+      <Word>item_db2</Word>
+      <Word>item_db</Word>
+      <Word>mob_db2</Word>
+      <Word>mob_db</Word>
+      <Word>mob_avail</Word>
+      <Word>homunculus_db2</Word>
+      <Word>homunculus_db</Word>
+      <Word>skill_db</Word>
+      <Word>skill_castnodex_db</Word>
+      <Word>skill_nocast_db</Word>
+      <Word>skill_cast_db</Word>
+      <Word>skill_require_db</Word>
+      <Word>skill_tree</Word>
+      <Word>item_combo_db</Word>
+      <Word>mob_skill_db2</Word>
+      <Word>mob_skill_db</Word>
+      <Word>const</Word>
+      <Word>item_group_db</Word>
+      <Word>pet_db2</Word>
+      <Word>pet_db</Word>
+      <Word>castle_db</Word>
+    </Keywords>
+
+    <Keywords foreground="#638AFF">
+      <Word>abs</Word>
+      <Word>divmod</Word>
+      <Word>input</Word>
+      <Word>open</Word>
+      <Word>staticmethod</Word>
+      <Word>all</Word>
+      <Word>enumerate</Word>
+      <Word>int</Word>
+      <Word>ord</Word>
+      <Word>str</Word>
+      <Word>any</Word>
+      <Word>eval</Word>
+      <Word>isinstance</Word>
+      <Word>pow</Word>
+      <Word>sum</Word>
+      <Word>basestring</Word>
+      <Word>execfile</Word>
+      <Word>issubclass</Word>
+      <Word>print</Word>
+      <Word>super</Word>
+      <Word>bin</Word>
+      <Word>file</Word>
+      <Word>iter</Word>
+      <Word>property</Word>
+      <Word>tuple</Word>
+      <Word>bool</Word>
+      <Word>filter</Word>
+      <Word>len</Word>
+      <Word>range</Word>
+      <Word>type</Word>
+      <Word>bytearray</Word>
+      <Word>float</Word>
+      <Word>list</Word>
+      <Word>raw_input</Word>
+      <Word>unichr</Word>
+      <Word>callable</Word>
+      <Word>format</Word>
+      <Word>locals</Word>
+      <Word>reduce</Word>
+      <Word>unicode</Word>
+      <Word>chr</Word>
+      <Word>frozenset</Word>
+      <Word>long</Word>
+      <Word>reload</Word>
+      <Word>vars</Word>
+      <Word>classmethod</Word>
+      <Word>getattr</Word>
+      <Word>map</Word>
+      <Word>repr</Word>
+      <Word>xrange</Word>
+      <Word>cmp</Word>
+      <Word>globals</Word>
+      <Word>max</Word>
+      <Word>reversed</Word>
+      <Word>zip</Word>
+      <Word>compile</Word>
+      <Word>hasattr</Word>
+      <Word>memoryview</Word>
+      <Word>round</Word>
+      <Word>__import__</Word>
+      <Word>complex</Word>
+      <Word>hash</Word>
+      <Word>min</Word>
+      <Word>set</Word>
+      <Word>delattr</Word>
+      <Word>help</Word>
+      <Word>next</Word>
+      <Word>setattr</Word>
+      <Word>dict</Word>
+      <Word>hex</Word>
+      <Word>object</Word>
+      <Word>slice</Word>
+      <Word>dir</Word>
+      <Word>id</Word>
+      <Word>oct</Word>
+      <Word>sorted</Word>
+      <Word>fopen</Word>
+    </Keywords>
+
+    <!--<Keywords foreground="#ff0000">
+    </Keywords>-->
+
+    <Keywords fontStyle="italic" foreground="#ff0000">
+      <Word>selection</Word>
+      <Word>selected_db</Word>
+      <Word>database</Word>
+      <Word>script</Word>
+    </Keywords>
+
+    <!-- Digits -->
+		<Rule foreground="#ff0000">
+            \b0[xX][0-9a-fA-F]+  # hex number
+        |    \b
+            (    \d+(\.[0-9]+)?   #number with optional floating point
+            |    \.[0-9]+         #or just starting with floating point
+            )
+            ([eE][+-]?[0-9]+)? # optional exponent
+        </Rule>
+	</RuleSet>
+</SyntaxDefinition>

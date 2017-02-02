@@ -18,7 +18,6 @@ namespace SDE.Core.Avalon {
 		}
 
 		#region ISearchStrategy Members
-
 		public IEnumerable<ISearchResult> FindAll(ITextSource document, int offset, int length) {
 			int endOffset = offset + length;
 			foreach (Match result in _searchPattern.Matches(document.Text)) {
@@ -38,7 +37,6 @@ namespace SDE.Core.Avalon {
 		public bool Equals(ISearchStrategy other) {
 			return other == this;
 		}
-
 		#endregion
 	}
 }

@@ -1,0 +1,69 @@
+﻿<Styles:TkWindow x:Class="SDE.View.MultiGrfExplorer"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
+        xmlns:TokeiLibrary="clr-namespace:TokeiLibrary;assembly=TokeiLibrary"
+              xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
+                 xmlns:Application="clr-namespace:GrfToWpfBridge.Application;assembly=GrfToWpfBridge"
+                 Title="Meta GRF Explorer" Height="510" Width="610">
+    <Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="250" />
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Row="0" Grid.Column="0" Margin="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <DockPanel LastChildFill="True">
+                        <Label Content="View encoding" />
+                        <Application:EncodingPicker Margin="3" Name="_comboBoxEncoding" IsReadOnly="True" Width="120" HorizontalAlignment="Right" />
+                    </DockPanel>
+                    <DockPanel Grid.Row="1">
+                        <Image Source="../Resources/filter.png" Margin="5,0,0,0" Height="16" Width="16" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                        <TextBox Name="_textBoxSearch"  Margin="3" TextChanged="_textBoxSearch_TextChanged" />
+                    </DockPanel>
+                    <ListView TextSearch.TextPath="DisplayFileName" Foreground="Black" AllowDrop="True" Grid.Row="2" Name="_items" SelectionChanged="_items_SelectionChanged"  SelectionMode="Extended"
+                     BorderThickness="0" ListView:WpfUtils.IsGridSortable="True" VirtualizingStackPanel.IsVirtualizing="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    </ListView>
+                </Grid>
+                <GridSplitter Width="2" Grid.Column="1" HorizontalAlignment="Left" Background="{x:Static TokeiLibrary:Configuration.UIGridBackground}" />
+                <ScrollViewer Background="Transparent" Name="_scrollViewer" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" Grid.Column="2" >
+                    <DockPanel Name="_dockPanelImages">
+                        <DockPanel DockPanel.Dock="Top" />
+                        <Image Margin="10" RenderOptions.BitmapScalingMode="NearestNeighbor" HorizontalAlignment="Left" VerticalAlignment="Top" SnapsToDevicePixels="True" Name="_imagePreview" Stretch="None" RenderTransformOrigin="0.5,0.5">
+                            <Image.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Name="_menuItemImageExport" Header="Export preview image to..." Click="_menuItemImageExport_Click">
+                                        <MenuItem.Icon>
+                                            <Image Source="../Resources/export.png" Height="16"  />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                </ContextMenu>
+                            </Image.ContextMenu>
+                            <Image.RenderTransform>
+                                <TransformGroup>
+                                </TransformGroup>
+                            </Image.RenderTransform>
+                        </Image>
+                    </DockPanel>
+                </ScrollViewer>
+            </Grid>
+            <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="50" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+                <DockPanel HorizontalAlignment="Right" Margin="0 0 3 0">
+                    <Button Name="_buttonSelect" Click="_buttonSelect_Click" Content="Select" Margin="3" Height="25" MinWidth="100" />
+                    <Button Name="_buttonCancel" Click="_buttonCancel_Click" Content="Cancel" Margin="3" Height="25" MinWidth="100" />
+                </DockPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</Styles:TkWindow>

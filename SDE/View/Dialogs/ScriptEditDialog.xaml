@@ -1,0 +1,25 @@
+﻿<Styles:TkWindow x:Class="SDE.View.Dialogs.ScriptEditDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit"
+              xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
+                 xmlns:TokeiLibrary="clr-namespace:TokeiLibrary;assembly=TokeiLibrary"
+                 xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary" Height="280" Width="604">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <avalonedit:TextEditor Grid.Row="0"
+					Name="_textEditor"
+					FontFamily="Consolas" Margin="3 3 3 0"
+					ShowLineNumbers="True">
+        </avalonedit:TextEditor>
+        <Grid Name="_footerGrid" ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="50" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+            <DockPanel HorizontalAlignment="Right" Margin="0 0 3 0">
+                <Button Name="_buttonOk" Click="_buttonOk_Click" Content="Ok" Height="25" Margin="3" MinWidth="100" />
+                <Button Name="_buttonCancel" Click="_buttonCancel_Click" Content="Cancel" Height="25" Margin="3" MinWidth="100" />
+            </DockPanel>
+        </Grid>
+    </Grid>
+</Styles:TkWindow>

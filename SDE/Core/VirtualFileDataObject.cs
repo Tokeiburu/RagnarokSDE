@@ -31,16 +31,14 @@ namespace SDE.Core {
 		public bool Finished { get; set; }
 
 		#region IProgress Members
-
 		public float Progress { get; set; }
 		public bool IsCancelling { get; set; }
 		public bool IsCancelled { get; set; }
+		#endregion
 
 		public void CancelOperation() {
 			IsCancelling = true;
 		}
-
-		#endregion
 
 		public void Update() {
 			Progress = -1;
@@ -93,45 +91,49 @@ namespace SDE.Core {
 		public string SelectedPath { get; set; }
 
 		#region IAsyncOperation Members
-
 		void IAsyncOperation.SetAsyncMode(int fDoOpAsync) {
 			IsAsynchronous = NativeMethods.VARIANT_FALSE != fDoOpAsync;
 		}
+
 		void IAsyncOperation.GetAsyncMode(out int pfIsOpAsync) {
 			pfIsOpAsync = IsAsynchronous ? NativeMethods.VARIANT_TRUE : NativeMethods.VARIANT_FALSE;
 		}
+
 		void IAsyncOperation.StartOperation(IBindCtx pbcReserved) {
 			_inOperation = true;
 			if (null != _startAction) {
 				_startAction(this);
 			}
 		}
+
 		void IAsyncOperation.InOperation(out int pfInAsyncOp) {
 			pfInAsyncOp = _inOperation ? NativeMethods.VARIANT_TRUE : NativeMethods.VARIANT_FALSE;
 		}
+
 		void IAsyncOperation.EndOperation(int hResult, IBindCtx pbcReserved, uint dwEffects) {
 			if (null != _endAction) {
 				_endAction(this);
 			}
 			_inOperation = false;
 		}
-
 		#endregion
 
 		#region IDataObject Members
-
 		int IDataObject.DAdvise(ref FORMATETC pFormatetc, ADVF advf, IAdviseSink adviseSink, out int connection) {
 			Marshal.ThrowExceptionForHR(NativeMethods.OLE_E_ADVISENOTSUPPORTED);
 			throw new NotImplementedException();
 		}
+
 		void IDataObject.DUnadvise(int connection) {
 			Marshal.ThrowExceptionForHR(NativeMethods.OLE_E_ADVISENOTSUPPORTED);
 			throw new NotImplementedException();
 		}
+
 		int IDataObject.EnumDAdvise(out IEnumSTATDATA enumAdvise) {
 			Marshal.ThrowExceptionForHR(NativeMethods.OLE_E_ADVISENOTSUPPORTED);
 			throw new NotImplementedException();
 		}
+
 		IEnumFORMATETC IDataObject.EnumFormatEtc(DATADIR direction) {
 			if (direction == DATADIR.DATADIR_GET) {
 				if (0 == _dataObjects.Count) {
@@ -143,8 +145,8 @@ namespace SDE.Core {
 				IEnumFORMATETC enumerator;
 				if (
 					NativeMethods.Succeeded(NativeMethods.SHCreateStdEnumFmtEtc((uint)(_dataObjects.Count),
-																				_dataObjects.Select(d => d.FORMATETC).ToArray(),
-																				out enumerator))) {
+						_dataObjects.Select(d => d.FORMATETC).ToArray(),
+						out enumerator))) {
 					return enumerator;
 				}
 
@@ -153,6 +155,7 @@ namespace SDE.Core {
 			}
 			throw new NotImplementedException();
 		}
+
 		int IDataObject.GetCanonicalFormatEtc(ref FORMATETC formatIn, out FORMATETC formatOut) {
 			throw new NotImplementedException();
 		}
@@ -161,7 +164,6 @@ namespace SDE.Core {
 			medium = new STGMEDIUM();
 			var hr = ((IDataObject)this).QueryGetData(ref format);
 			if (NativeMethods.Succeeded(hr)) {
-
 				// Find the best match
 				var formatCopy = format;
 				// Cannot use ref or out parameter inside an anonymous method, lambda expression, or query expression
@@ -222,8 +224,8 @@ namespace SDE.Core {
 		void IDataObject.SetData(ref FORMATETC formatIn, ref STGMEDIUM medium, bool release) {
 			var handled = false;
 			if ((formatIn.dwAspect == DVASPECT.DVASPECT_CONTENT) &&
-				(formatIn.tymed == TYMED.TYMED_HGLOBAL) &&
-				(medium.tymed == formatIn.tymed)) {
+			    (formatIn.tymed == TYMED.TYMED_HGLOBAL) &&
+			    (medium.tymed == formatIn.tymed)) {
 				// Supported format; capture the data
 				var ptr = NativeMethods.GlobalLock(medium.unionmember);
 				if (IntPtr.Zero != ptr) {
@@ -260,7 +262,6 @@ namespace SDE.Core {
 				throw new NotImplementedException();
 			}
 		}
-
 		#endregion
 
 		public void SetData(short dataFormat, IEnumerable<byte> data) {
@@ -281,6 +282,7 @@ namespace SDE.Core {
 					},
 				});
 		}
+
 		public void SetData(short dataFormat, int index, FileDescriptor descriptor) {
 			_dataObjects.Add(
 				new DataObject {
@@ -343,7 +345,7 @@ namespace SDE.Core {
 			}
 
 			// Set CFSTR_FILEDESCRIPTORW
-			switch (Source) {
+			switch(Source) {
 				case DragAndDropSource.ListView:
 					SetData(FILESOURCE, Encoding.ASCII.GetBytes("ListView\0"));
 					break;
@@ -363,7 +365,7 @@ namespace SDE.Core {
 					SetData(FILESOURCE, Encoding.ASCII.GetBytes("Other\0"));
 					break;
 			}
-			
+
 			SetData(FILEDESCRIPTORW, bytes);
 			// Set n CFSTR_FILECONTENTS
 			var index = 0;
@@ -371,7 +373,6 @@ namespace SDE.Core {
 				SetData(FILECONTENTS, index, fileDescriptor);
 				index++;
 			}
-
 		}
 
 		private static IEnumerable<byte> StructureBytes(object source) {
@@ -414,14 +415,14 @@ namespace SDE.Core {
 					if (a.LeftButton == MouseButtonState.Pressed) {
 						VirtualFileDataObject virtualFileDataObject = new VirtualFileDataObject();
 
-						string name = (string) imagePreview.Tag;
+						string name = (string)imagePreview.Tag;
 
 						List<FileDescriptor> descriptors = new List<FileDescriptor> {
 							new FileDescriptor {
-								Name = name + (name.GetExtension() == null ? Imaging.GuessExtension(((BitmapSource) imagePreview.Source).Format) : ""),
+								Name = name + (name.GetExtension() == null ? Imaging.GuessExtension(((BitmapSource)imagePreview.Source).Format) : ""),
 								Argument = wrapper,
 								StreamContents = (grfData, filePath, stream, argument) => {
-									GrfImageWrapper image = (GrfImageWrapper) argument;
+									GrfImageWrapper image = (GrfImageWrapper)argument;
 
 									if (image.Image != null) {
 										GrfImage grfImage = image.Image;
@@ -453,27 +454,23 @@ namespace SDE.Core {
 		}
 
 		#region Nested type: DataObject
-
 		private class DataObject {
 			public FORMATETC FORMATETC { get; set; }
 
 			public Func<Tuple<IntPtr, int>> GetData { get; set; }
 		}
-
 		#endregion
 
 		#region Nested type: DropSource
-
 		private class DropSource : NativeMethods.IDropSource {
 			#region IDropSource Members
-
 			public int QueryContinueDrag(int fEscapePressed, uint grfKeyState) {
 				var escapePressed = (0 != fEscapePressed);
 				var keyStates = (DragDropKeyStates)grfKeyState;
 				if (escapePressed) {
 					return NativeMethods.DRAGDROP_S_CANCEL;
 				}
-				else if (DragDropKeyStates.None == (keyStates & DragDropKeyStates.LeftMouseButton)) {
+				if (DragDropKeyStates.None == (keyStates & DragDropKeyStates.LeftMouseButton)) {
 					return NativeMethods.DRAGDROP_S_DROP;
 				}
 				return NativeMethods.S_OK;
@@ -482,14 +479,11 @@ namespace SDE.Core {
 			public int GiveFeedback(uint dwEffect) {
 				return NativeMethods.DRAGDROP_S_USEDEFAULTCURSORS;
 			}
-
 			#endregion
 		}
-
 		#endregion
 
 		#region Nested type: FileDescriptor
-
 		public class FileDescriptor {
 			public string Name { get; set; }
 
@@ -503,11 +497,9 @@ namespace SDE.Core {
 			public string FilePath { get; set; }
 			public object Argument { get; set; }
 		}
-
 		#endregion
 
 		#region Nested type: IStreamWrapper
-
 		private class IStreamWrapper : Stream {
 			private readonly IStream _iStream;
 
@@ -556,7 +548,6 @@ namespace SDE.Core {
 				_iStream.Write(offset == 0 ? buffer : buffer.Skip(offset).ToArray(), count, IntPtr.Zero);
 			}
 		}
-
 		#endregion
 	}
 

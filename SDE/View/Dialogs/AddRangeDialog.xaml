@@ -1,0 +1,52 @@
+﻿<Styles:TkWindow x:Class="SDE.View.Dialogs.AddRangeDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
+                 xmlns:TokeiLibrary="clr-namespace:TokeiLibrary;assembly=TokeiLibrary"
+                 xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
+                 xmlns:controls="clr-namespace:SDE.View.Controls">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <Grid Name="_jobGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <StackPanel>
+                <DockPanel>
+                    <Label Content="Destination table..." VerticalAlignment="Center" />
+                    <ComboBox Name="_destTable" VerticalAlignment="Center" HorizontalAlignment="Left" Width="100" Margin="3" />
+                </DockPanel>
+
+                <DockPanel>
+                    <Label Content="Based on" VerticalAlignment="Center" />
+                    <TextBlock Name="_tbBasedOn" VerticalAlignment="Center" Text="None" Foreground="Blue" Margin="0 3 3 3" />
+                    <Image VerticalAlignment="Center" Name="_imReset" MouseLeftButtonUp="_imReset_MouseLeftButtonUp" ListView:WpfUtils.ImagePath="reset.png" HorizontalAlignment="Left" Visibility="Collapsed" ToolTip="Sets the source to None." Margin="3" />
+                    <Button Name="_buttonSearch" Click="_buttonSearch_Click" Content="..." HorizontalAlignment="Left" Height="22" Width="22" Margin="3" />
+                </DockPanel>
+                <DockPanel>
+                    <Label Content="From :" />
+                    <controls:ClickSelectTextBoxEffect x:Name="_tbFrom" Width="70" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                    <Label Content="Range :" />
+                    <controls:ClickSelectTextBoxEffect x:Name="_tbRange" Width="70" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0 0 3 0" />
+                </DockPanel>
+            </StackPanel>
+        </Grid>
+        <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="50" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+            <Grid Margin="0 0 3 0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <DockPanel Grid.Column="2">
+                    <Button Name="_buttonOk" Click="_buttonOk_Click" Content="Add" Height="25" Margin="3" MinWidth="100" Grid.Column="2" />
+                    <Button Name="_buttonCancel" Click="_buttonCancel_Click" Content="Cancel" Height="25" Margin="3" MinWidth="100" Grid.Column="3" />
+                </DockPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</Styles:TkWindow>

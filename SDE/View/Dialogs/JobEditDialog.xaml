@@ -1,0 +1,74 @@
+﻿<Styles:TkWindow x:Class="SDE.View.Dialogs.JobEditDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
+                 xmlns:TokeiLibrary="clr-namespace:TokeiLibrary;assembly=TokeiLibrary"
+                 xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
+                 xmlns:Jobs="clr-namespace:SDE.Editor.Jobs"
+                 Width="650">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <Grid>
+            <StackPanel>
+                <DockPanel>
+                    <Label Content="Job mode" />
+                    <ComboBox Name="_cbJobMode" VerticalAlignment="Center" Margin="3" Width="130" HorizontalAlignment="Left" >
+                        <ComboBoxItem Content="Only selected" />
+                        <ComboBoxItem Content="Every Job except..." />
+                    </ComboBox>
+                    <CheckBox Name="_cbSelectAll" Content="Select all" Margin="3" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                </DockPanel>
+                <CheckBox Name="_cbRestrictClasses" Content="Restrict to possible classes only" Margin="3" HorizontalAlignment="Left" />
+            </StackPanel>
+        </Grid>
+        <Grid Name="_jobGrid" Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Label HorizontalAlignment="Center" Content="Others" Grid.Column="0" />
+            <Label HorizontalAlignment="Center" Content="1st Jobs" Grid.Column="1" />
+            <Label HorizontalAlignment="Center" Content="2nd - 1 Jobs" Grid.Column="2" />
+            <Label HorizontalAlignment="Center" Content="2nd - 2 Jobs" Grid.Column="3" />
+            <Grid Name="_jobGrid1" Grid.Column="0" Grid.Row="1"/>
+            <Grid Name="_jobGrid2" Grid.Column="1" Grid.Row="1"/>
+            <Grid Name="_jobGrid3" Grid.Column="2" Grid.Row="1"/>
+            <Grid Name="_jobGrid4" Grid.Column="3" Grid.Row="1"/>
+            <Border Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" BorderThickness="2" BorderBrush="#AEB8FF" CornerRadius="3" Margin="2" />
+            <Border Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" BorderThickness="2" BorderBrush="#AEB8FF" CornerRadius="3" Margin="2" />
+            <Border Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" BorderThickness="2" BorderBrush="#AEB8FF" CornerRadius="3" Margin="2" />
+            <Border Grid.Column="3" Grid.Row="0" Grid.RowSpan="2" BorderThickness="2" BorderBrush="#AEB8FF" CornerRadius="3" Margin="2" />
+            <Border />
+            <Border />
+            <Border />
+            <Border />
+            <TextBox IsReadOnly="True" Grid.Row="2" Height="40" Grid.ColumnSpan="4" Name="_previewClass" Margin="3" Background="Transparent" BorderThickness="0" AcceptsReturn="True" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Column="0" />
+        </Grid>
+        <Grid Name="_footerGrid" ListView:WpfUtils.IsDraggable="True" Grid.Row="2" Height="50" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+            <Grid Margin="0 0 3 0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <DockPanel Grid.Column="2">
+                    <ComboBox Name="_cbJobs" VerticalAlignment="Center" Margin="3" Width="120" ItemsSource="{x:Static Jobs:Job.Jobs}" />
+                    <TextBox Name="_preview" Width="120" Margin="3" VerticalAlignment="Center" Grid.Column="1" />
+                    <Button Name="_buttonOk" Click="_buttonOk_Click" Content="Ok" Height="25" Margin="3" MinWidth="100" Grid.Column="2" />
+                    <Button Name="_buttonCancel" Click="_buttonCancel_Click" Content="Cancel" Height="25" Margin="3" MinWidth="100" Grid.Column="3" />
+                </DockPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</Styles:TkWindow>

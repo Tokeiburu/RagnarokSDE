@@ -1,5 +1,4 @@
-﻿using SDE.Tools.DatabaseEditor;
-using TokeiLibrary.Paths;
+﻿using TokeiLibrary.Paths;
 using Utilities;
 
 namespace SDE.ApplicationConfiguration {
@@ -9,22 +8,31 @@ namespace SDE.ApplicationConfiguration {
 	/// </summary>
 	public static class PathRequest {
 		public static Setting ExtractSetting {
-			get { return new Setting(null, typeof(SdeAppConfiguration).GetProperty("AppLastPath")); }
+			get { return new Setting(null, typeof (SdeAppConfiguration).GetProperty("AppLastPath")); }
 		}
+
 		public static string SaveFileCde(params string[] extra) {
-			return TkPathRequest.SaveFile(new Setting(null, typeof(SdeAppConfiguration).GetProperty("AppLastPath")), extra);
+			return TkPathRequest.SaveFile(new Setting(null, typeof (SdeAppConfiguration).GetProperty("AppLastPath")), extra);
 		}
+
 		public static string OpenFileCde(params string[] extra) {
-			return TkPathRequest.OpenFile(new Setting(null, typeof(ProjectConfiguration).GetProperty("AppLastPath")), extra);
+			return TkPathRequest.OpenFile(new Setting(null, typeof (SdeAppConfiguration).GetProperty("AppLastPath")), extra);
 		}
+
+		public static string[] OpenFilesCde(params string[] extra) {
+			return TkPathRequest.OpenFiles(new Setting(null, typeof (SdeAppConfiguration).GetProperty("AppLastPath")), extra);
+		}
+
 		public static string FolderEditor(params string[] extra) {
-			return TkPathRequest.Folder(new Setting(null, typeof(SdeAppConfiguration).GetProperty("AppLastPath")), extra);
+			return TkPathRequest.Folder(new Setting(null, typeof (SdeAppConfiguration).GetProperty("AppLastPath")), extra);
 		}
+
 		public static string FolderExtractSql(params string[] extra) {
-			return TkPathRequest.Folder(new Setting(null, typeof(SdeAppConfiguration).GetProperty("AppLastPathSql")), extra);
+			return TkPathRequest.Folder(new Setting(null, typeof (SdeAppConfiguration).GetProperty("AppLastPathSql")), extra);
 		}
+
 		public static string FolderExtractDb(params string[] extra) {
-			return TkPathRequest.Folder(new Setting(null, typeof(SdeAppConfiguration).GetProperty("AppLastPathDb")), extra);
+			return TkPathRequest.Folder(new Setting(null, typeof (SdeAppConfiguration).GetProperty("AppLastPathDb")), extra);
 		}
 	}
 }

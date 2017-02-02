@@ -1,5 +1,5 @@
 using System;
-using SDE.Tools.DatabaseEditor.Engines.BackupsEngine;
+using SDE.Editor.Engines.BackupsEngine;
 
 namespace SDE.Core.ViewItems {
 	/// <summary>
@@ -8,7 +8,7 @@ namespace SDE.Core.ViewItems {
 	public class BackupView {
 		public BackupView(Backup backup) {
 			if (backup == null) throw new ArgumentNullException("backup");
-			
+
 			BackupDate = backup.BackupDate;
 			DbPath = backup.Info.DestinationPath;
 			DateInt = long.Parse(backup.BackupDate);
@@ -21,9 +21,7 @@ namespace SDE.Core.ViewItems {
 		public long DateInt { get; set; }
 
 		public bool Normal {
-			get {
-				return true;
-			}
+			get { return true; }
 		}
 	}
 }

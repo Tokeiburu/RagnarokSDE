@@ -1,0 +1,45 @@
+﻿<UserControl x:Class="SDE.View.Controls.DbSearchPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:controls="clr-namespace:SDE.View.Controls"
+             xmlns:wpfBugFix="clr-namespace:TokeiLibrary.WpfBugFix;assembly=TokeiLibrary"
+             xmlns:styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
+             mc:Ignorable="d">
+    <Grid>
+        <Border  Margin="0" Name="_border1" BorderBrush="#8490A1" VerticalAlignment="Center" BorderThickness="1 1 0 1">
+            <Grid Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <controls:LeftComboBox Grid.ColumnSpan="3" Height="0" x:Name="_cbSubMenu" VerticalAlignment="Bottom" >
+                    <wpfBugFix:UnclickableBorder x:Name="_unclickableBorder" Margin="-4, -2, -4, -2" Focusable="False" BorderThickness="1" BorderBrush="#9AA6B6" FocusVisualStyle="{x:Null}">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Offset="0" Color="#DEDEDE" />
+                                <GradientStop Offset="0.5" Color="White" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Grid Name="_gridSearchContent" MaxWidth="{Binding Path=ActualWidth, ElementName=_cbSubMenu}" Width="{Binding Path=ActualWidth, ElementName=_cbSubMenu}" Margin="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition />
+                                <!--<ColumnDefinition Width="auto" />-->
+                            </Grid.ColumnDefinitions>
+                        </Grid>
+                    </wpfBugFix:UnclickableBorder>
+                </controls:LeftComboBox>
+                <TextBox AcceptsReturn="False" AcceptsTab="False" Padding="3" BorderThickness="0" Name="_searchTextBox" VerticalAlignment="Center" />
+                <TextBlock  Name="_labelFind" Margin="3 0 0 0" VerticalAlignment="Center" Text="Search..." FontStyle="Italic" Foreground="Gray" IsHitTestVisible="False" />
+                <styles:FancyButton Background="{Binding ElementName=_searchTextBox, Path=Background}" Grid.Column="1" x:Name="_buttonResetSearch" HorizontalAlignment="Right" ImagePath="reset.png" />
+                <Border Grid.Column="2" HorizontalAlignment="Right" BorderBrush="White" Width="{Binding Source={x:Static SystemParameters.VerticalScrollBarWidth}}" BorderThickness="0">
+                    <styles:FancyButton x:Name="_buttonOpenSubMenu" Background="{Binding ElementName=_searchTextBox, Path=Background}" HorizontalAlignment="Right" Width="{Binding Source={x:Static SystemParameters.VerticalScrollBarWidth}}" ImagePath="smallArrow.png" />
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
