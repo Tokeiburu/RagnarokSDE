@@ -30,8 +30,9 @@ namespace SDE.Editor.Generic.Core {
 			_dbs.Add(new DbItemCombos());
 			_dbs.Add(new DbItemCombos2());
 			//_dbs.Add(new DbItemGroups());
-			_dbs.Add(new DbMobGroups());
+			//_dbs.Add(new DbMobGroups());
 			_dbs.Add(new DbSkills());
+			_dbs.Add(new DbSkills2());
 			_dbs.Add(new DbSkillRequirements());
 			_dbs.Add(new DbMobs());
 			_dbs.Add(new DbMobs2());
@@ -40,6 +41,7 @@ namespace SDE.Editor.Generic.Core {
 			_dbs.Add(new DbQuest());
 			_dbs.Add(new DbQuest2());
 			_dbs.Add(new DbCheevo());
+			_dbs.Add(new DbCheevo2());
 			_dbs.Add(new DbHomuns());
 			_dbs.Add(new DbHomuns2());
 			_dbs.Add(new DbPet());
@@ -47,7 +49,7 @@ namespace SDE.Editor.Generic.Core {
 			_dbs.Add(new DbCastle());
 			_dbs.Add(new DbCastle2());
 			_dbs.Add(new DbConstants());
-
+			
 			_dbs.ForEach(p => p.Holder = this);
 			_dbs.ForEach(p => p.Init(database));
 		}

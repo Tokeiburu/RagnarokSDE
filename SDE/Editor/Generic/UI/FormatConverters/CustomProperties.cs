@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -10,18 +11,25 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Database;
 using ErrorManager;
+using SDE.ApplicationConfiguration;
 using SDE.Core;
+using SDE.Editor.Engines;
 using SDE.Editor.Engines.LuaEngine;
 using SDE.Editor.Engines.Parsers;
 using SDE.Editor.Engines.TabNavigationEngine;
 using SDE.Editor.Generic.Lists;
+using SDE.Editor.Generic.Parsers;
+using SDE.Editor.Generic.Parsers.Generic;
 using SDE.Editor.Generic.TabsMakerCore;
 using SDE.Editor.Generic.UI.CustomControls;
+using SDE.Editor.Jobs;
 using SDE.View;
 using SDE.View.Dialogs;
 using TokeiLibrary;
 using TokeiLibrary.WPF;
 using TokeiLibrary.WPF.Styles;
+using Utilities;
+using Utilities.Extension;
 using Utilities.Services;
 using Extensions = SDE.Core.Extensions;
 
@@ -32,6 +40,23 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 		protected Grid _grid;
 		protected GDbTabWrapper<TKey, ReadableTuple<TKey>> _tab;
 		protected TextBox _textBox;
+
+		public delegate void CustomPropertyHandler();
+
+		public event CustomPropertyHandler TextChanged;
+
+		protected virtual void OnTextChanged() {
+			CustomPropertyHandler handler = TextChanged;
+			if (handler != null) handler();
+		}
+
+		public TextBox TextBox {
+			get { return _textBox; }
+		}
+
+		public Grid Grid {
+			get { return _grid; }
+		}
 
 		public override void Init(GDbTabWrapper<TKey, ReadableTuple<TKey>> tab, DisplayableProperty<TKey, ReadableTuple<TKey>> dp) {
 			if (_textBox == null)
@@ -84,10 +109,14 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 					_textBox.Text = sval;
 					_textBox.UndoLimit = 0;
 					_textBox.UndoLimit = int.MaxValue;
+					_onUpdateAction();
 				}
 				catch {
 				}
 			});
+		}
+
+		protected virtual void _onUpdateAction() {
 		}
 
 		protected virtual void _onInitalized() {
@@ -104,9 +133,6 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 			}
 		}
 
-		protected virtual void _onTextChanged() {
-		}
-
 		protected virtual void _textBox_TextChanged(object sender, TextChangedEventArgs e) {
 			try {
 				if (_tab.ItemsEventsDisabled) return;
@@ -116,7 +142,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 						_displayableProperty.ApplyDicoCommand(_tab, _displayableProperty.DicoConfiguration.ListView, (ReadableTuple<TKey>)_tab.List.SelectedItem, _displayableProperty.DicoConfiguration.AttributeTable, (ReadableTuple<TKey>)_displayableProperty.DicoConfiguration.ListView.SelectedItem, _attribute, _textBox.Text);
 					else
 						DisplayableProperty<TKey, ReadableTuple<TKey>>.ApplyCommand(_tab, _attribute, _textBox.Text);
-					_onTextChanged();
+					OnTextChanged();
 				}
 			}
 			catch (Exception err) {
@@ -324,6 +350,119 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 		}
 	}
 
+	public class SubTypeProperty<TKey> : FormatConverter<TKey, ReadableTuple<TKey>> {
+		protected Grid _grid;
+		protected GDbTabWrapper<TKey, ReadableTuple<TKey>> _tab;
+		protected ComboBox _comboBox;
+
+		public override void Init(GDbTabWrapper<TKey, ReadableTuple<TKey>> tab, DisplayableProperty<TKey, ReadableTuple<TKey>> dp) {
+			var flagsData = FlagsManager.GetFlag<WeaponType>();
+			List<long> values = flagsData.Values.Select(p => p.Value).ToList();
+
+			_comboBox = new ComboBox();
+			_comboBox.Margin = new Thickness(3);
+			var items = flagsData.Values.Select(p => _getDescription(p.Description)).ToList();
+			_comboBox.ItemsSource = items;
+
+			_comboBox.SelectionChanged += delegate {
+				if (tab.ItemsEventsDisabled) return;
+
+				try {
+					if (_comboBox.SelectedIndex < 0)
+						DisplayableProperty<TKey, ReadableTuple<TKey>>.ApplyCommand(tab, ServerItemAttributes.SubType, values[0], false);
+					else
+						DisplayableProperty<TKey, ReadableTuple<TKey>>.ApplyCommand(tab, ServerItemAttributes.SubType, values[_comboBox.SelectedIndex], false);
+				}
+				catch {
+					DisplayableProperty<TKey, ReadableTuple<TKey>>.ApplyCommand(tab, ServerItemAttributes.SubType, values[0], false);
+				}
+			};
+
+			_tab = tab;
+
+			var cbType = dp.GetComponent<ComboBox>(0, 4);
+			var lastType = -1;
+
+			cbType.SelectionChanged += delegate {
+				var tuple = _tab._listView.SelectedItem as ReadableTuple<int>;
+				
+				if (tuple != null) {
+					TypeType type = (TypeType)tuple.GetValue<int>(ServerItemAttributes.Type);
+					if (type == TypeType.Weapon) {
+						flagsData = FlagsManager.GetFlag<WeaponType>();
+						_comboBox.IsEnabled = true;
+
+						if (lastType == 0)
+							return;
+
+						_comboBox.IsEnabled = true;
+
+						values = flagsData.Values.Select(p => p.Value).ToList();
+
+						items = flagsData.Values.Select(p => _getDescription(p.Description) ?? p.Name).ToList();
+
+						_comboBox.ItemsSource = items;
+						lastType = 0;
+					}
+					else if (type == TypeType.Ammo) {
+						flagsData = FlagsManager.GetFlag<AmmoType>();
+						_comboBox.IsEnabled = true;
+
+						if (lastType == 1)
+							return;
+
+						values = flagsData.Values.Select(p => p.Value).ToList();
+
+						items = flagsData.Values.Select(p => _getDescription(p.Description) ?? p.Name).ToList();
+
+						_comboBox.ItemsSource = items;
+						lastType = 1;
+					}
+					else {
+						_comboBox.IsEnabled = false;
+					}
+				}
+			};
+			
+			dp.AddResetField(_comboBox);
+
+			_grid = new Grid();
+			_grid.SetValue(Grid.RowProperty, _row);
+			_grid.SetValue(Grid.ColumnProperty, _column);
+			_grid.ColumnDefinitions.Add(new ColumnDefinition());
+			_grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(-1, GridUnitType.Auto) });
+
+			_grid.Children.Add(_comboBox);
+
+			_parent = _parent ?? tab.PropertiesGrid;
+			_parent.Children.Add(_grid);
+
+			dp.AddUpdateAction(new Action<ReadableTuple<TKey>>(item => _comboBox.Dispatch(delegate {
+				try {
+					_comboBox.SelectedIndex = values.IndexOf(item.GetValue<int>(ServerItemAttributes.SubType));
+				}
+				catch {
+					_comboBox.SelectedIndex = -1;
+				}
+			})));
+
+			_onInitalized();
+		}
+
+		private string _getDescription(string desc) {
+			if (desc == null)
+				return null;
+
+			if (desc.Contains("#")) {
+				return SdeAppConfiguration.RevertItemTypes ? desc.Split('#')[1] : desc.Split('#')[0];
+			}
+			return desc;
+		}
+
+		protected virtual void _onInitalized() {
+		}
+	}
+
 	public class LevelEditProperty3<TKey> : LevelEditPropertyAny<TKey> {
 		public LevelEditProperty3() {
 			_maxVal = 3;
@@ -336,18 +475,24 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 		}
 	}
 
+	public class LevelEditPropertyItem10<TKey> : LevelEditPropertyAny<TKey> {
+		public LevelEditPropertyItem10() {
+			_maxVal = 10;
+		}
+	}
+
 	public class LevelEditPropertyAny<TKey> : CustomProperty<TKey> {
 		protected int _maxVal;
 
 		public override void ButtonClicked() {
-			LevelEditDialog dialog = new LevelEditDialog(_textBox.Text, _maxVal, false, false, false);
+			LevelEditDialog dialog = new LevelEditDialog(_textBox.Text, _maxVal, LevelEditFlag.None);
 			InputWindowHelper.Edit(dialog, _textBox, _button);
 		}
 	}
 
 	public class LevelEditProperty<TKey> : CustomProperty<TKey> {
 		public override void ButtonClicked() {
-			var db = _tab.GetTable<int>(ServerDbs.Skills);
+			var db = _tab.GetMetaTable<int>(ServerDbs.Skills);
 			object maxVal = 20;
 			var tuple = db.TryGetTuple(((ReadableTuple<TKey>)_tab.List.SelectedItem).GetKey<int>());
 
@@ -355,14 +500,30 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 				maxVal = tuple.GetValue(ServerSkillAttributes.MaxLevel);
 			}
 
-			LevelEditDialog dialog = new LevelEditDialog(_textBox.Text, maxVal);
+			LevelEditDialog dialog = new LevelEditDialog(_textBox.Text, maxVal, LevelEditFlag.AutoFill | LevelEditFlag.ShowPreview | LevelEditFlag.ShowPreview2);
 			InputWindowHelper.Edit(dialog, _textBox, _button);
+		}
+	}
+
+	public class InvisibleProperty<TKey> : CustomProperty<TKey> {
+		protected override void _onInitalized() {
+			_button.Visibility = Visibility.Hidden;
+			_textBox.Visibility = Visibility.Hidden;
+			var label = _displayableProperty.GetLabel(_attribute.DisplayName);
+
+			if (label != null) {
+				label.SetValue(Grid.ColumnSpanProperty, 2);
+				label.FontStyle = FontStyles.Italic;
+			}
+		}
+
+		public override void ButtonClicked() {
 		}
 	}
 
 	public class LevelIntEditProperty<TKey> : CustomProperty<TKey> {
 		public override void ButtonClicked() {
-			var db = _tab.GetTable<int>(ServerDbs.Skills);
+			var db = _tab.GetMetaTable<int>(ServerDbs.Skills);
 			object maxVal = 20;
 			var tuple = db.TryGetTuple(((ReadableTuple<TKey>)_tab.List.SelectedItem).GetKey<int>());
 
@@ -370,14 +531,153 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 				maxVal = tuple.GetValue(ServerSkillAttributes.MaxLevel);
 			}
 
-			LevelEditDialog dialog = new LevelEditDialog(_textBox.Text, maxVal, false);
+			LevelEditDialog dialog = new LevelEditDialog(_textBox.Text, maxVal, LevelEditFlag.ShowPreview2 | LevelEditFlag.AutoFill);
 			InputWindowHelper.Edit(dialog, _textBox, _button);
+		}
+	}
+
+	public class PreviewSelectLevelIntEditProperty<TKey> : CustomProperty<TKey> {
+		public override void OnInitialized() {
+			var preview = new PreviewField<TKey>(this);
+			MetaTable<int> itemDb = null;
+
+			preview.PreviewFunc = delegate(Database.Tuple obj, string input, ref string output) {
+				if (itemDb == null)
+					itemDb = _tab.GetMetaTable<int>(ServerDbs.Items);
+
+				string[] data = input.Split(':');
+
+				for (int i = 0; i < data.Length; i++) {
+					if (data[i] == "0" || data[i] == "")
+						continue;
+
+					output += DbIOUtils.Id2Name(itemDb, ServerItemAttributes.Name, data[i]) + ", ";
+				}
+
+				output = output.Trim(',', ' ');
+
+				if (output == input)
+					return false;
+
+				return true;
+			};
+		}
+
+		public override void ButtonClicked() {
+			LevelEditDialog dialog = new LevelEditDialog(_textBox.Text, 10, LevelEditFlag.ShowPreview2 | LevelEditFlag.ItemDbPick);
+			InputWindowHelper.Edit(dialog, _textBox, _button, false);
+		}
+	}
+
+	public class PreviewSelectItemLevelIntEditProperty<TKey> : CustomProperty<TKey> {
+		public override void OnInitialized() {
+			var preview = new PreviewField<TKey>(this);
+			MetaTable<int> itemDb = null;
+
+			preview.PreviewFunc = delegate(Database.Tuple obj, string input, ref string output) {
+				if (itemDb == null)
+					itemDb = _tab.GetMetaTable<int>(ServerDbs.Items);
+
+				string[] data = input.Split(':');
+
+				for (int i = 0; i < data.Length; i += 2) {
+					if (data[i] == "0" || data[i] == "")
+						continue;
+
+					if (i + 1 < data.Length) {
+						output += DbIOUtils.Id2Name(itemDb, ServerItemAttributes.Name, data[i]) + " (" + Int32.Parse(data[i + 1]) + "), ";
+					}
+					else {
+						output += DbIOUtils.Id2Name(itemDb, ServerItemAttributes.Name, data[i]) + " (0), ";
+					}
+				}
+
+				output = output.Trim(',', ' ');
+
+				if (output == input)
+					return false;
+
+				return true;
+			};
+		}
+
+		public override void ButtonClicked() {
+			LevelEditDialog dialog = new LevelEditDialog(_textBox.Text, 10, LevelEditFlag.ShowPreview2 | LevelEditFlag.ItemDbPick | LevelEditFlag.ShowAmount);
+			InputWindowHelper.Edit(dialog, _textBox, _button, false);
+		}
+	}
+
+	public class LevelElementEditProperty<TKey, TEnum> : CustomProperty<TKey> {
+		private ComboBox _comboBox = new ComboBox();
+		private List<int> _values;
+		private bool _eventsEnabled;
+
+		public override void ButtonClicked() {
+			var db = _tab.GetMetaTable<int>(ServerDbs.Skills);
+			object maxVal = 20;
+			var tuple = db.TryGetTuple(((ReadableTuple<TKey>)_tab.List.SelectedItem).GetKey<int>());
+
+			if (tuple != null) {
+				maxVal = tuple.GetValue(ServerSkillAttributes.MaxLevel);
+			}
+
+			LevelEnumDialog dialog = new LevelEnumDialog(_textBox.Text, maxVal, true, typeof(TEnum));
+			InputWindowHelper.Edit(dialog, _textBox, _button);
+		}
+
+		protected override void _onInitalized() {
+			_values = Enum.GetValues(typeof(TEnum)).Cast<int>().ToList();
+			_comboBox.SelectionChanged += new SelectionChangedEventHandler(_comboBox_SelectionChanged);
+
+			_comboBox.SetValue(Grid.ColumnProperty, 0);
+			_comboBox.VerticalAlignment = VerticalAlignment.Center;
+			_textBox.Visibility = Visibility.Hidden;
+			_comboBox.Visibility = Visibility.Visible;
+			_comboBox.Margin = new Thickness(3);
+			_comboBox.ItemsSource = Enum.GetValues(typeof(TEnum)).Cast<Enum>().Select(Description.GetDescription);
+			_grid.Children.Add(_comboBox);
+			TextChanged += _onUpdateAction;
+			base._onInitalized();
+		}
+
+		private void _comboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+			if (!_eventsEnabled)
+				return;
+
+			if (_comboBox.SelectedIndex == -1)
+				return;
+
+			try {
+				_textBox.Text = Constants.Int2String(_values[_comboBox.SelectedIndex], typeof(TEnum));
+			}
+			catch {
+			}
+		}
+
+		protected override void _onUpdateAction() {
+			if (_textBox.Text.Contains(":")) {
+				_comboBox.Visibility = Visibility.Hidden;
+				_textBox.Visibility = Visibility.Visible;
+			}
+			else {
+				_textBox.Visibility = Visibility.Hidden;
+				_comboBox.Visibility = Visibility.Visible;
+
+				_eventsEnabled = false;
+				try {
+					_comboBox.SelectedIndex = _values.IndexOf((int)(object)Constants.FromString<TEnum>(_textBox.Text));
+				}
+				catch {
+					_comboBox.SelectedIndex = -1;
+				}
+				_eventsEnabled = true;
+			}
 		}
 	}
 
 	public class LevelIntEditAnyProperty<TKey> : CustomProperty<TKey> {
 		public override void ButtonClicked() {
-			LevelEditDialog dialog = new LevelEditDialog(_textBox.Text, 30, false, false, false);
+			LevelEditDialog dialog = new LevelEditDialog(_textBox.Text, 30, LevelEditFlag.None);
 			InputWindowHelper.Edit(dialog, _textBox, _button);
 		}
 	}
@@ -408,18 +708,69 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 					if (_textBox.Text.Contains(":")) {
 						string[] values = _textBox.Text.Split(new char[] { ':' }, 2);
 
-						var oldTradeOverride = tuple.GetIntNoThrow(ServerItemAttributes.TradeOverride);
+						//var oldTradeOverride = tuple.GetIntNoThrow(ServerItemAttributes.TradeOverride);
 						var oldTradeFlag = tuple.GetIntNoThrow(ServerItemAttributes.TradeFlag);
 
-						var curTradeOverride = Utilities.FormatConverters.IntOrHexConverter(values[0]);
+						//var curTradeOverride = Utilities.FormatConverters.IntOrHexConverter(values[0]);
 						var curTradeFlag = Utilities.FormatConverters.IntOrHexConverter(values[1]);
 
-						if (oldTradeOverride != curTradeOverride) {
-							DisplayableProperty<int, ReadableTuple<int>>.ApplyCommand(_tab, ServerItemAttributes.TradeOverride, values[0]);
-						}
+						//if (oldTradeOverride != curTradeOverride) {
+						//	DisplayableProperty<int, ReadableTuple<int>>.ApplyCommand(_tab, ServerItemAttributes.TradeOverride, values[0]);
+						//}
 
 						if (oldTradeFlag != curTradeFlag) {
 							DisplayableProperty<int, ReadableTuple<int>>.ApplyCommand(_tab, ServerItemAttributes.TradeFlag, values[1]);
+						}
+					}
+					else {
+						DisplayableProperty<int, ReadableTuple<int>>.ApplyCommand(_tab, _attribute, _textBox.Text);
+					}
+				}
+			}
+			catch (Exception err) {
+				ErrorHandler.HandleException(err);
+			}
+		}
+	}
+
+	public class NouseProperty : CustomProperty<int> {
+		protected override void _onInitalized() {
+			_textBox.Visibility = Visibility.Collapsed;
+			_button.Width = double.NaN;
+			_button.Content = "Edit...";
+			_button.Margin = new Thickness(3);
+			_grid.ColumnDefinitions.RemoveAt(1);
+		}
+
+		public override void ButtonClicked() {
+			NouseEditDialog dialog = new NouseEditDialog(_tab.List.SelectedItem as ReadableTuple<int>);
+			InputWindowHelper.Edit(dialog, _textBox, _button);
+		}
+
+		protected override void _textBox_TextChanged(object sender, TextChangedEventArgs e) {
+			try {
+				if (_tab.ItemsEventsDisabled) return;
+
+				if (_enableEvents) {
+					var tuple = _tab.List.SelectedItem as ReadableTuple<int>;
+
+					if (tuple == null) return;
+
+					if (_textBox.Text.Contains(":")) {
+						string[] values = _textBox.Text.Split(new char[] { ':' }, 2);
+
+						//var oldNoUseOverride = tuple.GetIntNoThrow(ServerItemAttributes.NoUseOverride);
+						var oldNoUseFlag = tuple.GetIntNoThrow(ServerItemAttributes.NoUseFlag);
+
+						//var curNoUseOverride = Utilities.FormatConverters.IntOrHexConverter(values[0]);
+						var curNoUseFlag = Utilities.FormatConverters.IntOrHexConverter(values[1]);
+
+						//if (oldNoUseOverride != curNoUseOverride) {
+						//	DisplayableProperty<int, ReadableTuple<int>>.ApplyCommand(_tab, ServerItemAttributes.NoUseOverride, values[0]);
+						//}
+
+						if (oldNoUseFlag != curNoUseFlag) {
+							DisplayableProperty<int, ReadableTuple<int>>.ApplyCommand(_tab, ServerItemAttributes.NoUseFlag, values[1]);
 						}
 					}
 					else {
@@ -481,6 +832,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 				CheckBox box = new CheckBox();
 				box.MinWidth = 140;
 				box.Content = new TextBlock { Text = _constStrings[i], VerticalAlignment = VerticalAlignment.Center, TextWrapping = TextWrapping.Wrap };
+				box.SetValue(TextBlock.ForegroundProperty, Application.Current.Resources["TextForeground"] as Brush);
 				box.Margin = new Thickness(3);
 				box.VerticalAlignment = VerticalAlignment.Center;
 				box.SetValue(Grid.RowProperty, i);
@@ -517,7 +869,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 				return;
 
 			int newVal = _boxes.Skip(1).Where(p => p.IsChecked == true).Sum(p => (int)p.Tag);
-			var table = _tab.GetTable<int>(ServerDbs.Skills);
+			var table = _tab.GetMetaTable<int>(ServerDbs.Skills);
 
 			table.Commands.Set(_tab.List.SelectedItem as ReadableTuple<int>, _attribute, newVal);
 			_boxes[0].IsChecked = newVal == 0;
@@ -573,6 +925,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 
 		protected override void _onInitalized() {
 			_button.Content = new Image { Source = ApplicationManager.PreloadResourceImage("arrowdown.png"), Stretch = Stretch.None };
+			TextChanged += () => OnUpdate(null);
 		}
 
 		private void _init() {
@@ -592,29 +945,25 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 			_textPreview.Margin = new Thickness(7, 0, 4, 0);
 			_textPreview.VerticalAlignment = VerticalAlignment.Center;
 			_textPreview.TextAlignment = TextAlignment.Left;
-			_textPreview.Foreground = new SolidColorBrush(Color.FromArgb(255, 140, 140, 140));
+			_textPreview.Foreground = Application.Current.Resources["TextBoxOverlayBrush"] as SolidColorBrush;
 			_textPreview.SetValue(Grid.ColumnProperty, 0);
 			_textPreview.IsHitTestVisible = false;
 
 			_grid.Children.Add(_textPreview);
 			_textBox.GotFocus += delegate {
 				_textPreview.Visibility = Visibility.Collapsed;
-				_textBox.Foreground = Brushes.Black;
+				_textBox.Foreground = Application.Current.Resources["TextForeground"] as Brush;
 			};
 			_textBox.LostFocus += delegate { OnUpdate(null); };
 
 			_isLoaded = true;
 		}
 
-		protected override void _onTextChanged() {
-			OnUpdate(null);
-		}
-
 		public override void OnInitialized() {
 			_displayableProperty.AddUpdateAction(_onUpdate);
 		}
 
-		private void OnUpdate(Tuple obj) {
+		private void OnUpdate(Database.Tuple obj) {
 			try {
 				if (!_isLoaded)
 					_init();
@@ -624,35 +973,35 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 				string text = obj == null ? _textBox.Text : obj.GetValue<string>(_attribute);
 
 				if (!Int32.TryParse(text, out value)) {
-					_textBox.Foreground = Brushes.Black;
+					_textBox.Foreground = Application.Current.Resources["TextForeground"] as Brush;
 					_textPreview.Visibility = Visibility.Collapsed;
 					return;
 				}
 
 				if (value <= 0) {
-					_textBox.Foreground = Brushes.Black;
+					_textBox.Foreground = Application.Current.Resources["TextForeground"] as Brush;
 					_textPreview.Visibility = Visibility.Collapsed;
 					return;
 				}
 
-				Tuple tuple = _table.TryGetTuple(value);
+				Database.Tuple tuple = _table.TryGetTuple(value);
 
 				if (tuple != null) {
 					val = tuple.GetValue<string>(ViewConstantsAttributes.Value);
 				}
 
 				if (_textBox.IsFocused) {
-					_textBox.Foreground = Brushes.Black;
+					_textBox.Foreground = Application.Current.Resources["TextForeground"] as Brush;
 					_textPreview.Visibility = Visibility.Collapsed;
 					return;
 				}
 
-				_textBox.Foreground = Brushes.White;
+				_textBox.Foreground = Application.Current.Resources["UIThemeTextBoxBackgroundColor"] as Brush;
 				_textPreview.Text = val + " (" + value + ")";
 				_textPreview.Visibility = Visibility.Visible;
 			}
 			catch {
-				_textBox.Foreground = Brushes.Black;
+				_textBox.Foreground = Application.Current.Resources["TextForeground"] as Brush;
 				_textPreview.Visibility = Visibility.Collapsed;
 			}
 		}
@@ -683,7 +1032,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 			_button.ContextMenu.IsOpen = true;
 		}
 
-		private void _onUpdate(Tuple tuple) {
+		private void _onUpdate(Database.Tuple tuple) {
 			if (_textBox.IsFocused)
 				return;
 
@@ -698,6 +1047,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 
 		protected override void _onInitalized() {
 			_button.Content = new Image { Source = ApplicationManager.PreloadResourceImage("arrowdown.png"), Stretch = Stretch.None };
+			TextChanged += () => OnUpdate(null);
 		}
 
 		private void _init() {
@@ -716,36 +1066,32 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 			selectFromList.Icon = new Image { Source = ApplicationManager.PreloadResourceImage("treeList.png"), Stretch = Stretch.None };
 			selectFromList.Click += _selectFromList_Click;
 
-			_button.ContextMenu.Items.Add(_select);
 			_button.ContextMenu.Items.Add(selectFromList);
+			_button.ContextMenu.Items.Add(_select);
 
 			_textPreview = new TextBlock();
 			_textPreview.Margin = new Thickness(7, 0, 4, 0);
 			_textPreview.VerticalAlignment = VerticalAlignment.Center;
 			_textPreview.TextAlignment = TextAlignment.Left;
-			_textPreview.Foreground = new SolidColorBrush(Color.FromArgb(255, 140, 140, 140));
+			_textPreview.Foreground = Application.Current.Resources["TextBoxOverlayBrush"] as SolidColorBrush;
 			_textPreview.SetValue(Grid.ColumnProperty, 0);
 			_textPreview.IsHitTestVisible = false;
 
 			_grid.Children.Add(_textPreview);
 			_textBox.GotFocus += delegate {
 				_textPreview.Visibility = Visibility.Collapsed;
-				_textBox.Foreground = Brushes.Black;
+				_textBox.Foreground = Application.Current.Resources["TextForeground"] as Brush;
 			};
 			_textBox.LostFocus += delegate { OnUpdate(null); };
 
 			_isLoaded = true;
 		}
 
-		protected override void _onTextChanged() {
-			OnUpdate(null);
-		}
-
 		public override void OnInitialized() {
 			_displayableProperty.AddUpdateAction(_onUpdate);
 		}
 
-		private void OnUpdate(Tuple obj) {
+		private void OnUpdate(Database.Tuple obj) {
 			try {
 				if (!_isLoaded)
 					_init();
@@ -755,37 +1101,37 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 				string text = obj == null ? _textBox.Text : obj.GetValue<string>(_attribute);
 
 				if (!Int32.TryParse(text, out value)) {
-					_textBox.Foreground = Brushes.Black;
+					_textBox.Foreground = Application.Current.Resources["TextForeground"] as Brush;
 					_textPreview.Visibility = Visibility.Collapsed;
 					return;
 				}
 
 				if (value <= 0) {
-					_textBox.Foreground = Brushes.Black;
+					_textBox.Foreground = Application.Current.Resources["TextForeground"] as Brush;
 					_textPreview.Visibility = Visibility.Collapsed;
 					return;
 				}
 				ServerDbs sdb = (ServerDbs)_attribute.AttachedObject;
 
 				MetaTable<int> table = _tab.ProjectDatabase.GetMetaTable<int>(sdb);
-				Tuple tuple = table.TryGetTuple(value);
+				Database.Tuple tuple = table.TryGetTuple(value);
 
 				if (tuple != null) {
 					val = tuple.GetValue(table.AttributeList.Attributes.FirstOrDefault(p => p.IsDisplayAttribute) ?? table.AttributeList.Attributes[1]).ToString();
 				}
 
 				if (_textBox.IsFocused) {
-					_textBox.Foreground = Brushes.Black;
+					_textBox.Foreground = Application.Current.Resources["TextForeground"] as Brush;
 					_textPreview.Visibility = Visibility.Collapsed;
 					return;
 				}
 
-				_textBox.Foreground = Brushes.White;
+				_textBox.Foreground = Application.Current.Resources["UIThemeTextBoxBackgroundColor"] as Brush;
 				_textPreview.Text = val + " (" + value + ")";
 				_textPreview.Visibility = Visibility.Visible;
 			}
 			catch {
-				_textBox.Foreground = Brushes.Black;
+				_textBox.Foreground = Application.Current.Resources["TextForeground"] as Brush;
 				_textPreview.Visibility = Visibility.Collapsed;
 			}
 		}
@@ -827,7 +1173,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 
 			int value;
 
-			((MenuItem)_button.ContextMenu.Items[0]).IsEnabled = Int32.TryParse(_textBox.Text, out value) && value > 0;
+			((MenuItem)_button.ContextMenu.Items[1]).IsEnabled = Int32.TryParse(_textBox.Text, out value) && value > 0;
 
 			try {
 				string val = "Unknown";
@@ -838,7 +1184,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 					ServerDbs sdb = (ServerDbs)_attribute.AttachedObject;
 
 					MetaTable<int> table = _tab.ProjectDatabase.GetMetaTable<int>(sdb);
-					Tuple tuple = table.TryGetTuple(value);
+					Database.Tuple tuple = table.TryGetTuple(value);
 
 					if (tuple != null) {
 						val = tuple.GetValue(table.AttributeList.Attributes.FirstOrDefault(p => p.IsDisplayAttribute) ?? table.AttributeList.Attributes[1]).ToString();
@@ -853,7 +1199,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 			_button.ContextMenu.IsOpen = true;
 		}
 
-		private void _onUpdate(Tuple tuple) {
+		private void _onUpdate(Database.Tuple tuple) {
 			if (_textBox.IsFocused)
 				return;
 
@@ -875,6 +1221,67 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 			try {
 				var name = tuple.GetValue<string>(ServerItemAttributes.AegisName).Replace("_", " ").Trim(' ');
 				_textBox.Text = name;
+			}
+			catch (Exception err) {
+				ErrorHandler.HandleException(err);
+			}
+		}
+	}
+
+	public class AutoDisplayItemInfoNameProperty<TKey> : CustomProperty<TKey> {
+		private PreviewField<TKey> _preview;
+
+		protected override void _onInitalized() {
+			_button.Content = new Image { Source = ApplicationManager.PreloadResourceImage("refresh.png"), Stretch = Stretch.None };
+
+			var properties = _displayableProperty.FormattedProperties.OfType<AutoDisplayNameProperty<TKey>>().FirstOrDefault();
+			//var x = properties.FirstOrDefault(p => (int)p.Item1.GetValue(Grid.RowProperty) == row && (int)p.Item1.GetValue(Grid.ColumnProperty) == column);
+			//var comp = _displayableProperty.FormattedProperties.FirstOrDefault(p =Page(1, 4) as CustomProperty<TKey>;
+
+			if (properties != null) {
+				properties.TextBox.TextChanged += delegate {
+					if (_tab.ItemsEventsDisabled) return;
+					
+					_preview.OnUpdate(null);
+				};
+			}
+		}
+
+		public override void OnInitialized() {
+			_preview = new PreviewField<TKey>(this);
+
+			_preview.PreviewFunc = delegate(Database.Tuple obj, string input, ref string output) {
+				if (input != "") {
+					return false;
+				}
+
+				ReadableTuple<TKey> tuple = _tab.List.SelectedItem as ReadableTuple<TKey>;
+
+				if (tuple == null)
+					return false;
+
+				output = tuple.GetValue<string>(ServerItemAttributes.Name);
+
+				if (output == "")
+					return false;
+
+				return true;
+			};
+		}
+
+		public override void ButtonClicked() {
+			ReadableTuple<TKey> tuple = _tab.List.SelectedItem as ReadableTuple<TKey>;
+			var clientdb = SdeEditor.Instance.ProjectDatabase.GetTable<int>(ServerDbs.CItems);
+
+			if (tuple == null)
+				return;
+
+			try {
+				var tup = clientdb.TryGetTuple(tuple.GetKey<int>());
+
+				if (tup != null) {
+					_textBox.Text = tup.GetValue<string>(ClientItemAttributes.IdentifiedDisplayName);
+				}
 			}
 			catch (Exception err) {
 				ErrorHandler.HandleException(err);
@@ -925,7 +1332,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 				return;
 
 			var dbMobs = _tab.GetMetaTable<int>(ServerDbs.Mobs);
-			var dbSkills = _tab.GetTable<int>(ServerDbs.Skills);
+			var dbSkills = _tab.GetMetaTable<int>(ServerDbs.Skills);
 
 			try {
 				string mobName = "";
@@ -999,7 +1406,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 				var tupleMob = dbMobs.TryGetTuple(tuple.GetKey<int>());
 
 				if (tupleMob != null) {
-					name = tupleMob.GetValue<string>(ServerMobAttributes.SpriteName);
+					name = tupleMob.GetValue<string>(ServerMobAttributes.AegisName);
 				}
 
 				_textBox.Text = name;
@@ -1042,6 +1449,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 
 	public class AutokRONameProperty<TKey> : CustomProperty<TKey> {
 		protected override void _onInitalized() {
+			Grid.SetValue(Grid.ColumnSpanProperty, 3);
 			_button.Content = new Image { Source = ApplicationManager.PreloadResourceImage("refresh.png"), Stretch = Stretch.None };
 		}
 
@@ -1076,6 +1484,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 
 	public class AutoiRONameProperty<TKey> : CustomProperty<TKey> {
 		protected override void _onInitalized() {
+			Grid.SetValue(Grid.ColumnSpanProperty, 3);
 			_button.Content = new Image { Source = ApplicationManager.PreloadResourceImage("refresh.png"), Stretch = Stretch.None };
 		}
 
@@ -1093,6 +1502,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 		private MetaTable<int> _mobDb;
 
 		protected override void _onInitalized() {
+			Grid.SetValue(Grid.ColumnSpanProperty, 3);
 			_textBox.Loaded += delegate { _button.IsEnabled = ProjectConfiguration.SynchronizeWithClientDatabases; };
 
 			_button.Content = new Image { Source = ApplicationManager.PreloadResourceImage("refresh.png"), Stretch = Stretch.None };
@@ -1121,11 +1531,11 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 
 				var current = _textBox.Text.ToUpper();
 
-				if (_mobDb.FastItems.Count(p => p.GetStringValue(ServerMobAttributes.SpriteName.Index).ToUpper() == current) > 1) {
-					WpfUtilities.TextBoxError(_textBox);
+				if (_mobDb.FastItems.Count(p => p.GetStringValue(ServerMobAttributes.AegisName.Index).ToUpper() == current) > 1) {
+					_textBox.Dispatch(p => p.Background = Application.Current.Resources["GSearchEngineError"] as Brush);
 				}
 				else {
-					WpfUtilities.TextBoxOk(_textBox);
+					_textBox.Dispatch(p => p.Background = Application.Current.Resources["GSearchEngineOk"] as Brush);
 				}
 
 				var sid = tuple.GetKey<int>().ToString(CultureInfo.InvariantCulture);
@@ -1135,7 +1545,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 				}
 			}
 			catch (Exception err) {
-				WpfUtilities.TextBoxError(_textBox);
+				_textBox.Dispatch(p => p.Background = Application.Current.Resources["GSearchEngineError"] as Brush);
 				ErrorHandler.HandleException(err);
 			}
 		}
@@ -1152,7 +1562,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 
 			try {
 				var current = LuaHelper.LatinOnly(tuple.GetValue<string>(ServerMobAttributes.KRoName).ToUpper());
-				var count = _mobDb.FastItems.Count(p => p.Key != key && p.GetStringValue(ServerMobAttributes.SpriteName.Index).ToUpper() == current);
+				var count = _mobDb.FastItems.Count(p => p.Key != key && p.GetStringValue(ServerMobAttributes.AegisName.Index).ToUpper() == current);
 
 				if (count == 0) {
 					_textBox.Text = current;
@@ -1161,7 +1571,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 
 				current = current + "_";
 
-				count = _mobDb.FastItems.Count(p => p.Key != key && p.GetStringValue(ServerMobAttributes.SpriteName.Index).ToUpper() == current);
+				count = _mobDb.FastItems.Count(p => p.Key != key && p.GetStringValue(ServerMobAttributes.AegisName.Index).ToUpper() == current);
 
 				if (count == 0) {
 					_textBox.Text = current;
@@ -1172,7 +1582,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 
 				int i = 0;
 				var output = String.Format(sprite, i);
-				while (_mobDb.FastItems.Count(p => p.Key != key && p.GetStringValue(ServerMobAttributes.SpriteName.Index).ToUpper() == output) != 0) {
+				while (_mobDb.FastItems.Count(p => p.Key != key && p.GetStringValue(ServerMobAttributes.AegisName.Index).ToUpper() == output) != 0) {
 					i++;
 					output = String.Format(sprite, i);
 				}
@@ -1209,57 +1619,6 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 		}
 	}
 
-	public class NouseProperty : CustomProperty<int> {
-		protected override void _onInitalized() {
-			_textBox.Visibility = Visibility.Collapsed;
-			_button.Width = double.NaN;
-			_button.Content = "Edit...";
-			_button.Margin = new Thickness(3);
-			_grid.ColumnDefinitions.RemoveAt(1);
-		}
-
-		public override void ButtonClicked() {
-			NouseEditDialog dialog = new NouseEditDialog(_tab.List.SelectedItem as ReadableTuple<int>);
-			InputWindowHelper.Edit(dialog, _textBox, _button);
-		}
-
-		protected override void _textBox_TextChanged(object sender, TextChangedEventArgs e) {
-			try {
-				if (_tab.ItemsEventsDisabled) return;
-
-				if (_enableEvents) {
-					var tuple = _tab.List.SelectedItem as ReadableTuple<int>;
-
-					if (tuple == null) return;
-
-					if (_textBox.Text.Contains(":")) {
-						string[] values = _textBox.Text.Split(new char[] { ':' }, 2);
-
-						var oldNoUseOverride = tuple.GetIntNoThrow(ServerItemAttributes.NoUseOverride);
-						var oldNoUseFlag = tuple.GetIntNoThrow(ServerItemAttributes.NoUseFlag);
-
-						var curNoUseOverride = Utilities.FormatConverters.IntOrHexConverter(values[0]);
-						var curNoUseFlag = Utilities.FormatConverters.IntOrHexConverter(values[1]);
-
-						if (oldNoUseOverride != curNoUseOverride) {
-							DisplayableProperty<int, ReadableTuple<int>>.ApplyCommand(_tab, ServerItemAttributes.NoUseOverride, values[0]);
-						}
-
-						if (oldNoUseFlag != curNoUseFlag) {
-							DisplayableProperty<int, ReadableTuple<int>>.ApplyCommand(_tab, ServerItemAttributes.NoUseFlag, values[1]);
-						}
-					}
-					else {
-						DisplayableProperty<int, ReadableTuple<int>>.ApplyCommand(_tab, _attribute, _textBox.Text);
-					}
-				}
-			}
-			catch (Exception err) {
-				ErrorHandler.HandleException(err);
-			}
-		}
-	}
-
 	public class SkillLevelPreviewProperty<TKey> : CustomProperty<TKey> {
 		public override void ButtonClicked() {
 			var dialog = new SkillLevelEditDialog(_textBox.Text);
@@ -1270,6 +1629,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 	public class RatePreviewProperty<TKey> : CustomProperty<TKey> {
 		protected override void _onInitalized() {
 			_button.MinWidth = 70;
+			_button.HorizontalAlignment = HorizontalAlignment.Stretch;
 			_textBox.TextChanged += delegate {
 				int val;
 				Int32.TryParse(_textBox.Text, out val);
@@ -1295,7 +1655,31 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 		}
 	}
 
+	public class TimePreviewProperty2<TKey> : CustomProperty<TKey> {
+		//protected override void _onInitalized() {
+		//	_button.MinWidth = 70;
+		//	_textBox.TextChanged += delegate { _button.Content = Extensions.ParseToTimeMs(_textBox.Text); };
+		//}
+
+		public override void ButtonClicked() {
+			TimeEditDialog dialog = new TimeEditDialog(_textBox.Text, true, true);
+			InputWindowHelper.Edit(dialog, _textBox, _button);
+		}
+	}
+
 	public class TimeHourPreviewProperty<TKey> : CustomProperty<TKey> {
+		protected override void _onInitalized() {
+			_button.MinWidth = 70;
+			_textBox.TextChanged += delegate { _button.Content = Extensions.ParseToTimeSeconds(_textBox.Text); };
+		}
+
+		public override void ButtonClicked() {
+			TimeEditDialog dialog = new TimeEditDialog(_textBox.Text, true);
+			InputWindowHelper.Edit(dialog, _textBox, _button);
+		}
+	}
+
+	public class TimeHourPreviewProperty2<TKey> : CustomProperty<TKey> {
 		protected override void _onInitalized() {
 			_button.MinWidth = 70;
 			_textBox.TextChanged += delegate { _button.Content = Extensions.ParseToTimeSeconds(_textBox.Text); };
@@ -1309,6 +1693,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 
 	public class CustomMobSpriteProperty : CustomProperty<int> {
 		protected override void _onInitalized() {
+			Grid.SetValue(Grid.ColumnSpanProperty, 3);
 			_textBox.Loaded += delegate { _grid.IsEnabled = ProjectConfiguration.SynchronizeWithClientDatabases; };
 
 			var cli = new CustomLinkedImage<int, ReadableTuple<int>>(_textBox, @"data\sprite\¸ó½ºÅÍ\", ".spr", 0, 3, 1, 3);
@@ -1366,8 +1751,11 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 			_grid.ColumnDefinitions.Add(new ColumnDefinition());
 
 			Label matk = new Label { Content = "Matk", Padding = new Thickness(0), Margin = new Thickness(3), VerticalAlignment = VerticalAlignment.Center, ToolTip = "Weapon's magical attack." };
+			matk.SetValue(TextBlock.ForegroundProperty, Application.Current.Resources["TextForeground"] as Brush);
 			_grid.Children.Add(matk);
 			matk.SetValue(Grid.ColumnProperty, 1);
+
+			_displayableProperty.AddLabelContextMenu(matk, ServerItemAttributes.Matk);
 
 			TextBox matkBox = new TextBox { Padding = new Thickness(0), Margin = new Thickness(3) };
 			_grid.Children.Add(matkBox);
@@ -1404,6 +1792,61 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 
 					if (_enableEvents)
 						DisplayableProperty<int, ReadableTuple<int>>.ApplyCommand(_tab, ServerItemAttributes.Matk, matkBox.Text);
+				}
+				catch (Exception err) {
+					ErrorHandler.HandleException(err);
+				}
+			};
+		}
+
+		public override void ButtonClicked() {
+		}
+	}
+
+	public class CustomItemMaxEquipProperty : CustomProperty<int> {
+		protected override void _onInitalized() {
+			base._onInitalized();
+
+			_grid.ColumnDefinitions.Clear();
+			_grid.ColumnDefinitions.Add(new ColumnDefinition());
+			_grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(-1, GridUnitType.Auto) });
+			_grid.ColumnDefinitions.Add(new ColumnDefinition());
+
+			Label matk = new Label { Content = "Max", Padding = new Thickness(0), Margin = new Thickness(3), VerticalAlignment = VerticalAlignment.Center, ToolTip = "Maximum level that can equip." };
+			matk.SetValue(TextBlock.ForegroundProperty, Application.Current.Resources["TextForeground"] as Brush);
+			_grid.Children.Add(matk);
+			matk.SetValue(Grid.ColumnProperty, 1);
+
+			_displayableProperty.AddLabelContextMenu(matk, ServerItemAttributes.EquipLevelMax);
+
+			TextBox matkBox = new TextBox { Padding = new Thickness(0), Margin = new Thickness(3) };
+			_grid.Children.Add(matkBox);
+			_grid.Children.Remove(_button);
+			matkBox.SetValue(Grid.ColumnProperty, 2);
+
+			_displayableProperty.AddUpdateAction(sTuple => matkBox.Dispatch(delegate {
+				try {
+					string sval = sTuple.GetValue<string>(ServerItemAttributes.EquipLevelMax);
+
+					if (sval == matkBox.Text)
+						return;
+
+					matkBox.Text = sval;
+					matkBox.UndoLimit = 0;
+					matkBox.UndoLimit = int.MaxValue;
+				}
+				catch {
+				}
+			}));
+
+			_displayableProperty.AddResetField(matkBox);
+
+			matkBox.TextChanged += delegate {
+				try {
+					if (_tab.ItemsEventsDisabled) return;
+
+					if (_enableEvents)
+						DisplayableProperty<int, ReadableTuple<int>>.ApplyCommand(_tab, ServerItemAttributes.EquipLevelMax, matkBox.Text);
 				}
 				catch (Exception err) {
 					ErrorHandler.HandleException(err);
@@ -1582,10 +2025,10 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 				bool success = Int32.TryParse(_textBox.Text, out ival);
 
 				if (success) {
-					WpfUtilities.TextBoxProcessing(_textBox);
+					_textBox.Dispatch(p => p.Background = Application.Current.Resources["GSearchEngineProcessing"] as Brush);
 				}
 				else {
-					WpfUtilities.TextBoxOk(_textBox);
+					_textBox.Dispatch(p => p.Background = Application.Current.Resources["GSearchEngineOk"] as Brush);
 				}
 			};
 		}
@@ -1598,7 +2041,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 				int ival;
 				bool success = Int32.TryParse(_textBox.Text, out ival);
 
-				WpfUtilities.TextBoxProcessing(_textBox);
+				_textBox.Dispatch(p => p.Background = Application.Current.Resources["GSearchEngineProcessing"] as Brush);
 				var cli = _tab.AttachedProperty["CustomLinkedImage"] as CustomLinkedImage<int, ReadableTuple<int>>;
 
 				Int32.TryParse(_textBox.Text, out ival);
@@ -1609,14 +2052,528 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 				var meta = _tab.ProjectDatabase.GetMetaTable<int>(ServerDbs.Mobs);
 
 				if (success && !meta.ContainsKey(ival)) {
-					WpfUtilities.TextBoxError(_textBox);
+					_textBox.Dispatch(p => p.Background = Application.Current.Resources["GSearchEngineError"] as Brush);
 					return;
 				}
 
 				if (!success) {
-					WpfUtilities.TextBoxOk(_textBox);
+					_textBox.Dispatch(p => p.Background = Application.Current.Resources["GSearchEngineOk"] as Brush);
 				}
 			};
+		}
+	}
+
+	public class PreviewWeaponFlagProperty<T, TEnum> : PreviewGenericFlagProperty<T, TEnum> {
+		public override bool _handleInput(ref string input, long value, List<long> valuesEnum, List<Enum> values) {
+			long vAll = valuesEnum.Aggregate<long, long>(0, (current, v) => current | v);
+
+			if (value == vAll) {
+				input = "All";
+				return true;
+			}
+
+			return false;
+		}
+	}
+
+	public class PreviewGenericFlagProperty<T, TEnum> : GenericFlagProperty<T, TEnum> {
+		public virtual bool _handleInput(ref string input, long value, List<long> valuesEnum, List<Enum> values) {
+			return false;
+		}
+
+		public override void OnInitialized() {
+			var preview = new PreviewField<T>(this);
+
+			preview.PreviewFunc = delegate(Database.Tuple obj, string input, ref string output) {
+				long value = 0;
+
+				if (input != "" && !Int64.TryParse(input, out value)) {
+					return false;
+				}
+
+				if (value < 0) {
+					return false;
+				}
+
+				List<long> valuesEnum = Enum.GetValues(typeof(TEnum)).Cast<int>().Select(p => (long)p).ToList();
+				List<Enum> values = Enum.GetValues(typeof(TEnum)).Cast<Enum>().ToList();
+
+				for (int i = 0; i < values.Count; i++) {
+					if ((valuesEnum[i] & value) == valuesEnum[i]) {
+						output += _getDisplay(Description.GetDescription(values[i])) + ", ";
+					}
+				}
+
+				output = output.Trim(',', ' ');
+
+				if (output == "")
+					output = "None";
+
+				_handleInput(ref output, value, valuesEnum, values);
+				return true;
+			};
+		}
+
+		private static string _getDisplay(string desc) {
+			if (desc.Contains("#")) {
+				return desc.Split(new char[] { '#' }, 2)[0].TrimEnd('.');
+			}
+			return desc.TrimEnd('.');
+		}
+	}
+
+	public class PreviewUpperFlagProperty<T> : GenericFlagProperty<T, UpperType> {
+		public virtual bool _handleInput(ref string input, long value, List<long> valuesEnum, List<Enum> values) {
+			return false;
+		}
+
+		public override void OnInitialized() {
+			var preview = new PreviewField<T>(this);
+
+			preview.PreviewFunc = delegate(Database.Tuple obj, string input, ref string output) {
+				//UpperType value;
+				long value = 0;
+
+				if (input != "" && !Int64.TryParse(input, out value)) {
+					return false;
+				}
+
+				if (value < 0) {
+					return false;
+				}
+
+				List<long> valuesEnum = Enum.GetValues(typeof(UpperType)).Cast<int>().Select(p => (long)p).ToList();
+				List<Enum> values = Enum.GetValues(typeof(UpperType)).Cast<Enum>().ToList();
+
+				UpperType valueT = (UpperType)value;
+
+				if ((UpperType.En0 & valueT) == UpperType.En0) {
+					output += "Normal, ";
+				}
+				if ((UpperType.En1 & valueT) == UpperType.En1) {
+					output += "Trans 2nd, ";
+				}
+				if ((UpperType.En2 & valueT) == UpperType.En2) {
+					output += "Baby, ";
+				}
+				if ((UpperType.En3 & valueT) == UpperType.En3) {
+					output += "Normal 3rd, ";
+				}
+				if ((UpperType.En4 & valueT) == UpperType.En4) {
+					output += "Trans 3rd, ";
+				}
+				if ((UpperType.En5 & valueT) == UpperType.En5) {
+					output += "Baby 3rd, ";
+				}
+
+				if (JobGroup.Trans.Id == value) {
+					output = "Trans classes";
+				}
+				else if (JobGroup.Trans2.Id == value) {
+					output = "Trans 2nd";
+				}
+				else if (JobGroup.Trans3.Id == value) {
+					output = "Trans 3rd";
+				}
+				else if (JobGroup.Baby.Id == value) {
+					output = "Baby classes";
+				}
+				else if (JobGroup.Baby2.Id == value) {
+					output = "Baby (excluding 3rd)";
+				}
+				else if (JobGroup.Baby3.Id == value) {
+					output = "Baby 3rd";
+				}
+				else if ((JobGroup.Normal2.Id | JobGroup.Normal3.Id) == value) {
+					output = "Normal only";
+				}
+				else if (JobGroup.Renewal.Id == value) {
+					output = "All 3rd classes";
+				}
+				else if (JobGroup.All.Id == value) {
+					output = "All classes";
+				}
+				else if (JobGroup.PreRenewal.Id == value) {
+					output = "All except 3rd classes";
+				}
+				else if ((JobGroup.Trans2.Id | JobGroup.Renewal.Id) == value) {
+					output = "Trans or 3rd classes";
+				}
+
+				output = output.Trim(',', ' ');
+
+				if (output == "")
+					output = "None";
+
+				_handleInput(ref output, value, valuesEnum, values);
+				return true;
+			};
+		}
+
+		private static string _getDisplay(string desc) {
+			if (desc.Contains("#")) {
+				return desc.Split(new char[] { '#' }, 2)[0].TrimEnd('.');
+			}
+			return desc.TrimEnd('.');
+		}
+	}
+
+	public class PreviewField<T> {
+		protected TextBlock _textPreview;
+		protected bool _isLoaded;
+		private CustomProperty<T> _customProperty;
+
+		public delegate bool PreviewFunctionHandler(Database.Tuple obj, string input, ref string output);
+
+		public PreviewField(CustomProperty<T> customProperty) {
+			_customProperty = customProperty;
+			_customProperty.TextChanged += () => OnUpdate(null);
+			_customProperty.DisplayableProperty.AddUpdateAction(_onUpdate);
+		}
+
+		public PreviewFunctionHandler PreviewFunc;
+
+		private void _init() {
+			_textPreview = new TextBlock();
+			_textPreview.Margin = new Thickness(7, 0, 4, 0);
+			_textPreview.VerticalAlignment = VerticalAlignment.Center;
+			_textPreview.TextAlignment = TextAlignment.Left;
+			_textPreview.Foreground = Application.Current.Resources["TextBoxOverlayBrush"] as SolidColorBrush;
+			_textPreview.SetValue(Grid.ColumnProperty, 0);
+			_textPreview.IsHitTestVisible = false;
+
+			_customProperty.Grid.Children.Add(_textPreview);
+			_customProperty.TextBox.GotFocus += delegate {
+				_textPreview.Visibility = Visibility.Collapsed;
+				_customProperty.TextBox.Foreground = Application.Current.Resources["TextForeground"] as Brush;
+			};
+
+			_customProperty.TextBox.LostFocus += delegate { OnUpdate(null); };
+			_isLoaded = true;
+		}
+
+		public void OnUpdate(Database.Tuple obj) {
+			try {
+				if (!_isLoaded)
+					_init();
+
+				string text = obj == null ? _customProperty.TextBox.Text : obj.GetValue<string>(_customProperty.Attribute);
+
+				if (PreviewFunc == null)
+					return;
+
+				string val = "";
+
+				if (!PreviewFunc(obj, text, ref val)) {
+					_customProperty.TextBox.Foreground = Application.Current.Resources["TextForeground"] as Brush;
+					_textPreview.Visibility = Visibility.Collapsed;
+					return;
+				}
+
+				if (_customProperty.TextBox.IsFocused) {
+					_customProperty.TextBox.Foreground = Application.Current.Resources["TextForeground"] as Brush;
+					_textPreview.Visibility = Visibility.Collapsed;
+					return;
+				}
+
+				_customProperty.TextBox.Foreground = Application.Current.Resources["UIThemeTextBoxBackgroundColor"] as Brush;
+				_textPreview.Text = val;
+				_textPreview.Visibility = Visibility.Visible;
+			}
+			catch {
+				_customProperty.TextBox.Foreground = Application.Current.Resources["TextForeground"] as Brush;
+				_textPreview.Visibility = Visibility.Collapsed;
+			}
+		}
+
+		private void _onUpdate(Database.Tuple tuple) {
+			if (_customProperty.TextBox.IsFocused)
+				return;
+
+			OnUpdate(tuple);
+		}
+	}
+
+	public class PreviewGenericDefinedFlagProperty<T, TEnum> : CustomProperty<T> {
+		public override void OnInitialized() {
+			var preview = new PreviewField<T>(this);
+
+			preview.PreviewFunc = delegate(Database.Tuple obj, string input, ref string output) {
+				long value = 0;
+
+				if (input != "" && !Int64.TryParse(input, out value)) {
+					return false;
+				}
+
+				if (value < 0) {
+					return false;
+				}
+
+				var flagData = FlagsManager.GetFlag<TEnum>();
+				List<long> valuesEnum = flagData.Values.Select(p => p.Value).ToList();
+
+				for (int i = 0; i < valuesEnum.Count; i++) {
+					if ((valuesEnum[i] & value) == valuesEnum[i]) {
+						output += flagData.Values[i].Name + ", ";
+					}
+				}
+
+				output = output.Trim(',', ' ');
+
+				if (output == "")
+					output = "None";
+
+				return true;
+			};
+		}
+
+		public override void ButtonClicked() {
+			GenericFlagDialog dialog = new GenericFlagDialog(this._attribute, _textBox.Text, null, FlagsManager.GetFlag<TEnum>());
+			InputWindowHelper.Edit(dialog, _textBox, _button);
+		}
+	}
+
+	public class PreviewLocationDefinedFlagProperty<T, TEnum> : CustomProperty<T> {
+		public override void OnInitialized() {
+			var preview = new PreviewField<T>(this);
+
+			preview.PreviewFunc = delegate(Database.Tuple obj, string input, ref string output) {
+				long value = 0;
+
+				if (input != "" && !Int64.TryParse(input, out value)) {
+					return false;
+				}
+
+				if (value < 0) {
+					return false;
+				}
+
+				StringBuilder builder = new StringBuilder();
+
+				if ((value & 0x000100) == 0x000100) {
+					builder.Append("Top, ");
+				}
+
+				if ((value & 0x000200) == 0x000200) {
+					builder.Append("Mid, ");
+				}
+
+				if ((value & 0x000001) == 0x000001) {
+					builder.Append("Low, ");
+				}
+
+				if ((value & 0x000040) == 0x000040) {
+					builder.Append("Shoes, ");
+				}
+
+				if ((value & (0x000002 | 0x000020)) == (0x000002 | 0x000020)) {
+					builder.Append("Both Hand, ");
+				}
+				else {
+					if ((value & 0x000002) == 0x000002) {
+						builder.Append("Right Hand, ");
+					}
+
+					if ((value & 0x000020) == 0x000020) {
+						builder.Append("Left Hand, ");
+					}
+				}
+
+				if ((value & 0x000010) == 0x000010) {
+					builder.Append("Armor, ");
+				}
+
+				if ((value & 0x000004) == 0x000004) {
+					builder.Append("Garment, ");
+				}
+
+				if ((value & (0x000080 | 0x000008)) == (0x000080 | 0x000008)) {
+					builder.Append("Both Acc, ");
+				}
+				else {
+					if ((value & 0x000080) == 0x000080) {
+						builder.Append("L. Acc, ");
+					}
+
+					if ((value & 0x000008) == 0x000008) {
+						builder.Append("R. Acc, ");
+					}
+				}
+
+				if ((value & 0x008000) == 0x008000) {
+					builder.Append("Ammo, ");
+				}
+
+				if ((value & 0x000400) == 0x000400) {
+					builder.Append("Costume Top, ");
+				}
+
+				if ((value & 0x000800) == 0x000800) {
+					builder.Append("Costume Mid, ");
+				}
+
+				if ((value & 0x001000) == 0x001000) {
+					builder.Append("Costume Low, ");
+				}
+
+				if ((value & 0x002000) == 0x002000) {
+					builder.Append("Costume Garment, ");
+				}
+
+				if ((value & 0x010000) == 0x010000) {
+					builder.Append("Shadow Armor, ");
+				}
+
+				if ((value & 0x020000) == 0x020000) {
+					builder.Append("Shadow Weapon, ");
+				}
+
+				if ((value & 0x040000) == 0x040000) {
+					builder.Append("Shadow Shield, ");
+				}
+
+				if ((value & 0x080000) == 0x080000) {
+					builder.Append("Shadow Shoes, ");
+				}
+
+				if ((value & 0x100000) == 0x100000) {
+					builder.Append("Shadow R. Acc, ");
+				}
+
+				if ((value & 0x200000) == 0x200000) {
+					builder.Append("Shadow L. Acc, ");
+				}
+
+				output = builder.ToString();
+				output = output.Trim(',', ' ');
+
+				if (output == "")
+					output = "None";
+
+				return true;
+			};
+		}
+
+		public override void ButtonClicked() {
+			GenericFlagDialog dialog = new GenericFlagDialog(_attribute, _textBox.Text, typeof(TEnum));
+			InputWindowHelper.Edit(dialog, _textBox, _button);
+		}
+	}
+
+	public class PreviewTradeDefinedFlagProperty<T, TEnum> : CustomProperty<T> {
+		public override void OnInitialized() {
+			var preview = new PreviewField<T>(this);
+
+			preview.PreviewFunc = delegate(Database.Tuple obj, string input, ref string output) {
+				long value = 0;
+
+				if (input != "" && !Int64.TryParse(input, out value)) {
+					return false;
+				}
+
+				if (value < 0) {
+					return false;
+				}
+
+				StringBuilder builder = new StringBuilder();
+
+				bool parsed = false;
+
+				if ((value & 4) == 4) {	// Default
+					
+				}
+				else if ((value & 483) == 483) {
+					builder.Append("Char bound, ");
+
+					if ((value & 8) == 8) {
+						builder.Append("can't sell");
+					}
+					else {
+						builder.Append("can sell");
+					}
+
+					parsed = true;
+				}
+				else if ((value & 467) == 467) {
+					builder.Append("Account bound, ");
+
+					if ((value & 8) == 8) {
+						builder.Append("can't sell");
+					}
+					else {
+						builder.Append("can sell");
+					}
+
+					parsed = true;
+				}
+				else if (value == 507) {
+					builder.Append("Quest bound");
+					parsed = true;
+				}
+
+				if (!parsed) {
+					var flagData = FlagsManager.GetFlag<TEnum>();
+					List<long> valuesEnum = flagData.Values.Select(p => p.Value).ToList();
+
+					for (int i = 0; i < valuesEnum.Count; i++) {
+						if ((valuesEnum[i] & value) == valuesEnum[i]) {
+							builder.Append(flagData.Values[i].Name + ", ");
+						}
+					}
+				}
+
+				output = builder.ToString();
+				output = output.Trim(',', ' ');
+
+				if (output == "")
+					output = "None";
+
+				return true;
+			};
+		}
+
+		public override void ButtonClicked() {
+			TradeEditDialog dialog = new TradeEditDialog(_tab.List.SelectedItem as ReadableTuple<int>);
+			//GenericFlagDialog dialog = new GenericFlagDialog(_attribute, _textBox.Text, null, FlagsManager.GetFlag<TEnum>());
+			InputWindowHelper.Edit(dialog, _textBox, _button);
+		}
+	}
+
+	public class PreviewNoUseDefinedFlagProperty<T> : CustomProperty<T> {
+		public override void OnInitialized() {
+			var preview = new PreviewField<T>(this);
+
+			preview.PreviewFunc = delegate(Database.Tuple obj, string input, ref string output) {
+				long value = 0;
+
+				if (input != "" && !Int64.TryParse(input, out value)) {
+					return false;
+				}
+
+				if (value < 0) {
+					return false;
+				}
+
+				StringBuilder builder = new StringBuilder();
+
+				if (value == 1) {
+					builder.Append("Sitting");
+				}
+
+				output = builder.ToString();
+				output = output.Trim(',', ' ');
+
+				if (output == "")
+					output = "None";
+
+				return true;
+			};
+		}
+
+		public override void ButtonClicked() {
+			NouseEditDialog dialog = new NouseEditDialog(_tab.List.SelectedItem as ReadableTuple<int>);
+			//GenericFlagDialog dialog = new GenericFlagDialog(_attribute, _textBox.Text, null, FlagsManager.GetFlag<TEnum>());
+			InputWindowHelper.Edit(dialog, _textBox, _button);
 		}
 	}
 
@@ -1629,12 +2586,9 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 
 	public class GenericFlagProperty<T, TEnum> : CustomProperty<T> {
 		public override void ButtonClicked() {
-			GenericFlagDialog dialog = new GenericFlagDialog(_textBox.Text, typeof(TEnum));
+			GenericFlagDialog dialog = new GenericFlagDialog(_attribute, _textBox.Text, typeof(TEnum));
 			InputWindowHelper.Edit(dialog, _textBox, _button);
 		}
-	}
-
-	public class CustomUpperProperty : GenericFlagProperty<int, UpperType> {
 	}
 
 	public class CustomSkillTypeProperty : GenericFlagProperty<int, SkillType1Type> {
@@ -1649,15 +2603,9 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 	public class CustomSkillType3Property : GenericFlagProperty<int, SkillType3Type> {
 	}
 
-	public class CustomSkillDamageProperty : GenericFlagProperty<int, SkillDamageType> {
-	}
-
 	public class CustomScriptProperty<TKey> : FlagProperty<TKey, ScriptEditDialog> {
 	}
 
 	public class CustomModeProperty : GenericFlagProperty<int, MobModeType> {
-	}
-
-	public class CustomLocationProperty : GenericFlagProperty<int, LocationType> {
 	}
 }

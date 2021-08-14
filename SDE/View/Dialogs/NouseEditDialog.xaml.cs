@@ -20,7 +20,6 @@ namespace SDE.View.Dialogs {
 	public partial class NouseEditDialog : TkWindow, IInputWindow {
 		private readonly List<CheckBox> _boxes = new List<CheckBox>();
 		private int _eventId;
-		private int _override;
 		private int _flag;
 
 		public NouseEditDialog(ReadableTuple<int> tuple)
@@ -31,26 +30,20 @@ namespace SDE.View.Dialogs {
 				"Cannot use the item while sitting."
 			}, this);
 
-			_override = tuple.GetIntNoThrow(ServerItemAttributes.NoUseOverride);
 			_flag = tuple.GetIntNoThrow(ServerItemAttributes.NoUseFlag);
 
 			_cbUpper1.Tag = 1 << 0;
 
 			_boxes.Add(_cbUpper1);
 
-			_tbOverride.Text = tuple.GetIntNoThrow(ServerItemAttributes.NoUseOverride).ToString(CultureInfo.InvariantCulture);
 			_eventId = 0;
 			_boxes.ForEach(_addEvents);
-
-			_tbOverride.TextChanged += delegate {
-				_update();
-			};
 
 			WindowStartupLocation = WindowStartupLocation.CenterOwner;
 		}
 
 		public string Text {
-			get { return _override + ":" + _flag; }
+			get { return _flag.ToString(CultureInfo.InvariantCulture); }
 		}
 
 		public Grid Footer { get { return _footerGrid; } }
@@ -82,7 +75,6 @@ namespace SDE.View.Dialogs {
 					}
 				}
 
-				_override = FormatConverters.IntOrHexConverter(_tbOverride.Text);
 				_flag = flag;
 				OnValueChanged();
 			}

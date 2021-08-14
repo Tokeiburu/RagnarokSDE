@@ -5,7 +5,7 @@
                  xmlns:TokeiLibrary="clr-namespace:TokeiLibrary;assembly=TokeiLibrary"
                  xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
                  xmlns:WPF="clr-namespace:TokeiLibrary.WPF;assembly=TokeiLibrary" Width="606" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                 xmlns:WpfBugFix="clr-namespace:TokeiLibrary.WpfBugFix;assembly=TokeiLibrary" d:DesignHeight="332">
+                 xmlns:WpfBugFix="clr-namespace:TokeiLibrary.WpfBugFix;assembly=TokeiLibrary" d:DesignHeight="332" Background="{StaticResource TabItemBackground}" Foreground="{StaticResource TextForeground}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -13,34 +13,18 @@
         </Grid.RowDefinitions>
         
         <Grid Name="_upperGrid">
-            <WpfBugFix:RangeListView TextSearch.TextPath="Date" FocusVisualStyle="{x:Null}" BorderThickness="0" Grid.Row="1" Name="_listView" VirtualizingStackPanel.IsVirtualizing="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <WpfBugFix:RangeListView TextSearch.TextPath="Date" FocusVisualStyle="{x:Null}" BorderThickness="0" Grid.Row="1" Name="_listView" VirtualizingStackPanel.IsVirtualizing="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Background="{StaticResource TabItemBackground}">
                 <WpfBugFix:RangeListView.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Name="_miRestore" Header="Restore" Click="_miRestore_Click"  >
-                            <MenuItem.Icon>
-                                <Image Source="../Resources/validity.png"  />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Name="_miDelete" Click="_miDelete_Click" Header="Delete" >
-                            <MenuItem.Icon>
-                                <Image Source="../Resources/delete.png"  />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Name="_miExport" Click="_miExport_Click" Header="Export to..." >
-                            <MenuItem.Icon>
-                                <Image Source="../Resources/archive.png"  />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Name="_miSelect" Click="_miSelect_Click" Header="Select in explorer" >
-                            <MenuItem.Icon>
-                                <Image Source="../Resources/arrowdown.png"  />
-                            </MenuItem.Icon>
-                        </MenuItem>
+                        <MenuItem Name="_miRestore" Header="Restore" Click="_miRestore_Click" ListView:WpfUtils.ImagePath="validity.png" />
+                        <MenuItem Name="_miDelete" Click="_miDelete_Click" Header="Delete" ListView:WpfUtils.ImagePath="delete.png" />
+                        <MenuItem Name="_miExport" Click="_miExport_Click" Header="Export to..." ListView:WpfUtils.ImagePath="archive.png" />
+                        <MenuItem Name="_miSelect" Click="_miSelect_Click" Header="Select in explorer" ListView:WpfUtils.ImagePath="arrowdown.png" />
                     </ContextMenu>
                 </WpfBugFix:RangeListView.ContextMenu>
             </WpfBugFix:RangeListView>
         </Grid>
-        <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="50" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+        <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="49" Background="{DynamicResource UIDialogBackground}">
             <DockPanel HorizontalAlignment="Right" Margin="0 0 3 0">
                 <Button Name="_buttonOk" Click="_buttonOk_Click" Content="Ok" Height="25" Margin="3" MinWidth="100" Grid.Column="2" />
                 <!--<Button Name="_buttonCancel" Click="_buttonCancel_Click" Content="Cancel" Height="25" Margin="3" MinWidth="100" />-->

@@ -374,5 +374,17 @@ namespace SDE.Editor.Engines.Parsers {
 
 			return "Failed to read line #" + LastReader.LineNumber + ", in '" + LatestFile + "'.";
 		}
+
+		public static IEnumerable<string> ReadAllLines(byte[] data) {
+			if (data != null) {
+				using (StreamReader reader = SetAndLoadReader(data)) {
+					while (!reader.EndOfStream) {
+						string line = ReadNextLine(reader);
+
+						yield return line;
+					}
+				}
+			}
+		}
 	}
 }

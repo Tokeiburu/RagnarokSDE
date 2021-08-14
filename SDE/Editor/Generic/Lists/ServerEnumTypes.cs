@@ -1,4 +1,7 @@
-﻿using Utilities;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using Utilities;
 
 namespace SDE.Editor.Generic.Lists {
 	public enum ScaleType {
@@ -36,6 +39,68 @@ namespace SDE.Editor.Generic.Lists {
 		[Description("MhFighting (Requires Eleanor fighthing mode)")] MhFighting,
 		[Description("MhGrappling (Requires Eleanor grappling mode)")] MhGrappling,
 		[Description("Peco (Requires riding a peco)")] Peco
+	}
+
+	public enum RequiredStateTypeNew {
+		[Description("None (Nothing special)")] None,
+		[Description("Hidden (Requires to be hidden)")] Hidden,
+		[Description("Riding (Requires a mount)")] Riding,
+		[Description("Falcon (Requires a Falcon)")] Falcon,
+		[Description("Cart (Requires a Pushcart)")] Cart,
+		[Description("Shield (Requires a shield equipped)")] Shield,
+		[Description("Recover Weight Rate (Requires to be less than 70% weight)")] RecoverWeightRate,
+		[Description("Move enable (Requires to be able to move)")] MoveEnable,
+		[Description("Water (Requires to be standing on a water cell)")] Water,
+		[Description("Riding Dragon (Requires to ride a Warg)")] RidingDragon,
+		[Description("Warg (Requires a Warg)")] Warg,
+		[Description("Dragon Warg (Requires to ride a Dragon)")] Ridingwarg,
+		[Description("Mado (Requires to have an active mado)")] Mado,
+		[Description("Elemental Spirit (Requires to have an Elemental Spirit summoned)")] Elementalspirit,
+		[Description("Elemental Spirit2")] Elementalspirit2,
+		[Description("Dragon Warg (Requires to ride a Peco)")] RidingPeco,
+		[Description("Sun Stance (Requires Sun Stance active)")] SunStance,
+		[Description("Moon Stance (Requires Moon Stance active)")] MoonStance,
+		[Description("Stars Stance (Requires Stars Stance active)")] StarsStance,
+		[Description("Universe Stance (Requires Stars Stance active)")] UniverseStance,
+	}
+
+	public enum UnitTargetType {
+		None = 0,
+		Self = 0x010000,
+		Enemy = 0x020000,
+		Party = 0x040000,
+		GuildAlly = 0x080000,
+		Neutral = 0x100000,
+		SameGuild = 0x200000,
+		All = 0x3F0000,
+		WoS = 0x400000,
+		Guild = SameGuild | GuildAlly,
+		NoGuild = All & ~Guild,
+		NoParty = All & ~Party,
+		NoEnemy = All & ~Enemy,
+		Ally = Party | Guild,
+		Friend = NoEnemy,
+	}
+
+	public enum UnitFlagType {
+		//[Description("NoEnemy#If 'defunit_not_enemy' is set, the target is changed to 'friend'.")] NoEnemy = 0x1,
+		//[Description("NoReiteration#Spell cannot be stacked.")] NoReiteration = 0x2,
+		//[Description("NoFootStep#Spell cannot be cast near/on targets.")] NoFootStep = 0x4,
+		//[Description("NoOverlap#Spell effects do not overlap.")] NoOverlap = 0x8,
+		//[Description("PathCheck#Spell effects do not overlap.")] PathCheck = 0x10,
+		//[Description("NoPc#May not target players.")] NoPc = 0x20,
+		//[Description("NoMob#May not target mobs.")] NoMob = 0x40,
+		//[Description("Skill#May not target skill.")] Skill = 0x80,
+		//[Description("Dance")] Dance = 0x100,
+		//[Description("Ensemble")] Ensemble = 0x200,
+		//[Description("Song")] Song = 0x400,
+		//[Description("DualMode#Spells should trigger both ontimer and onplace/onout/onleft effects.")] DualMode = 0x800,
+		//[Description("NoKnockback#Skill unit cannot be knocked back.")] NoKnockback = 0x1000,
+		//[Description("RangedSingleUnit#Hack for ranged layout, only display center.")] RangedSingleUnit = 0x2000,
+		//[Description("CrazyWeedImmune#Immune to Crazy Weed removal.")] CrazyWeedImmune = 0x4000,
+		//[Description("RemovedByFireRain#Removed by Fire Rain.")] RemovedByFireRain = 0x8000,
+		//[Description("KnockbackGroup#Removed by Fire Rain.")] KnockbackGroup = 0x10000,
+		//[Description("HiddenTrap#Hidden trap.")] HiddenTrap = 0x20000,
 	}
 
 	public enum StateType {
@@ -88,7 +153,23 @@ namespace SDE.Editor.Generic.Lists {
 		[Description("5x5 area around target")] Around6,
 		[Description("7x7 area around target")] Around7,
 		[Description("9x9 area around target")] Around8,
-		[Description("3x3 area around target (again?)")] Around
+		[Description("3x3 area around target (again?)")] Around,
+		//[Description("Non-Top-Hate")] nontophate,
+		//[Description("1st Hate")] tophate,
+		//[Description("2nd Hate")] secondhate,
+		//[Description("Last Hate")] lasthate,
+		//[Description("Tank")] tank,
+		//[Description("Dps")] dps,
+		//[Description("Healer")] healer,
+		//[Description("Support")] support,
+		//[Description("Non-Tank")] nontank,
+		//[Description("Non-Dps")] nondps,
+		//[Description("Non-Healer")] nonhealer,
+		//[Description("Non-Support")] nonsupport,
+	}
+
+	[Description("Special group edit")]
+	public enum MobGroup2Type {
 	}
 
 	public enum MobRaceType {
@@ -102,10 +183,45 @@ namespace SDE.Editor.Generic.Lists {
 		[Description("Demi Human")] DemiHuman,
 		Angel,
 		Dragon,
-		Boss,
-		[Description("Non Boss")] NonBoss,
-		[Description("New Item")] NewItem,
-		[Description("Non Demi Human")] NonDemiHuman,
+		//Boss,
+		//[Description("Non Boss")] NonBoss,
+		//[Description("New Item")] NewItem,
+		//[Description("Non Demi Human")] NonDemiHuman,
+	}
+
+	public enum QuestRaceType {
+		All,
+		Formless,
+		Undead,
+		Brute,
+		Plant,
+		Insect,
+		Fish,
+		Demon,
+		[Description("Demi Human")] DemiHuman,
+		Angel,
+		Dragon
+	}
+
+	public enum QuestSizeType {
+		All,
+		Small,
+		Medium,
+		Large
+	}
+
+	public enum QuestElementType {
+		All,
+		Neutral,
+		Water,
+		Earth,
+		Fire,
+		Wind,
+		Poison,
+		Holy,
+		Dark,
+		Ghost,
+		Undead
 	}
 
 	public enum TypeType {
@@ -120,7 +236,7 @@ namespace SDE.Editor.Generic.Lists {
 		[Description("Arrow and ammunition")] Ammo = 10,
 		[Description("Usable with delayed consumption")] UsableWithDelayed = 11,
 		[Description("Shadow equipment")] ShadowEquip = 12,
-		[Description("Usable with delayed consumption2")] UsableWithDelayed2 = 18,
+		[Description("Cash")] UsableWithDelayed2 = 18,
 	}
 
 	public enum GenderType {
@@ -157,9 +273,29 @@ namespace SDE.Editor.Generic.Lists {
 	}
 
 	public enum HitType {
-		None = 0,
+		Normal = 0,
+		[Description("Pickup item")] PickupItem = 1,
+		[Description("Sit down")] SitDown = 2,
+		[Description("Stand up")] StandUp = 3,
+		Endure = 4,
+		Splash = 5,
 		[Description("Single hit")] SingleHit = 6,
-		[Description("Repeated hit")] RepeatedHit = 8
+		Repeat = 7,
+		[Description("Multi-hit")] MultiHit = 8,
+		[Description("Multi-hit endure")] MultiHitEndure = 9,
+		Critical = 10,
+		[Description("Lucky dodge")] LuckyDodge = 11,
+		Touch = 12,
+		[Description("Multi-hit critical")] MultiHitCritical = 13,
+	}
+
+	public enum SkillTargetType {
+		Passive = 0x0,
+		Attack = 0x1,
+		Ground = 0x2,
+		Self = 0x4,
+		Support = 0x10,
+		Trap = 0x20,
 	}
 
 	public enum AttackTypeType {
@@ -185,16 +321,68 @@ namespace SDE.Editor.Generic.Lists {
 		[Description("Use random element")] UseRandomElement = -3
 	}
 
+	[Flags]
 	[Description("Skill damage edit")]
 	public enum SkillDamageType {
-		[Description("No damage skill.")] NoSkillDamage = 1 << 0,
-		[Description("Has splash area#Has splash area (requires source modification).")] SplashDamage = 1 << 1,
-		[Description("Damage should be split among targets#Damage should be split among targets (requires 0x02 in order to work).")] SplitAmongTargets = 1 << 2,
-		[Description("Skill ignores caster's % damage cards (misc type always ignores)#Skill ignores caster's % damage cards (misc type always ignores).")] IgnoresCasterDamage = 1 << 3,
-		[Description("Skill ignores elemental adjustments.")] IgnoresElementalAdjusments = 1 << 4,
-		[Description("Skill ignores target's defense (misc type always ignores).")] IgnoresTargetDefense = 1 << 5,
-		[Description("Skill ignores target's flee (magic type always ignores).")] IgnoresTargetFlee = 1 << 6,
-		[Description("Skill ignores target's def cards.")] IgnoresTargetDefCards = 1 << 7,
+		//[Description("NoDamage#No damage skill.")] NoSkillDamage = 1 << 0,
+		//[Description("Splash#Has splash area#Has splash area (requires source modification).")] SplashDamage = 1 << 1,
+		//[Description("SplashSplit#Damage should be split among targets#Damage should be split among targets (requires 0x02 in order to work).")] SplitAmongTargets = 1 << 2,
+		//[Description("IgnoreAtkCard#Skill ignores caster's % damage cards (misc type always ignores)#Skill ignores caster's % damage cards (misc type always ignores).")] IgnoresCasterDamage = 1 << 3,
+		//[Description("IgnoreElement#Skill ignores elemental adjustments.")] IgnoresElementalAdjusments = 1 << 4,
+		//[Description("IgnoreDefense#Skill ignores target's defense (misc type always ignores).")] IgnoresTargetDefense = 1 << 5,
+		//[Description("IgnoreFlee#Skill ignores target's flee (magic type always ignores).")] IgnoresTargetFlee = 1 << 6,
+		//[Description("IgnoreDefCard#Skill ignores target's def cards.")] IgnoresTargetDefCards = 1 << 7,
+		//[Description("Critical#Skill can crit.")] Critical = 1 << 8,
+		//[Description("IgnoreLongCard#Ignore long range card effects.")] IgnoreLongCard = 1 << 9,
+	}
+
+	[Flags]
+	[Description("Item flag edit")]
+	public enum ItemFlagType {
+		//[Description("BuyingStore#If the item is available for Buyingstores. (Default: false)")] BuyingStore = 1 << 0,
+		//[Description("DeadBranch#If the item is a Dead Branch. (Default: false)")] DeadBranch = 1 << 1,
+		//[Description("Container#If the item is part of a container. (Default: false)")] Container = 1 << 2,
+		//[Description("UniqueId#If the item is a unique stack. (Default: false)")] UniqueId = 1 << 3,
+		//[Description("BindOnEquip#If the item is bound to the character upon equipping. (Default: false)")] BindOnEquip = 1 << 4,
+		//[Description("DropAnnounce#If the item has a special announcement to self on drop. (Default: false)")] DropAnnounce = 1 << 5,
+		//[Description("NoConsume#If the item is consumed on use. (Default: false)")] NoConsume = 1 << 6,
+		//[Description("DropEffect#If the item has a special effect when on the ground. (Default: None)")] DropEffect = 1 << 7,
+	}
+
+	[Flags]
+	[Description("Item custom flag edit")]
+	public enum ItemCustomFlagType {
+	}
+
+	[Description("Item custom flag edit")]
+	public enum SizeType {
+	}
+
+	[Description("Item custom flag edit")]
+	public enum ClassType {
+		Normal,
+		Boss,
+		Guardian,
+		Battlefield,
+		Event
+	}
+
+	[Description("Item custom flag edit")]
+	public enum RaceType {
+	}
+
+	[Flags]
+	[Description("Item MH flag edit")]
+	public enum ItemMHFlagType {
+	}
+
+	[Flags]
+	[Description("Stack flag edit")]
+	public enum ItemStackFlagType {
+		[Description("Inventory#If the stack is applied to player's inventory. (Default: true)")] Inventory = 1 << 0,
+		[Description("Cart#If the stack is applied to the player's cart. (Default: false)")] Cart = 1 << 1,
+		[Description("Storage#If the stack is applied to the player's storage. (Default: false)")] Storage = 1 << 2,
+		[Description("GuildStorage#If the stack is applied to player's guild storage. (Default: true)")] GuildStorage = 1 << 3,
 	}
 
 	[Description("Skill type3 edit#disable_tooltips")]
@@ -216,8 +404,64 @@ namespace SDE.Editor.Generic.Lists {
 		[Description("Spell that can't be used while in mado.")] En14 = 1 << 14,
 	}
 
+	[Description("Cast edit")]
+	public enum CastingFlags {
+		//[Description("IgnoreDex#Not affected by dex.")] En0 = 1 << 0,
+		//[Description("IgnoreStatus#Not affected by statuses (Suffragium, etc).")] En1 = 1 << 1,
+		//[Description("IgnoreItemBonus#Not affected by item bonuses (equips, cards).")] En2 = 1 << 2,
+	}
+	
+	[Description("No near NPC edit")]
+	public enum NoNearNpcType {
+		[Description("WarpPortal")] En0 = 1 << 0,
+		[Description("Shop")] En1 = 1 << 1,
+		[Description("Npc")] En2 = 1 << 2,
+		[Description("Tomb")] En3 = 1 << 3,
+	}
+
+	[Description("Weapon edit")]
+	public enum WeaponType {
+		//[Description("Fist")] En0 = 1 << 0,
+		//[Description("Dagger")] En1 = 1 << 1,
+		//[Description("1hSword")] En2 = 1 << 2,
+		//[Description("2hSword")] En3 = 1 << 3,
+		//[Description("1hSpear")] En4 = 1 << 4,
+		//[Description("2hSpear")] En5 = 1 << 5,
+		//[Description("1hAxe")] En6 = 1 << 6,
+		//[Description("2hAxe")] En7 = 1 << 7,
+		//[Description("Mace")] En8 = 1 << 8,
+		//[Description("2hMace")] En9 = 1 << 9,
+		//[Description("Staff")] En10 = 1 << 10,
+		//[Description("Bow")] En11 = 1 << 11,
+		//[Description("Knuckle")] En12 = 1 << 12,
+		//[Description("Musical")] En13 = 1 << 13,
+		//[Description("Whip")] En14 = 1 << 14,
+		//[Description("Book")] En15 = 1 << 15,
+		//[Description("Katar")] En16 = 1 << 16,
+		//[Description("Revolver")] En17 = 1 << 17,
+		//[Description("Rifle")] En18 = 1 << 18,
+		//[Description("Gatling")] En19 = 1 << 19,
+		//[Description("Shotgun")] En20 = 1 << 20,
+		//[Description("Grenade")] En21 = 1 << 21,
+		//[Description("Huuma")] En22 = 1 << 22,
+		//[Description("2hStaff")] En23 = 1 << 23,
+	}
+
+	[Description("Ammo edit")]
+	public enum AmmoType {
+		//[Description("Arrow")] En0 = 1 << 0,
+		//[Description("Dagger")] En1 = 1 << 1,
+		//[Description("Bullet")] En2 = 1 << 2,
+		//[Description("Shell")] En3 = 1 << 3,
+		//[Description("Grenade")] En4 = 1 << 4,
+		//[Description("Shuriken")] En5 = 1 << 5,
+		//[Description("Kunai")] En6 = 1 << 6,
+		//[Description("Cannonball")] En7 = 1 << 7,
+		//[Description("Throwweapon")] En8 = 1 << 8,
+	}
+
 	[Description("Skill type2 edit#disable_tooltips")]
-	public enum SkillType2Type {
+	public enum SkillType2Type : long {
 		[Description("Quest skill")] En0 = 1 << 0,
 		[Description("Npc skill")] En1 = 1 << 1,
 		[Description("Wedding skill")] En2 = 1 << 2,
@@ -235,6 +479,14 @@ namespace SDE.Editor.Generic.Lists {
 		[Description("Chorus skill")] En14 = 1 << 14,
 	}
 
+	[Description("Skill type2 edit")]
+	public enum SkillType2TypeNew {
+	}
+
+	[Description("Trade edit")]
+	public enum TradeFlag {
+	}
+	
 	[Description("Skill type edit#disable_tooltips")]
 	public enum SkillType1Type {
 		[Description("1 - Enemy")] En0 = 1 << 0,
@@ -245,6 +497,7 @@ namespace SDE.Editor.Generic.Lists {
 		[Description("32 - Trap")] En5 = 1 << 5,
 	}
 
+	[Flags]
 	[Description("Upper edit#disable_tooltips")]
 	public enum UpperType {
 		[Description("1 - Normal")] En0 = 1 << 0,
@@ -253,6 +506,11 @@ namespace SDE.Editor.Generic.Lists {
 		[Description("8 - 3rd Classes (excl. Trans-3rd classes and 3rd Baby classes)")] En3 = 1 << 3,
 		[Description("16 - Trans-3rd Classes")] En4 = 1 << 4,
 		[Description("32 - Baby 3rd Classes")] En5 = 1 << 5,
+	}
+
+	[Flags]
+	[Description("Mode edit")]
+	public enum NewMobModeType {
 	}
 
 	[Description("Mode edit")]
@@ -354,5 +612,41 @@ namespace SDE.Editor.Generic.Lists {
 		[Description("Block in zone 5 maps (Sealed Shrine)")] En9 = 1 << 9,
 		[Description("Block in zone 6 maps (Endless Tower, Orc's Memory, Nidhoggur's Nest)")] En10 = 1 << 10,
 		[Description("Block in zone 7 maps (Towns)")] En11 = 1 << 11,
+	}
+
+	public enum DropEffectType {
+		None,
+		Client,
+		[Description("White Pillar")] White_Pillar,
+		[Description("Blue Pillar")] Blue_Pillar,
+		[Description("Yellow Pillar")] Yellow_Pillar,
+		[Description("Purple Pillar")] Purple_Pillar,
+		[Description("Orange Pillar")] Orange_Pillar,
+		[Description("Green Pillar")] Green_Pillar,
+		[Description("Red Pillar")] Red_Pillar,
+		//[Description("Reproduce")] Reproduce = 1 << 1,
+	}
+	
+	[Description("Copy skill edit#disable_tooltips")]
+	public enum SkillCopyType {
+		//[Description("Plagiarism")] Plagiarism = 1 << 0,
+		//[Description("Reproduce")] Reproduce = 1 << 1,
+	}
+	
+	[Description("Copy skill remove requirement edit#disable_tooltips")]
+	public enum SkillCopyRemoveRequirementType {
+		HpCost = 1 << 0,
+		SpCost = 1 << 1,
+		HpRateCost = 1 << 2,
+		SpRateCost = 1 << 3,
+		MaxHpTrigger = 1 << 4,
+		ZenyCost = 1 << 5,
+		Weapon = 1 << 6,
+		Ammo = 1 << 7,
+		State = 1 << 8,
+		Status = 1 << 9,
+		SpiritSphereCost = 1 << 10,
+		ItemCost = 1 << 11,
+		Equipment = 1 << 12,
 	}
 }

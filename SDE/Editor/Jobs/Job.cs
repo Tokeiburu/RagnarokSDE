@@ -329,7 +329,7 @@ namespace SDE.Editor.Jobs {
 
 		public override int GetHashCode() {
 			unchecked {
-				return (Id * 397) ^ Upper;
+				return (int)((Id * 397) ^ Upper);
 			}
 		}
 
@@ -337,16 +337,16 @@ namespace SDE.Editor.Jobs {
 			get { return true; }
 		}
 
-		public Job(int jobId, int upper, string[] names) : this(jobId, upper, names, null, null) {
+		public Job(long jobId, int upper, string[] names) : this(jobId, upper, names, null, null) {
 		}
 
-		public Job(int jobId, int upper, string[] names, Job parent) : this(jobId, upper, names, parent, null) {
+		public Job(long jobId, int upper, string[] names, Job parent) : this(jobId, upper, names, parent, null) {
 		}
 
-		public Job(int jobId, int upper, string[] names, string spriteName) : this(jobId, upper, names, null, spriteName) {
+		public Job(long jobId, int upper, string[] names, string spriteName) : this(jobId, upper, names, null, spriteName) {
 		}
 
-		public Job(int jobId, int upper, string[] names, Job parent, string spriteName) {
+		public Job(long jobId, int upper, string[] names, Job parent, string spriteName) {
 			Id = jobId;
 			Upper = upper;
 			Name = names[0];
@@ -368,7 +368,7 @@ namespace SDE.Editor.Jobs {
 			}
 		}
 
-		public int Id { get; internal set; }
+		public long Id { get; internal set; }
 		public int Upper { get; private set; }
 		public string Name { get; private set; }
 		public Job Parent { get; private set; }
@@ -432,7 +432,7 @@ namespace SDE.Editor.Jobs {
 			return Name;
 		}
 
-		public static Job Get(int id) {
+		public static Job Get(long id) {
 			var job = JobList.AllJobs.FirstOrDefault(p => p.Id == id && p.Upper == 1);
 
 			if (job != null) return job;
@@ -440,8 +440,12 @@ namespace SDE.Editor.Jobs {
 			return JobList.AllJobs.FirstOrDefault(p => p.Id == id);
 		}
 
-		public static Job Get(int id, JobGroup group) {
+		public static Job Get(long id, JobGroup group, int equipLevel = 0) {
 			Job job;
+
+			if (equipLevel >= 100) {
+				group = JobGroup.Get(group.Id & ~JobGroup.PreRenewal.Id);
+			}
 
 			if (_returnIf(id, group.Id, out job)) return job;
 
@@ -484,7 +488,12 @@ namespace SDE.Editor.Jobs {
 			return Name;
 		}
 
-		private static bool _returnIf(int id, int upper, out Job job) {
+		public static bool IsExcept(long hexValue) {
+			int impossibleClasses = (1 << 13) | (1 << 20) | (1 << 26) | (1 << 27) | (1 << 28);
+			return (hexValue & impossibleClasses) == impossibleClasses;
+		}
+
+		private static bool _returnIf(long id, int upper, out Job job) {
 			job = JobList.AllJobs.FirstOrDefault(p => p.Id == id && p.Upper == upper);
 
 			if (job == null)

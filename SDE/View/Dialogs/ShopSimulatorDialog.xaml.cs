@@ -442,8 +442,8 @@ namespace SDE.View.Dialogs {
 				_actIndexSelected.SetAction(_convertAction(dir));
 				_frameViewer.Update();
 			}
-			catch (Exception err) {
-				ErrorHandler.HandleException(err);
+			catch {
+				//ErrorHandler.HandleException(err);
 			}
 		}
 

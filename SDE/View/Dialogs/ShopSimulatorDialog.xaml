@@ -6,7 +6,8 @@
                  xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
                  xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit" Width="560"
                  xmlns:ActViewer="clr-namespace:SDE.Tools.ActViewer"
-                 xmlns:WpfBugFix="clr-namespace:TokeiLibrary.WpfBugFix;assembly=TokeiLibrary">
+                 xmlns:WpfBugFix="clr-namespace:TokeiLibrary.WpfBugFix;assembly=TokeiLibrary"
+                 Background="{StaticResource TabItemBackground}" Foreground="{StaticResource TextForeground}">
     <Grid SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="Unspecified">
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -131,7 +132,7 @@
                 </Border>
             </Grid>
         </Grid>
-        <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="50" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+        <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="49" Background="{DynamicResource UIDialogBackground}">
             <Grid Margin="0 0 3 0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto" />

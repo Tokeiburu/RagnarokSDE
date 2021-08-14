@@ -67,7 +67,7 @@ namespace SDE.View {
 				new ListViewDataTemplateHelper.RangeColumnInfo { Header = "File name", DisplayExpression = "DataImage", ToolTipBinding="RelativePath", IsFill = true, MinWidth = 60, TextWrapping = TextWrapping.Wrap },
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = "Type", DisplayExpression = "FileType", FixedWidth = 40, TextAlignment = TextAlignment.Right, ToolTipBinding="FileType" },
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = "Size", DisplayExpression = "DisplaySize", FixedWidth = 60, TextAlignment = TextAlignment.Right, ToolTipBinding="DisplaySize" },
-			}, new MetaGrfSorter(), new string[] { });
+			}, new MetaGrfSorter(), new string[] { "Default", "{StaticResource TextForeground}" });
 
 			_items.MouseDoubleClick += new MouseButtonEventHandler(_items_MouseDoubleClick);
 

@@ -7,7 +7,7 @@
              xmlns:view="clr-namespace:SDE.View"
              xmlns:controls="clr-namespace:SDE.View.Controls">
     <Border Height="32" BorderBrush="#BEBEBE" BorderThickness="1" VerticalAlignment="Top" HorizontalAlignment="Right">
-        <Grid Background="White">
+        <Grid Background="{StaticResource TabControlBackground}">
             <DockPanel>
                 <Styles:FancyButton Margin="3 0 0 0" x:Name="_buttonFancyMode" Height="24" Width="24" ImagePath="replace.png" Click="_buttonFancyMode_Click" IsButtonEnabled="True">
                     <Styles:FancyButton.ToolTip>
@@ -17,13 +17,7 @@
                 <Border  Margin="3 0 3 0" Name="_border1" BorderBrush="#8490A1" VerticalAlignment="Center" BorderThickness="1" Width="160">
                     <Grid>
                         <controls:LeftComboBox Height="0" x:Name="_cbSubMenu" VerticalAlignment="Bottom" >
-                            <Border Margin="-4, -2, -4, -2" Width="170" Focusable="False" BorderThickness="1" BorderBrush="#9AA6B6" FocusVisualStyle="{x:Null}">
-                                <Border.Background>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                        <GradientStop Offset="0" Color="#DEDEDE" />
-                                        <GradientStop Offset="0.5" Color="White" />
-                                    </LinearGradientBrush>
-                                </Border.Background>
+                            <Border x:Name="_unclickableBorder" Margin="-4, -2, -4, -2" Width="170" Focusable="False" BorderThickness="1" BorderBrush="{StaticResource GSearchEngineExtendBorder}" Background="{StaticResource GSearchEngineExtendBackground}" FocusVisualStyle="{x:Null}">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition />
@@ -32,17 +26,17 @@
                                         <RowDefinition />
                                     </Grid.RowDefinitions>
                                     <TextBlock Margin="2 6 2 2" Text="Search options" Foreground="Gray" />
-                                    <CheckBox Margin="2" IsChecked="{Binding RelativeSource={RelativeSource AncestorType={x:Type controls:SearchPanel}}, Path=UseRegex}" Grid.Row="1" Content="Use Regular Expression">
+                                    <CheckBox Margin="2" Foreground="{StaticResource TextForeground}" IsChecked="{Binding RelativeSource={RelativeSource AncestorType={x:Type controls:SearchPanel}}, Path=UseRegex}" Grid.Row="1" Content="Use Regular Expression">
                                         <CheckBox.ToolTip>
                                             Search using .NET regular expression syntax.
                                         </CheckBox.ToolTip>
                                     </CheckBox>
-                                    <CheckBox Margin="2" IsChecked="{Binding RelativeSource={RelativeSource AncestorType={x:Type controls:SearchPanel}}, Path=WholeWords}" Grid.Row="2" Content="Match Whole Words">
+                                    <CheckBox Margin="2" Foreground="{StaticResource TextForeground}" IsChecked="{Binding RelativeSource={RelativeSource AncestorType={x:Type controls:SearchPanel}}, Path=WholeWords}" Grid.Row="2" Content="Match Whole Words">
                                         <CheckBox.ToolTip>
                                             Only find results that are whole words.
                                         </CheckBox.ToolTip>
                                     </CheckBox>
-                                    <CheckBox Margin="2 2 2 6" IsChecked="{Binding  RelativeSource={RelativeSource AncestorType={x:Type controls:SearchPanel}}, Path=MatchCase}" Grid.Row="3" Content="Match Case">
+                                    <CheckBox Margin="2 2 2 6" Foreground="{StaticResource TextForeground}" IsChecked="{Binding  RelativeSource={RelativeSource AncestorType={x:Type controls:SearchPanel}}, Path=MatchCase}" Grid.Row="3" Content="Match Case">
                                         <CheckBox.ToolTip>
                                             Perform case sensitive searches.
                                         </CheckBox.ToolTip>
@@ -60,7 +54,7 @@
                             </TextBox.Text>
                         </TextBox>
                         <TextBlock  Name="_labelFind" Margin="3 0 0 0" VerticalAlignment="Center" Text="Find..." FontStyle="Italic" Foreground="Gray" IsHitTestVisible="False" />
-                        <Border HorizontalAlignment="Right" BorderBrush="White" Width="15" Background="White" BorderThickness="0">
+                        <Border HorizontalAlignment="Right" BorderBrush="White" Width="15" Background="{Binding ElementName=_searchTextBox, Path=Background}" BorderThickness="0">
                             <Styles:FancyButton x:Name="_buttonOpenSubMenu" HorizontalAlignment="Right" Width="15" ImagePath="smallArrow.png" Click="_buttonOpenSubMenu_Click" />
                         </Border>
                     </Grid>

@@ -5,7 +5,8 @@
                  xmlns:ActViewer="clr-namespace:SDE.Tools.ActViewer" Width="303" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:WpfBugFix="clr-namespace:TokeiLibrary.WpfBugFix;assembly=TokeiLibrary"
                  xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
-                 d:DesignHeight="240">
+                 d:DesignHeight="240"
+                 Background="{StaticResource TabItemBackground}" Foreground="{StaticResource TextForeground}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -31,7 +32,7 @@
                 </DockPanel>
             </Border>
         </Grid>
-        <!--<Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="50" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+        <!--<Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="49" Background="{DynamicResource UIDialogBackground}">
             <Grid Margin="0 0 3 0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto" />

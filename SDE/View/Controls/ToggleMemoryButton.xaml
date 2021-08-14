@@ -5,20 +5,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:WpfBugFix="clr-namespace:TokeiLibrary.WpfBugFix;assembly=TokeiLibrary"
              xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary" mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300" SnapsToDevicePixels="True">
+             d:DesignHeight="300" d:DesignWidth="300" SnapsToDevicePixels="True" Background="Transparent" Foreground="{DynamicResource TextForeground}">
     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="auto" />
         </Grid.ColumnDefinitions>
-        <ComboBox Grid.ColumnSpan="2" MaxWidth="0" HorizontalAlignment="Left" Height="0" x:Name="_cbSubMenu" VerticalAlignment="Bottom">
-            <WpfBugFix:UnclickableBorder x:Name="_unclickableBorder" Margin="-4, -2, -4, -2" Focusable="False" BorderThickness="1" BorderBrush="#9AA6B6" FocusVisualStyle="{x:Null}">
-                <Border.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                        <GradientStop Offset="0" Color="#DEDEDE" />
-                        <GradientStop Offset="0.5" Color="White" />
-                    </LinearGradientBrush>
-                </Border.Background>
+        <ComboBox Grid.ColumnSpan="2" MaxWidth="0" HorizontalAlignment="Left" Height="0" x:Name="_cbSubMenu" VerticalAlignment="Bottom" Foreground="{DynamicResource TextForeground}">
+            <WpfBugFix:UnclickableBorder x:Name="_unclickableBorder" Margin="-4, -2, -4, -2" Focusable="False" BorderThickness="1" BorderBrush="{DynamicResource ToggleMemoryBorderBrush}" FocusVisualStyle="{x:Null}" Background="{DynamicResource ToggleMemoryBackgroundBrush}">
                 <Grid Name="_gridSearchContent" Margin="2">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />

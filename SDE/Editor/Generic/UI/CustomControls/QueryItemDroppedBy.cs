@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using Database;
 using ErrorManager;
 using SDE.Editor.Engines.DatabaseEngine;
@@ -20,13 +22,151 @@ using TokeiLibrary.WpfBugFix;
 using Extensions = SDE.Core.Extensions;
 
 namespace SDE.Editor.Generic.UI.CustomControls {
-	public class QueryItemDroppedBy<TKey, TValue> : ICustomControl<TKey, TValue> where TValue : Tuple {
+	public class QueryThread<TKey, TValue> where TValue : Database.Tuple {
+		private readonly Table<int, ReadableTuple<int>> _btable;
+		private readonly QueryItemDroppedBy<TKey, TValue> _qid;
+		private readonly object _lock = new object();
+		private readonly List<TValue> _items = new List<TValue>();
+		private readonly ManualResetEvent _threadHandle = new ManualResetEvent(false);
+		private bool _threadIsEnabled = true;
+		private bool _isRunning = true;
+
+		public QueryThread(Table<int, ReadableTuple<int>> btable, QueryItemDroppedBy<TKey, TValue> qid) {
+			_btable = btable;
+			_qid = qid;
+		}
+
+		public void Stop() {
+			_isRunning = false;
+			Enabled = true;
+		}
+
+		public bool Enabled {
+			set {
+				if (value) {
+					if (!_threadIsEnabled)
+						_threadHandle.Set();
+				}
+				else {
+					if (_threadIsEnabled) {
+						_threadIsEnabled = false;
+						_threadHandle.Reset();
+					}
+				}
+			}
+		}
+
+		public void Start() {
+			new Thread(_start) { Name = "SDE - Mob drops query thread" }.Start();
+		}
+
+		private void _start() {
+			while (true) {
+				if (!_isRunning)
+					return;
+
+				bool hasEntry = true;
+
+				while (hasEntry && _isRunning) {
+					TValue item = null;
+
+					Thread.Sleep(100);
+
+					lock (_lock) {
+						if (_items.Count > 0) {
+							item = _items.Last();
+						}
+
+						_items.Clear();
+					}
+
+					if (item != null) {
+						string id = item.GetKey<int>().ToString(CultureInfo.InvariantCulture);
+
+						if (item.GetKey<int>() == 0) {
+							_qid.Update(null);
+						}
+						else {
+							List<ReadableTuple<int>> tuples = _btable.FastItems;
+							List<QueryItemDroppedBy<TKey, TValue>.MobDropView> result = new List<QueryItemDroppedBy<TKey, TValue>.MobDropView>();
+
+							try {
+								int startIndex;
+								bool found;
+
+								for (int i = 0; i < tuples.Count; i++) {
+									var p = tuples[i];
+
+									found = false;
+									startIndex = ServerMobAttributes.Mvp1ID.Index;
+
+									for (int j = 0; j < 6; j += 2) {
+										if ((string)p.GetRawValue(startIndex + j) == id) {
+											result.Add(new QueryItemDroppedBy<TKey, TValue>.MobDropView(p, startIndex + j));
+											found = true;
+											break;
+										}
+									}
+
+									if (found)
+										continue;
+
+									startIndex = ServerMobAttributes.Drop1ID.Index;
+
+									if (!_isRunning)
+										return;
+
+									for (int j = 0; j < 20; j += 2) {
+										if ((string)p.GetRawValue(startIndex + j) == id) {
+											result.Add(new QueryItemDroppedBy<TKey, TValue>.MobDropView(p, startIndex + j));
+											break;
+										}
+									}
+								}
+
+								if (!_isRunning)
+									return;
+
+								_qid.Update(result);
+							}
+							catch {
+							}
+						}
+					}
+
+					if (!_isRunning)
+						return;
+
+					lock (_lock) {
+						if (_items.Count == 0) {
+							hasEntry = false;
+						}
+					}
+				}
+
+				_threadIsEnabled = false;
+				_threadHandle.Reset();
+				_threadHandle.WaitOne();
+			}
+		}
+
+		public void Search(TValue item) {
+			lock (_lock) {
+				_items.Add(item);
+			}
+
+			Enabled = true;
+		}
+	}
+
+	public class QueryItemDroppedBy<TKey, TValue> : ICustomControl<TKey, TValue> where TValue : Database.Tuple {
 		private readonly int _cSpan;
 		private readonly int _col;
 		private readonly int _rSpan;
 		private readonly int _row;
 		private RangeListView _lv;
 		private GDbTabWrapper<TKey, TValue> _tab;
+		private QueryThread<TKey, TValue> _queryThread;
 
 		public QueryItemDroppedBy(int row, int col, int rSpan, int cSpan) {
 			_row = row;
@@ -38,8 +178,15 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 		#region ICustomControl<TKey,TValue> Members
 		public void Init(GDbTabWrapper<TKey, TValue> tab, DisplayableProperty<TKey, TValue> dp) {
 			_tab = tab;
+			Table<int, ReadableTuple<int>> btable = _tab.ProjectDatabase.GetMetaTable<int>(ServerDbs.Mobs);
+			_queryThread = new QueryThread<TKey, TValue>(btable, this);
 			Grid grid = new Grid();
 			WpfUtilities.SetGridPosition(grid, _row, _rSpan, _col, _cSpan);
+
+			grid.Dispatcher.ShutdownStarted += delegate {
+				_queryThread.Stop();
+			};
+			_queryThread.Start();
 
 			grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(-1, GridUnitType.Auto) });
 			grid.RowDefinitions.Add(new RowDefinition());
@@ -49,6 +196,7 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 			label.FontStyle = FontStyles.Italic;
 			label.Padding = new Thickness(0);
 			label.Margin = new Thickness(3);
+			label.SetValue(TextBlock.ForegroundProperty, Application.Current.Resources["TextForeground"] as Brush);
 
 			_lv = new RangeListView();
 			_lv.SetValue(TextSearch.TextPathProperty, "ID");
@@ -58,13 +206,14 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 			_lv.FocusVisualStyle = null;
 			_lv.Margin = new Thickness(3);
 			_lv.BorderThickness = new Thickness(1);
+			_lv.Background = Application.Current.Resources["TabItemBackground"] as Brush;
 
-			Extensions.GenerateListViewTemplate(_lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			ListViewDataTemplateHelper.GenerateListViewTemplateNew(_lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = ServerMobAttributes.Id.DisplayName, DisplayExpression = "ID", SearchGetAccessor = "ID", FixedWidth = 60, TextAlignment = TextAlignment.Right, ToolTipBinding = "ID" },
 				new ListViewDataTemplateHelper.RangeColumnInfo { Header = ServerMobAttributes.KRoName.DisplayName, DisplayExpression = "Name", SearchGetAccessor = "Name", IsFill = true, ToolTipBinding = "Name", TextWrapping = TextWrapping.Wrap, MinWidth = 40 },
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = "Drop %", DisplayExpression = "Drop", SearchGetAccessor = "DropOriginal", ToolTipBinding = "DropOriginal", FixedWidth = 60, TextAlignment = TextAlignment.Right },
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = "Type", DisplayExpression = "MVP", SearchGetAccessor = "MVP", FixedWidth = 45, TextAlignment = TextAlignment.Center },
-			}, new DefaultListViewComparer<MobDropView>(), new string[] { "Modified", "Green", "Added", "Blue", "Default", "Black", "IsMvp", "#FFBA6200" });
+			}, new DefaultListViewComparer<MobDropView>(), new string[] { "Default", "{DynamicResource TextForeground}", "IsMvp", "{DynamicResource CellBrushMvp}" });
 
 			_lv.ContextMenu = new ContextMenu();
 			_lv.MouseDoubleClick += new MouseButtonEventHandler(_lv_MouseDoubleClick);
@@ -92,7 +241,6 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 
 			grid.Children.Add(label);
 			grid.Children.Add(_lv);
-
 			tab.ProjectDatabase.Commands.CommandIndexChanged += _commands_CommandIndexChanged;
 			tab.PropertiesGrid.Children.Add(grid);
 			dp.AddResetField(_lv);
@@ -190,58 +338,13 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 		}
 
 		private void _update(TValue item) {
-			Table<int, ReadableTuple<int>> btable = _tab.GetMetaTable<int>(ServerDbs.Mobs);
-			string id = item.GetKey<int>().ToString(CultureInfo.InvariantCulture);
-
-			if (item.GetKey<int>() == 0) {
-				_lv.ItemsSource = null;
-				return;
-			}
-
-			List<ReadableTuple<int>> tuples = btable.FastItems;
-			List<MobDropView> result = new List<MobDropView>();
-
-			try {
-				int startIndex;
-				bool found;
-
-				for (int i = 0; i < tuples.Count; i++) {
-					var p = tuples[i];
-
-					found = false;
-					startIndex = ServerMobAttributes.Mvp1ID.Index;
-
-					for (int j = 0; j < 6; j += 2) {
-						if ((string)p.GetRawValue(startIndex + j) == id) {
-							result.Add(new MobDropView(p, startIndex + j));
-							found = true;
-							break;
-						}
-					}
-
-					if (found)
-						continue;
-
-					startIndex = ServerMobAttributes.Drop1ID.Index;
-
-					for (int j = 0; j < 20; j += 2) {
-						if ((string)p.GetRawValue(startIndex + j) == id) {
-							result.Add(new MobDropView(p, startIndex + j));
-							break;
-						}
-					}
-				}
-			}
-			catch {
-			}
-
-			_lv.ItemsSource = new RangeObservableCollection<MobDropView>(result.OrderBy(p => p, Extensions.BindDefaultSearch<MobDropView>(_lv, "ID")));
+			_queryThread.Search(item);
 		}
 
 		private void _commands_CommandIndexChanged(object sender, IGenericDbCommand command) {
 			_tab.BeginDispatch(delegate {
 				if (_tab.List.SelectedItem != null)
-					_update(_tab.List.SelectedItem as TValue);
+					_queryThread.Search(_tab.List.SelectedItem as TValue);
 			});
 		}
 
@@ -405,5 +508,11 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 			}
 		}
 		#endregion
+
+		public void Update(List<MobDropView> result) {
+			_tab.BeginDispatch(delegate {
+				_lv.ItemsSource = new RangeObservableCollection<MobDropView>(result.OrderBy(p => p, Extensions.BindDefaultSearch<MobDropView>(_lv, "ID")));
+			});
+		}
 	}
 }

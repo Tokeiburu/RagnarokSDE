@@ -170,7 +170,7 @@ namespace SDE.View.Dialogs {
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = "Id", DisplayExpression = "Id", FixedWidth = 50, ToolTipBinding = "Id", TextAlignment = TextAlignment.Right },
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = "Db", DisplayExpression = "Db", FixedWidth = 100, ToolTipBinding = "Db", TextAlignment = TextAlignment.Left },
 				new ListViewDataTemplateHelper.RangeColumnInfo { Header = "Message", DisplayExpression = "Message", MinWidth = 150, ToolTipBinding = "Message", TextAlignment = TextAlignment.Left, IsFill = true, TextWrapping = TextWrapping.Wrap },
-			}, new DefaultListViewComparer<ValidationErrorView>(), new string[] { "Default", "Black" });
+			}, new DefaultListViewComparer<ValidationErrorView>(), new string[] { "Default", "{DynamicResource TextForeground}" });
 
 			_errors = new List<ValidationErrorView>();
 			_listViewResults.ItemsSource = _errors;

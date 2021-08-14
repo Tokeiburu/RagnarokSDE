@@ -55,6 +55,7 @@ namespace SDE.Editor.Generic.Lists {
 		public static readonly DbAttribute UnidentifiedDescription = new ClientItemAttributes(new DbAttribute("UnidentifiedDescription", typeof(string), "", "Un. description")) { DataConverter = ValueConverters.GetSetDescriptionString };
 		public static readonly DbAttribute UnidentifiedResourceName = new ClientItemAttributes(new DbAttribute("UnidentifiedResourceName", typeof(string), "", "Un. resource name")) { DataConverter = ValueConverters.GetSetResourceString };
 		public static readonly DbAttribute Affix = new ClientItemAttributes(new DbAttribute("Affix", typeof(string), "")) { DataConverter = ValueConverters.GetSetUniversalString };
+		public static readonly DbAttribute IsCostume = new ClientItemAttributes(new DbAttribute("IsCostume", typeof(bool), false, "Is costume")) { Description = "To use this property, make sure it is enabled in Tools > Settings > Db Writer > costume. A database reload is necessary to enable/disable this property." };
 		public static readonly DbAttribute NumberOfSlots = new ClientItemAttributes(new DbAttribute("NumberOfSlots", typeof(string), "", "Number of slots"));
 		public static readonly DbAttribute Illustration = new ClientItemAttributes(new DbAttribute("Illustration", typeof(IllustrationProperty<int>), "")) { DataConverter = ValueConverters.GetSetUniversalString };
 		public static readonly DbAttribute IsCard = new ClientItemAttributes(new DbAttribute("IsCard", typeof(bool), false, "Is card"));

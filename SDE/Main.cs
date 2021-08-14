@@ -58,7 +58,9 @@ namespace SDE {
 					if (stream != null) {
 						byte[] assemblyData = new Byte[stream.Length];
 						stream.Read(assemblyData, 0, assemblyData.Length);
-						return Assembly.Load(Decompress(assemblyData));
+						var size = Decompress(assemblyData);
+						//File.AppendAllText("output.log", "Loading " + compressedResourceName + ", decompressed: " + size.Length + "\n");
+						return Assembly.Load(size);
 					}
 				}
 

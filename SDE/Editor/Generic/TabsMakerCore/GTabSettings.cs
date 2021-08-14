@@ -14,7 +14,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 	/// </summary>
 	/// <typeparam name="TKey">The type of the key.</typeparam>
 	/// <typeparam name="TValue">The type of the value.</typeparam>
-	public class GTabSettings<TKey, TValue> where TValue : Tuple {
+	public class GTabSettings<TKey, TValue> where TValue : Database.Tuple {
 		public List<GItemCommand<TKey, TValue>> AddedCommands = new List<GItemCommand<TKey, TValue>>();
 		public Action CustomAddItemMethod;
 		public TabGenerator<TKey>.TabGeneratorDelegate Loaded;

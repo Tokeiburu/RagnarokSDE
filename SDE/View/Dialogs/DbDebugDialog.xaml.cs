@@ -22,6 +22,7 @@ namespace SDE.View.Dialogs {
 			Owner = WpfUtilities.TopWindow;
 
 			AvalonLoader.Load(_textEditor);
+			AvalonLoader.SetSyntax(_textEditor, "DebugDb");
 
 			Log = "Database: Debugger Started...";
 

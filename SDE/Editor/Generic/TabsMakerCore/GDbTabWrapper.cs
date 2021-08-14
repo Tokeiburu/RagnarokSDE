@@ -27,11 +27,17 @@ using Utilities.Extension;
 using Extensions = SDE.Core.Extensions;
 
 namespace SDE.Editor.Generic.TabsMakerCore {
-	public class GDbTabWrapper<TKey, TValue> : GDbTab where TValue : Tuple {
+	public class GDbTabWrapper<TKey, TValue> : GDbTab where TValue : Database.Tuple {
 		private readonly object _lock = new object();
 		public bool ItemsEventsDisabled;
 		private TValue _currentSelectedItem;
 		private bool _isDeployed;
+		private bool _isMenuDeployed;
+		internal Grid _displayGrid = new Grid();
+
+		public bool IsDeployed {
+			get { return _isDeployed; }
+		}
 
 		public new object Content {
 			get { return base.Content ?? ((Window)AttachedProperty["AttachedWindow"]).Content; }
@@ -85,6 +91,33 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 		public void Initialize(GTabSettings<TKey, TValue> settings) {
 			Settings = settings;
 
+			_displayGrid = new Grid();
+			_displayGrid.SetValue(Grid.ColumnProperty, 2);
+			_displayGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Auto) });
+			_displayGrid.ColumnDefinitions.Add(new ColumnDefinition());
+			_displayGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(10) });
+			_displayGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Auto) });
+			_displayGrid.ColumnDefinitions.Add(new ColumnDefinition());
+
+			if (Settings.DbData == ServerDbs.ClientItems ||
+				Settings.DbData == ServerDbs.Pet ||
+				Settings.DbData == ServerDbs.Pet2 ||
+				Settings.DbData == ServerDbs.Mobs ||
+				Settings.DbData == ServerDbs.Mobs2 ||
+				Settings.DbData == ServerDbs.MobGroups ||
+				Settings.DbData == ServerDbs.Items ||
+				Settings.DbData == ServerDbs.Items2) {
+				_viewGrid.Children.Add(_displayGrid);
+			}
+			else {
+				ScrollViewer sv = new ScrollViewer();
+				sv.SetValue(Grid.ColumnProperty, 2);
+				sv.SetValue(ScrollViewer.VerticalScrollBarVisibilityProperty, ScrollBarVisibility.Auto);
+				sv.Focusable = false;
+				sv.Content = _displayGrid;
+				_viewGrid.Children.Add(sv);
+			}
+
 			ProjectDatabase = settings.ClientDatabase;
 			DbComponent = ProjectDatabase.GetDb<TKey>(settings.DbData);
 			Table = Settings.Table;
@@ -95,17 +128,17 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 			Table.TableUpdated += new Table<TKey, TValue>.UpdateTableEventHandler(_table_TableUpdated);
 
 			if (Settings.SearchEngine.SetupImageDataGetter != null) {
-				Extensions.GenerateListViewTemplate(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+				ListViewDataTemplateHelper.GenerateListViewTemplateNew(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 					new ListViewDataTemplateHelper.GeneralColumnInfo { Header = Settings.AttId.DisplayName, DisplayExpression = "[" + Settings.AttId.Index + "]", SearchGetAccessor = Settings.AttId.AttributeName, FixedWidth = Settings.AttIdWidth, TextAlignment = TextAlignment.Right, ToolTipBinding = "[" + Settings.AttId.Index + "]" },
 					new ListViewDataTemplateHelper.ImageColumnInfo { Header = "", DisplayExpression = "DataImage", SearchGetAccessor = Settings.AttId.AttributeName, FixedWidth = 26, MaxHeight = 24 },
 					new ListViewDataTemplateHelper.RangeColumnInfo { Header = Settings.AttDisplay.DisplayName, DisplayExpression = "[" + Settings.AttDisplay.Index + "]", SearchGetAccessor = Settings.AttDisplay.AttributeName, IsFill = true, ToolTipBinding = "[" + Settings.AttDisplay.Index + "]", MinWidth = 100, TextWrapping = TextWrapping.Wrap }
-				}, new DatabaseItemSorter(Settings.AttributeList), new string[] { "Deleted", "Red", "Modified", "Green", "Added", "Blue", "Normal", "Black" }, "generateStyle", "false");
+				}, new DatabaseItemSorter(Settings.AttributeList), new string[] { "Deleted", "{DynamicResource CellBrushRemoved}", "Modified", "{DynamicResource CellBrushModified}", "Added", "{DynamicResource CellBrushAdded}", "Normal", "{DynamicResource TextForeground}" });
 			}
 			else {
-				Extensions.GenerateListViewTemplate(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+				ListViewDataTemplateHelper.GenerateListViewTemplateNew(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 					new ListViewDataTemplateHelper.GeneralColumnInfo { Header = Settings.AttId.DisplayName, DisplayExpression = "[" + Settings.AttId.Index + "]", SearchGetAccessor = Settings.AttId.AttributeName, FixedWidth = Settings.AttIdWidth, TextAlignment = TextAlignment.Right, ToolTipBinding = "[" + Settings.AttId.Index + "]" },
 					new ListViewDataTemplateHelper.RangeColumnInfo { Header = Settings.AttDisplay.DisplayName, DisplayExpression = "[" + Settings.AttDisplay.Index + "]", SearchGetAccessor = Settings.AttDisplay.AttributeName, IsFill = true, ToolTipBinding = "[" + Settings.AttDisplay.Index + "]", MinWidth = 100, TextWrapping = TextWrapping.Wrap }
-				}, new DatabaseItemSorter(Settings.AttributeList), new string[] { "Deleted", "Red", "Modified", "Green", "Added", "Blue", "Normal", "Black" }, "generateStyle", "false");
+				}, new DatabaseItemSorter(Settings.AttributeList), new string[] { "Deleted", "{DynamicResource CellBrushRemoved}", "Modified", "{DynamicResource CellBrushModified}", "Added", "{DynamicResource CellBrushAdded}", "Normal", "{DynamicResource TextForeground}" });
 			}
 
 			if (!Settings.CanBeDelayed || Settings.AttributeList.Attributes.Any(p => p.IsSkippable))
@@ -150,11 +183,35 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 			ApplicationShortcut.Link(ApplicationShortcut.AdvancedPaste, () => ImportFromFile("clipboard", true), this);
 			ApplicationShortcut.Link(ApplicationShortcut.AdvancedPaste2, () => ImportFromFile("clipboard", true), this);
 			ApplicationShortcut.Link(ApplicationShortcut.Cut, () => _miCut_Click(null, null), _listView);
+			ApplicationShortcut.Link(ApplicationShortcut.FromString("F3", "Search next empty ID"), () => {
+				if (_listView.SelectedItems.Count > 0) {
+					ReadableTuple<int> item = (_listView.SelectedItems[_listView.SelectedItems.Count - 1]) as ReadableTuple<int>;
+					var original = item;
+
+					if (item != null) {
+						int id = item.Key;
+
+						while (true) {
+							id++;
+							var idGeneric = (TKey)(object)id;
+
+							var tuple = (ReadableTuple<int>)(object)Table.TryGetTuple(idGeneric);
+
+							if (tuple == null && item != original && item != null) {
+								TabNavigation.SelectList(DbComponent.DbSource, new TKey[] { item.GetKey<TKey>() });
+								break;
+							}
+
+							item = tuple;
+						}
+					}
+				}
+			}, _listView);
 		}
 
 		private void _table_TableUpdated(object sender) {
 			if (SearchEngine.IsLoaded) {
-				List<Tuple> tuples = _listView.SelectedItems.OfType<Tuple>().ToList();
+				List<Database.Tuple> tuples = _listView.SelectedItems.OfType<Database.Tuple>().ToList();
 				SearchEngine.Filter(this, () => SelectItems(tuples));
 			}
 		}
@@ -162,9 +219,13 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 		private void _deployTabControls() {
 			if (!_isDeployed) {
 				Settings.DisplayablePropertyMaker.Deploy(this, Settings);
-				_initMenus();
-				WpfUtils.DisableContextMenuIfEmpty(_listView);
-				_listView.SelectionChanged += _listView_SelectionChanged;
+
+				if (!_isMenuDeployed) {
+					_initMenus();
+					WpfUtils.DisableContextMenuIfEmpty(_listView);
+					_listView.SelectionChanged += _listView_SelectionChanged;
+					_isMenuDeployed = true;
+				}
 
 				_isDeployed = true;
 			}
@@ -221,7 +282,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 
 		private void _miCut_Click(object sender, RoutedEventArgs e) {
 			try {
-				ApplicationShortcut.Execute(ApplicationShortcut.Copy, this);
+				ApplicationShortcut.Execute(ApplicationShortcut.Copy.KeyGesture, this);
 				_deleteItems();
 			}
 			catch (Exception err) {
@@ -261,7 +322,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 					//}
 
 					if ((path = DbPathLocator.DetectPath(Settings.DbData)) != null) {
-						if (!FtpHelper.IsSystemFile(path)) {
+						if (!IOHelper.IsSystemFile(path)) {
 							ErrorHandler.HandleException("The file cannot be opened because it is not stored locally.");
 							return;
 						}
@@ -526,10 +587,10 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 			SearchEngine.SetRange(tupleIndexes);
 		}
 
-		public override void SelectItems(List<Tuple> tuples) {
+		public override void SelectItems(List<Database.Tuple> tuples) {
 			_listView.SelectedIndex = -1;
 
-			List<Tuple> toAdd = new List<Tuple>();
+			List<Database.Tuple> toAdd = new List<Database.Tuple>();
 
 			for (int i = 0; i < tuples.Count; i++) {
 				if (_listView.Items.Contains(tuples[i]))
@@ -918,7 +979,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 					return;
 				}
 
-				CopyToDialog dialog = new CopyToDialog(this, items.OfType<Tuple>().ToList(), DbComponent, db);
+				CopyToDialog dialog = new CopyToDialog(this, items.OfType<Database.Tuple>().ToList(), DbComponent, db);
 				dialog.ShowDialog();
 			}
 			catch (KeyInvalidException) {
@@ -1054,5 +1115,11 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 			}
 		}
 		#endregion
+
+		public void Clear() {
+			PropertiesGrid.Children.Clear();
+			PropertiesGrid.RowDefinitions.Clear();
+			_isDeployed = false;
+		}
 	}
 }

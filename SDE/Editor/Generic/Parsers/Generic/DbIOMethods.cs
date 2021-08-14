@@ -7,6 +7,7 @@ using Database;
 using SDE.Editor.Engines;
 using SDE.Editor.Engines.Parsers;
 using SDE.Editor.Engines.Parsers.Libconfig;
+using SDE.Editor.Engines.Parsers.Yaml;
 using SDE.Editor.Generic.Core;
 using SDE.Editor.Generic.Lists;
 using SDE.Editor.Writers;
@@ -20,11 +21,11 @@ namespace SDE.Editor.Generic.Parsers.Generic {
 
 		public delegate void DbIOWriteEntryMethod<TKey>(StringBuilder builder, ReadableTuple<TKey> tuple);
 
-		public static void DbIOWriterConf<TKey>(DbDebugItem<TKey> debug, AbstractDb<TKey> db, DbIOWriteEntryMethod<TKey> writeEntryMethod) {
+		public static void DbIOWriter<TKey>(DbDebugItem<TKey> debug, AbstractDb<TKey> db, DbIOWriteEntryMethod<TKey> writeEntryMethod) {
 			try {
 				if (debug.FileType == FileType.Conf) {
 					try {
-						var lines = new LibconfigParser(debug.OldPath, LibconfigMode.Write);
+						var lines = new LibconfigParser(debug.OldPath, ParserMode.Write);
 						lines.Remove(db);
 
 						foreach (ReadableTuple<TKey> tuple in db.Table.FastItems.Where(p => !p.Normal).OrderBy(p => p.GetKey<TKey>())) {
@@ -33,6 +34,29 @@ namespace SDE.Editor.Generic.Parsers.Generic {
 							StringBuilder builder = new StringBuilder();
 							writeEntryMethod(builder, tuple);
 							lines.Write(key, builder.ToString());
+						}
+
+						lines.WriteFile(debug.FilePath);
+					}
+					catch (Exception err) {
+						debug.ReportException(err);
+					}
+				}
+				else if (debug.FileType == FileType.Yaml) {
+					try {
+						var lines = new YamlParser(debug.OldPath, ParserMode.Write);
+
+						if (lines.Output == null)
+							return;
+
+						lines.Remove(db);
+
+						foreach (ReadableTuple<TKey> tuple in db.Table.FastItems.Where(p => !p.Normal).OrderBy(p => p.GetKey<TKey>())) {
+							string key = tuple.Key.ToString();
+
+							StringBuilder builder = new StringBuilder();
+							writeEntryMethod(builder, tuple);
+							lines.Write(key, builder.ToString().Trim('\r', '\n'));
 						}
 
 						lines.WriteFile(debug.FilePath);
@@ -168,7 +192,7 @@ namespace SDE.Editor.Generic.Parsers.Generic {
 			}
 		}
 
-		public static void DbLoaderAny<TKey>(DbDebugItem<TKey> debug, AbstractDb<TKey> db, TextFileHelper.TextFileHelperGetterDelegate getter, bool uniqueKey = true) {
+		public static void DbLoaderAny<TKey>(DbDebugItem<TKey> debug, AbstractDb<TKey> db, TextFileHelper.TextFileHelperGetterDelegate getter, bool uniqueKey = true, int numberOfAttributesToGuess = -1) {
 			List<DbAttribute> attributes = new List<DbAttribute>(db.AttributeList.Attributes);
 			int indexOffset = uniqueKey ? 1 : 0;
 			int attributesOffset = uniqueKey ? 0 : 1;
@@ -185,10 +209,10 @@ namespace SDE.Editor.Generic.Parsers.Generic {
 				TextFileHelper.SaveLastLine = true;
 			}
 
-			foreach (string[] elements in getter(FtpHelper.ReadAllBytes(debug.FilePath))) {
+			foreach (string[] elements in getter(IOHelper.ReadAllBytes(debug.FilePath))) {
 				try {
 					if (!hasGuessedAttributes) {
-						GuessAttributes(elements, attributes, -1, db);
+						GuessAttributes(elements, attributes, numberOfAttributesToGuess, db);
 						hasGuessedAttributes = true;
 					}
 
@@ -226,7 +250,7 @@ namespace SDE.Editor.Generic.Parsers.Generic {
 		public static void DbLoaderCommaRange<T>(DbDebugItem<T> debug, AttributeList list, int indexStart, int length, bool addAutomatically = true) {
 			var table = debug.AbsractDb.Table;
 
-			foreach (string[] elements in TextFileHelper.GetElementsByCommas(FtpHelper.ReadAllBytes(debug.FilePath))) {
+			foreach (string[] elements in TextFileHelper.GetElementsByCommas(IOHelper.ReadAllBytes(debug.FilePath))) {
 				try {
 					T itemId = (T)TypeDescriptor.GetConverter(typeof(T)).ConvertFrom(elements[0]);
 
@@ -266,7 +290,7 @@ namespace SDE.Editor.Generic.Parsers.Generic {
 		public static void DbLoaderComma<T>(DbDebugItem<T> debug, AttributeList list, DbIOItems.DbCommaFunctionDelegate<T> function, TextFileHelper.TextFileHelperGetterDelegate getter, bool addAutomatically = true) {
 			var table = debug.AbsractDb.Table;
 
-			foreach (string[] elements in getter(FtpHelper.ReadAllBytes(debug.FilePath))) {
+			foreach (string[] elements in getter(IOHelper.ReadAllBytes(debug.FilePath))) {
 				try {
 					if (!addAutomatically) {
 						T id = (T)TypeDescriptor.GetConverter(typeof(T)).ConvertFrom(elements[0]);
@@ -298,7 +322,7 @@ namespace SDE.Editor.Generic.Parsers.Generic {
 		public static void DbLoaderCommaNoCast<T>(DbDebugItem<T> debug, AttributeList list, int indexStart, int length) {
 			var table = debug.AbsractDb.Table;
 
-			foreach (string[] elements in TextFileHelper.GetElementsByCommas(FtpHelper.ReadAllBytes(debug.FilePath))) {
+			foreach (string[] elements in TextFileHelper.GetElementsByCommas(IOHelper.ReadAllBytes(debug.FilePath))) {
 				try {
 					T itemId = (T)TypeDescriptor.GetConverter(typeof(T)).ConvertFrom(elements[0]);
 					int max = length;
@@ -362,10 +386,25 @@ namespace SDE.Editor.Generic.Parsers.Generic {
 
 		public static void DbDirectCopyWriter<TKey>(DbDebugItem<TKey> debug, AbstractDb<TKey> db) {
 			try {
-				if (debug.OldPath != debug.FilePath && !FtpHelper.SameFile(debug.OldPath, debug.FilePath)) {
-					// Test their modified date
-					FtpHelper.Delete(debug.FilePath);
-					FtpHelper.Copy(debug.OldPath, debug.FilePath);
+				if (debug.OldPath != debug.FilePath) {
+					var storeCompareList = db.Attached["StoreCompare"] as List<string>;
+
+					if (storeCompareList != null) {
+						foreach (var path in storeCompareList) {
+							var oldPath = DbPathLocator.GetStoredFile(path);
+
+							if (!IOHelper.SameFile(oldPath, path)) {
+								// Test their modified date
+								IOHelper.Delete(path);
+								IOHelper.Copy(oldPath, path);
+							}
+						}
+					}
+					else if (!IOHelper.SameFile(debug.OldPath, debug.FilePath)) {
+						// Test their modified date
+						IOHelper.Delete(debug.FilePath);
+						IOHelper.Copy(debug.OldPath, debug.FilePath);
+					}
 				}
 			}
 			catch (Exception err) {

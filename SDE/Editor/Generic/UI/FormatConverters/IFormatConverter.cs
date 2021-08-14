@@ -22,6 +22,14 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 		protected Grid _parent;
 		protected int _row;
 
+		public DbAttribute Attribute {
+			get { return _attribute; }
+		}
+
+		public DisplayableProperty<TKey, TValue> DisplayableProperty {
+			get { return _displayableProperty; }
+		}
+
 		public void Initialize(DbAttribute attribute, int row, int column, object displayableProperty, Grid parent = null) {
 			_row = row;
 			_column = column;

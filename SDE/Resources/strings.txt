@@ -17,6 +17,18 @@ main = function()
 				return false, msg
 			end
 		end
+		if DESC.EffectID ~= nil then
+			result, msg = AddItemEffectInfo(ItemID, DESC.EffectID)
+			if not result == true then
+				return false, msg
+			end
+		end
+		if DESC.costume ~= nil then
+			result, msg = AddItemIsCostume(ItemID, DESC.costume)
+			if not result == true then
+				return false, msg
+			end
+		end
 	end
 	return true, "good"
 end

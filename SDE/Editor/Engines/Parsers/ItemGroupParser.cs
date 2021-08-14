@@ -19,7 +19,7 @@ namespace SDE.Editor.Engines.Parsers {
 	/// </summary>
 	public class ItemGroupParser {
 		public string Id;
-		public List<Tuple<string, string>> Quantities = new List<Tuple<string, string>>();
+		public List<Utilities.Extension.Tuple<string, string>> Quantities = new List<Utilities.Extension.Tuple<string, string>>();
 
 		public bool Init<TKey>(DbDebugItem<TKey> debug, string[] elements) {
 			Id = null;
@@ -70,10 +70,10 @@ namespace SDE.Editor.Engines.Parsers {
 			string[] values = val.Split(',');
 
 			if (values.Length > 1) {
-				Quantities.Add(new Tuple<string, string>(values[0].Trim('\"'), values[1]));
+				Quantities.Add(new Utilities.Extension.Tuple<string, string>(values[0].Trim('\"'), values[1]));
 			}
 			else {
-				Quantities.Add(new Tuple<string, string>(values[0].Trim('\"'), "1"));
+				Quantities.Add(new Utilities.Extension.Tuple<string, string>(values[0].Trim('\"'), "1"));
 			}
 		}
 

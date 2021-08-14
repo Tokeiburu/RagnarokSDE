@@ -5,7 +5,7 @@
     <Grid>
         <StackPanel Margin="10 0 10 0">
             <Label Name="_label" Content="Loading components..." Padding="0" Margin="6 10 3 3 " />
-            <Styles:TkProgressBar x:Name="_progressBar" Margin="3 10 3 10" ShowCancelButton="False" />
+            <Styles:TkProgressBar x:Name="_progressBar" Margin="3 10 3 10" ShowCancelButton="False" Background="{StaticResource TabItemBackground}" Foreground="{StaticResource TextForeground}"/>
         </StackPanel>
     </Grid>
 </Styles:TkWindow>

@@ -278,7 +278,7 @@ namespace SDE.Core {
 						var dataArray = data.ToArray();
 						var ptr = Marshal.AllocHGlobal(dataArray.Length);
 						Marshal.Copy(dataArray, 0, ptr, dataArray.Length);
-						return new Tuple<IntPtr, int>(ptr, NativeMethods.S_OK);
+						return new Utilities.Extension.Tuple<IntPtr, int>(ptr, NativeMethods.S_OK);
 					},
 				});
 		}
@@ -305,7 +305,7 @@ namespace SDE.Core {
 						// Return an IntPtr for the IStream
 						IntPtr ptr = Marshal.GetComInterfaceForObject(iStream, typeof(IStream));
 						Marshal.ReleaseComObject(iStream);
-						return new Tuple<IntPtr, int>(ptr, NativeMethods.S_OK);
+						return new Utilities.Extension.Tuple<IntPtr, int>(ptr, NativeMethods.S_OK);
 					},
 				});
 		}
@@ -457,7 +457,7 @@ namespace SDE.Core {
 		private class DataObject {
 			public FORMATETC FORMATETC { get; set; }
 
-			public Func<Tuple<IntPtr, int>> GetData { get; set; }
+			public Func<Utilities.Extension.Tuple<IntPtr, int>> GetData { get; set; }
 		}
 		#endregion
 

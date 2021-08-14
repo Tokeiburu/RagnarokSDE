@@ -13,6 +13,8 @@ using SDE.ApplicationConfiguration;
 using SDE.Core;
 using SDE.Core.Avalon;
 using SDE.Editor.Engines.Parsers;
+using SDE.Editor.Generic;
+using SDE.Editor.Generic.Lists;
 using SDE.Editor.Generic.Parsers.Generic;
 using TokeiLibrary;
 using TokeiLibrary.WPF.Styles;
@@ -26,6 +28,8 @@ namespace SDE.View.Dialogs {
 	public partial class ScriptEditDialog : TkWindow, IInputWindow {
 		private readonly CompletionList _li;
 		private CompletionWindow _completionWindow;
+		private MetaTable<int> _skill_db;
+		private List<string> _skills;
 
 		public ScriptEditDialog(string text) : base("Script edit", "cde.ico", SizeToContent.Manual, ResizeMode.CanResize) {
 			InitializeComponent();
@@ -41,12 +45,14 @@ namespace SDE.View.Dialogs {
 			//_textEditor.TextArea.IndentationStrategy = new CSharpIndentationStrategy();
 
 			_completionWindow = new CompletionWindow(_textEditor.TextArea);
+			_completionWindow.Background = Application.Current.Resources["TabItemBackground"] as Brush;
 			_li = _completionWindow.CompletionList;
 			ListView lv = _li.ListBox;
 			lv.SelectionMode = SelectionMode.Single;
+			lv.Background = Application.Current.Resources["TabItemBackground"] as Brush;
 
 			//Image
-			Extensions.GenerateListViewTemplate(lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			ListViewDataTemplateHelper.GenerateListViewTemplateNew(lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 				new ListViewDataTemplateHelper.ImageColumnInfo { Header = "", DisplayExpression = "Image", TextAlignment = TextAlignment.Center, FixedWidth = 22, MaxHeight = 22, SearchGetAccessor = "Commands"},
 				new ListViewDataTemplateHelper.GeneralColumnInfo {Header = "Commands", DisplayExpression = "Text", TextAlignment = TextAlignment.Left, IsFill = true, ToolTipBinding = "Description"}
 			}, null, new string[] { }, "generateHeader", "false");
@@ -158,18 +164,26 @@ namespace SDE.View.Dialogs {
 			RangeObservableCollectionX<ICompletionData> data = (RangeObservableCollectionX<ICompletionData>)_li.CompletionData;
 			data.Clear();
 
+			if (_skills == null) {
+				_skills = new List<string>();
+				_skill_db = SdeEditor.Instance.ProjectDatabase.GetMetaTable<int>(ServerDbs.Skills);
+				_skill_db.FastItems.ForEach(p => _skills.Add(p.GetStringValue(ServerSkillAttributes.Name.Index)));
+			}
+
 			string word = AvalonLoader.GetWholeWord(_textEditor.TextArea.Document, _textEditor);
 
 			List<string> words = ScriptEditorList.Words.Where(p => p.IndexOf(word, StringComparison.OrdinalIgnoreCase) != -1).OrderBy(p => p).ToList();
 			List<string> constants = ScriptEditorList.Constants.Where(p => p.IndexOf(word, StringComparison.OrdinalIgnoreCase) != -1).OrderBy(p => p).ToList();
+			List<string> skills = _skills.Where(p => p.IndexOf(word, StringComparison.OrdinalIgnoreCase) != -1).OrderBy(p => p).ToList();
 
-			if (words.Count == 0 && constants.Count == 0) {
+			if (words.Count == 0 && constants.Count == 0 && skills.Count == 0) {
 				_completionWindow.Close();
 				return;
 			}
 
 			IEnumerable<ICompletionData> results = words.Select(p => (ICompletionData)new MyCompletionData(p, _textEditor, DataType.Function)).
-				Concat(constants.Select(p => (ICompletionData)new MyCompletionData(p, _textEditor, DataType.Constant)));
+				Concat(constants.Select(p => (ICompletionData)new MyCompletionData(p, _textEditor, DataType.Constant))).
+				Concat(skills.Select(p => (ICompletionData)new MyCompletionData(p, _textEditor, DataType.Skill)));
 
 			data.AddRange(results);
 
@@ -221,6 +235,8 @@ namespace SDE.View.Dialogs {
 							return ApplicationManager.PreloadResourceImage("properties.png") as ImageSource;
 						case DataType.Function:
 							return ApplicationManager.PreloadResourceImage("file_imf.png") as ImageSource;
+						case DataType.Skill:
+							return ApplicationManager.PreloadResourceImage("sword.png") as ImageSource;
 					}
 					return null;
 				}
@@ -257,6 +273,7 @@ namespace SDE.View.Dialogs {
 
 	public enum DataType {
 		Function,
-		Constant
+		Constant,
+		Skill
 	}
 }

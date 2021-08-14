@@ -5,7 +5,8 @@
                  xmlns:TokeiLibrary="clr-namespace:TokeiLibrary;assembly=TokeiLibrary"
                  xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
                  xmlns:controls="clr-namespace:SDE.View.Controls"
-                 Width="300">
+                 Width="400"
+                 Background="{StaticResource TabItemBackground}" Foreground="{StaticResource TextForeground}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -24,26 +25,30 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
+                <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
             <Grid Grid.ColumnSpan="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto" />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <Label Content="Override" Padding="0" Margin="3 6 3 6" VerticalAlignment="Center" />
-                <controls:ClickSelectTextBoxEffect x:Name="_tbOverride" VerticalAlignment="Center" Text="150" HorizontalAlignment="Left" Width="60" Margin="3 6 3 6" Grid.Column="1" />
             </Grid>
-            <CheckBox Name="_cbUpper1" Margin="3 6 3 6" VerticalAlignment="Center" Grid.Row="1" Content="nodrop" />
-            <CheckBox Name="_cbUpper2" Margin="3 6 3 6" VerticalAlignment="Center" Grid.Row="2" Content="notrade" />
-            <CheckBox Name="_cbUpper3" Margin="3 6 3 6" VerticalAlignment="Center" Grid.Row="3" Content="partneroverride" />
-            <CheckBox Name="_cbUpper4" Margin="3 6 3 6" VerticalAlignment="Center" Grid.Row="4" Content="noselltonpc" />
-            <CheckBox Name="_cbUpper5" Margin="3 6 3 6" VerticalAlignment="Center" Grid.Row="5" Content="nocart" />
-            <CheckBox Name="_cbUpper6" Margin="3 6 3 6" VerticalAlignment="Center"  Grid.Column="1" Grid.Row="1" Content="nostorage" />
-            <CheckBox Name="_cbUpper7" Margin="3 6 3 6" VerticalAlignment="Center"  Grid.Column="1" Grid.Row="2" Content="nogstorage" />
-            <CheckBox Name="_cbUpper8" Margin="3 6 3 6" VerticalAlignment="Center"  Grid.Column="1" Grid.Row="3" Content="nomail" />
-            <CheckBox Name="_cbUpper9" Margin="3 6 3 6" VerticalAlignment="Center" Grid.Column="1" Grid.Row="4" Content="noauction" />
+            <CheckBox Name="_cbUpper1" Margin="3 6 3 6" VerticalAlignment="Center" Grid.Row="1" Content="NoDrop" />
+            <CheckBox Name="_cbUpper2" Margin="3 6 3 6" VerticalAlignment="Center" Grid.Row="2" Content="NoTrade" />
+            <CheckBox Name="_cbUpper3" Margin="3 6 3 6" VerticalAlignment="Center" Grid.Row="3" Content="TradePartner" />
+            <CheckBox Name="_cbUpper4" Margin="3 6 3 6" VerticalAlignment="Center" Grid.Row="4" Content="NoSell" />
+            <CheckBox Name="_cbUpper5" Margin="3 6 3 6" VerticalAlignment="Center" Grid.Row="5" Content="NoCart" />
+            <CheckBox Name="_cbUpper6" Margin="3 6 3 6" VerticalAlignment="Center"  Grid.Column="1" Grid.Row="1" Content="NoStorage" />
+            <CheckBox Name="_cbUpper7" Margin="3 6 3 6" VerticalAlignment="Center"  Grid.Column="1" Grid.Row="2" Content="NoGuildStorage" />
+            <CheckBox Name="_cbUpper8" Margin="3 6 3 6" VerticalAlignment="Center"  Grid.Column="1" Grid.Row="3" Content="NoMail" />
+            <CheckBox Name="_cbUpper9" Margin="3 6 3 6" VerticalAlignment="Center" Grid.Column="1" Grid.Row="4" Content="NoAuction" />
+            <RadioButton Visibility="Collapsed" Name="_rbMet1" Margin="3 6 10 6" VerticalAlignment="Center" Grid.Column="2" Grid.Row="1" Content="Account bound, can sell" />
+            <RadioButton Visibility="Collapsed" Name="_rbMet2" Margin="3 6 10 6" VerticalAlignment="Center" Grid.Column="2" Grid.Row="2" Content="Account bound, can't sell" />
+            <RadioButton Visibility="Collapsed" Name="_rbMet3" Margin="3 6 10 6" VerticalAlignment="Center" Grid.Column="2" Grid.Row="3" Content="Char bound, can sell" />
+            <RadioButton Visibility="Collapsed" Name="_rbMet4" Margin="3 6 10 6" VerticalAlignment="Center" Grid.Column="2" Grid.Row="4" Content="Char bound, can't sell" />
+            <RadioButton Visibility="Collapsed" Name="_rbMet5" Margin="3 6 10 6" VerticalAlignment="Center" Grid.Column="2" Grid.Row="5" Content="Quest bound" />
         </Grid>
-        <Grid Name="_footerGrid" ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="50" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+        <Grid Name="_footerGrid" ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="49" Background="{DynamicResource UIDialogBackground}">
             <DockPanel HorizontalAlignment="Right" Margin="0 0 3 0">
                 <Button Name="_buttonOk" Click="_buttonOk_Click" Content="Ok" Height="25" Margin="3" MinWidth="100" Grid.Column="2" />
                 <Button Name="_buttonCancel" Click="_buttonCancel_Click" Content="Cancel" Height="25" Margin="3" MinWidth="100" />

@@ -1,7 +1,10 @@
 ﻿using System.Globalization;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using GRF.Image;
+using GrfToWpfBridge;
 using SDE.ApplicationConfiguration;
 using SDE.Editor.Items;
 using TokeiLibrary;
@@ -24,6 +27,12 @@ namespace SDE.View.Controls {
 		
 		public ShopItem() {
 			InitializeComponent();
+
+			if (SdeAppConfiguration.ThemeIndex == 1) {
+				_tb.Foreground = (Brush)Application.Current.Resources["TextForeground"];
+				_tb.Visibility = System.Windows.Visibility.Hidden;
+				_imIcon2.Visibility = System.Windows.Visibility.Hidden;
+			}
 		}
 
 		public void SetPrice(int price) {
@@ -43,7 +52,12 @@ namespace SDE.View.Controls {
 					GrfImage img2 = _generatePrice(newPrice);
 
 					img = img.Extract(0, 0, img.Width - 14, 11);
-					_append(img, 12, GrfColor.Black);
+					if (SdeAppConfiguration.ThemeIndex == 0) {
+						_append(img, 12, GrfColor.Black);
+					}
+					else if (SdeAppConfiguration.ThemeIndex == 1) {
+						_append(img, 12, ((Color)Application.Current.Resources["UIThemeDefaultTextColor"]).ToGrfColor());
+					}
 					img.SetPixelsUnrestricted(img.Width, 0, img2);
 				}
 			}
@@ -62,55 +76,101 @@ namespace SDE.View.Controls {
 				int v = str[i] - '0';
 
 				if ((str.Length - i) % 3 == 0 && i != 0) {
-					_append(img, 10, GrfColor.Black);
+					if (SdeAppConfiguration.ThemeIndex == 0) {
+						_append(img, 10, GrfColor.Black);
+					}
+					else if (SdeAppConfiguration.ThemeIndex == 1) {
+						_append(img, 10, ((Color)Application.Current.Resources["UIThemeDefaultTextColor"]).ToGrfColor());
+					}
 				}
 
-				_append(img, v, GrfColor.Black);
+				if (SdeAppConfiguration.ThemeIndex == 0) {
+					_append(img, v, GrfColor.Black);
+				}
+				else if (SdeAppConfiguration.ThemeIndex == 1) {
+					_append(img, v, ((Color)Application.Current.Resources["UIThemeDefaultTextColor"]).ToGrfColor());
+				}
 			}
 
 			var img2 = img.Copy();
 			img2 = img2.Extract(1, 0, img.Width - 1, img.Height);
 
-			if (!SdeAppConfiguration.UseZenyColors) {
+			if (SdeAppConfiguration.ThemeIndex == 0) {
+				if (!SdeAppConfiguration.UseZenyColors) {
+				}
+				else if (price < 10) {
+					_setColor(img, "#00ffff");
+					img.SetPixelsUnrestricted(0, 0, img2, true);
+				}
+				else if (price < 100) {
+					_setColor(img, "#ce00ce");
+					_setColor(img2, "#0000ff");
+					img.SetPixelsUnrestricted(0, 0, img2);
+				}
+				else if (price < 1000) {
+					_setColor(img, "#00ffff");
+					_setColor(img2, "#0000ff");
+					img.SetPixelsUnrestricted(0, 0, img2, true);
+				}
+				else if (price < 10000) {
+					_setColor(img, "#ffff00");
+					_setColor(img2, "#ff0000");
+					img.SetPixelsUnrestricted(0, 0, img2, true);
+				}
+				else if (price < 100000) {
+					_setColor(img, "#ff18ff");
+				}
+				else if (price < 1000000) {
+					_setColor(img, "#0000ff");
+				}
+				else if (price < 10000000) {
+					_setColor(img, "#00ff00");
+					img.SetPixelsUnrestricted(0, 0, img2, true);
+				}
+				else if (price < 100000000) {
+					_setColor(img, "#ff0000");
+				}
+				else {
+					_setColor(img, "#cece63");
+					img.SetPixelsUnrestricted(0, 0, img2, true);
+				}
+
+				_append(img, 11, GrfColor.Black);
 			}
-			else if (price < 10) {
-				_setColor(img, "#00ffff");
-				img.SetPixelsUnrestricted(0, 0, img2, true);
-			}
-			else if (price < 100) {
-				_setColor(img, "#ce00ce");
-				_setColor(img2, "#0000ff");
-				img.SetPixelsUnrestricted(0, 0, img2);
-			}
-			else if (price < 1000) {
-				_setColor(img, "#00ffff");
-				_setColor(img2, "#0000ff");
-				img.SetPixelsUnrestricted(0, 0, img2, true);
-			}
-			else if (price < 10000) {
-				_setColor(img, "#ffff00");
-				_setColor(img2, "#ff0000");
-				img.SetPixelsUnrestricted(0, 0, img2, true);
-			}
-			else if (price < 100000) {
-				_setColor(img, "#ff18ff");
-			}
-			else if (price < 1000000) {
-				_setColor(img, "#0000ff");
-			}
-			else if (price < 10000000) {
-				_setColor(img, "#00ff00");
-				img.SetPixelsUnrestricted(0, 0, img2, true);
-			}
-			else if (price < 100000000) {
-				_setColor(img, "#ff0000");
-			}
-			else {
-				_setColor(img, "#cece63");
-				img.SetPixelsUnrestricted(0, 0, img2, true);
+			else if (SdeAppConfiguration.ThemeIndex == 1) {
+				if (!SdeAppConfiguration.UseZenyColors) {
+				}
+				else if (price < 10) {
+					_setColor(img, "#00ffff");
+				}
+				else if (price < 100) {
+					_setColor(img, ((Color)Application.Current.Resources["UIThemePropertyAddedColor"]).ToGrfColor());
+				}
+				else if (price < 1000) {
+					_setColor(img, ((Color)Application.Current.Resources["UIThemePropertyLzmaColor"]).ToGrfColor());
+				}
+				else if (price < 10000) {
+					_setColor(img, ((Color)Application.Current.Resources["UIThemePropertyEncryptedColor"]).ToGrfColor());
+				}
+				else if (price < 100000) {
+					_setColor(img, ((Color)Application.Current.Resources["UIThemePropertyLzmaColor"]).ToGrfColor());
+				}
+				else if (price < 1000000) {
+					_setColor(img, ((Color)Application.Current.Resources["UIThemePropertyAddedColor"]).ToGrfColor());
+				}
+				else if (price < 10000000) {
+					_setColor(img, "#00DA00");
+				}
+				else if (price < 100000000) {
+					_setColor(img, ((Color)Application.Current.Resources["UIThemePropertyRemovedColor"]).ToGrfColor());
+				}
+				else {
+					_setColor(img, "#cece63");
+				}
+
+				_append(img, 11, ((Color)Application.Current.Resources["UIThemeDefaultTextColor"]).ToGrfColor());
 			}
 
-			_append(img, 11, GrfColor.Black);
 			return img;
 		}
 
@@ -138,11 +198,11 @@ namespace SDE.View.Controls {
 			}
 
 			if (elementIndex == 11)
-				return _imgNumbers.Extract(73, 0, 15, 11);
+				return _setColor(_imgNumbers.Extract(73, 0, 15, 11), color);
 			if (elementIndex == 12)
-				return _imgNumbers.Extract(88, 0, 16, 11);
+				return _setColor(_imgNumbers.Extract(88, 0, 16, 11), color);
 
-			return _imgNumbers.Extract(73, 0, 15, 11);
+			return _setColor(_imgNumbers.Extract(73, 0, 15, 11), color);
 		}
 
 		public void SetName(string name) {

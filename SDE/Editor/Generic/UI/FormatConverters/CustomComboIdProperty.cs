@@ -11,6 +11,7 @@ using ErrorManager;
 using SDE.Editor.Engines.TabNavigationEngine;
 using SDE.Editor.Generic.Lists;
 using SDE.Editor.Generic.TabsMakerCore;
+using SDE.View;
 using SDE.View.Dialogs;
 using TokeiLibrary;
 using Utilities.Extension;
@@ -48,6 +49,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 				label.Margin = new Thickness(3);
 				label.Padding = new Thickness(0);
 				label.SetValue(Grid.RowProperty, 2 * i);
+				label.SetValue(TextBlock.ForegroundProperty, Application.Current.Resources["TextForeground"] as Brush);
 
 				Label spacer = new Label();
 				spacer.Height = 3;
@@ -60,7 +62,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 				preview.Margin = new Thickness(7, 0, 4, 0);
 				preview.Padding = new Thickness(0);
 				preview.SetValue(Grid.RowProperty, 2 * i);
-				preview.Foreground = new SolidColorBrush(Color.FromArgb(255, 140, 140, 140));
+				preview.Foreground = Application.Current.Resources["TextBoxOverlayBrush"] as SolidColorBrush;
 				preview.SetValue(Grid.ColumnProperty, 1);
 				preview.IsHitTestVisible = false;
 
@@ -105,7 +107,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 
 				textBox.GotFocus += delegate {
 					preview.Visibility = Visibility.Collapsed;
-					textBox.Foreground = Brushes.Black;
+					textBox.Foreground = Application.Current.Resources["TextForeground"] as Brush;
 				};
 				textBox.LostFocus += (sender, e) => _textBox2_TextChanged(sender, null);
 
@@ -189,30 +191,30 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 				TextBlock preview = (TextBlock)textBox.Tag;
 
 				if (!Int32.TryParse(textBox.Text, out value)) {
-					textBox.Foreground = Brushes.Black;
+					textBox.Foreground = Application.Current.Resources["TextForeground"] as Brush;
 					preview.Visibility = Visibility.Collapsed;
 					return;
 				}
 
 				if (value <= 0) {
-					textBox.Foreground = Brushes.Black;
+					textBox.Foreground = Application.Current.Resources["TextForeground"] as Brush;
 					preview.Visibility = Visibility.Collapsed;
 					return;
 				}
 
-				Tuple tuple = table.TryGetTuple(value);
+				Database.Tuple tuple = table.TryGetTuple(value);
 
 				if (tuple != null) {
 					val = tuple.GetValue(table.AttributeList.Attributes.FirstOrDefault(p => p.IsDisplayAttribute) ?? table.AttributeList.Attributes[1]).ToString();
 				}
 
 				if (textBox.IsFocused) {
-					textBox.Foreground = Brushes.Black;
+					textBox.Foreground = Application.Current.Resources["TextForeground"] as Brush;
 					preview.Visibility = Visibility.Collapsed;
 					return;
 				}
 
-				textBox.Foreground = Brushes.White;
+				textBox.Foreground = Application.Current.Resources["UIThemeTextBoxBackgroundColor"] as Brush;
 				preview.Text = val + " (" + value + ")";
 				preview.Visibility = Visibility.Visible;
 			}
@@ -237,7 +239,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 					ServerDbs sdb = ServerDbs.Items;
 
 					MetaTable<int> table = _tab.ProjectDatabase.GetMetaTable<int>(sdb);
-					Tuple tuple = table.TryGetTuple(value);
+					Database.Tuple tuple = table.TryGetTuple(value);
 
 					if (tuple != null) {
 						val = tuple.GetValue(table.AttributeList.Attributes.FirstOrDefault(p => p.IsDisplayAttribute) ?? table.AttributeList.Attributes[1]).ToString();

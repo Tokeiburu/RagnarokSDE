@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using SDE.ApplicationConfiguration;
 
 namespace SDE.View.Controls {
 	/// <summary>
@@ -9,6 +10,10 @@ namespace SDE.View.Controls {
 	public partial class DbSearchPanel : UserControl {
 		public DbSearchPanel() {
 			InitializeComponent();
+
+			if (SdeAppConfiguration.ThemeIndex == 1) {
+				_unclickableBorder.Margin = new Thickness(-6, -4, -6, -4);
+			}
 
 			_unclickableBorder.Init(_cbSubMenu);
 
@@ -56,7 +61,7 @@ namespace SDE.View.Controls {
 		private void _searchTextBox_GotFocus(object sender, RoutedEventArgs e) {
 			_labelFind.Visibility = Visibility.Hidden;
 			_border1.BorderBrush = new SolidColorBrush(Color.FromArgb(255, 5, 122, 0));
-			_searchTextBox.Foreground = new SolidColorBrush(Colors.Black);
+			_searchTextBox.Foreground = Application.Current.Resources["TextForeground"] as Brush;
 		}
 	}
 }

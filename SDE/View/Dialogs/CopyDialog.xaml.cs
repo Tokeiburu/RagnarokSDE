@@ -12,6 +12,7 @@ using SDE.Editor.Generic.TabsMakerCore;
 using TokeiLibrary;
 using TokeiLibrary.WPF.Styles;
 using TokeiLibrary.WPF.Styles.ListView;
+using Tuple = Database.Tuple;
 
 namespace SDE.View.Dialogs {
 	/// <summary>
@@ -108,7 +109,7 @@ namespace SDE.View.Dialogs {
 			_replace();
 		}
 
-		private void _replace<T>(GDbTab tab, Tuple tuple) {
+		private void _replace<T>(GDbTab tab, Database.Tuple tuple) {
 			var aDb = tab.DbComponent.To<T>();
 			aDb.Table.Commands.Begin();
 

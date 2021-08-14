@@ -5,7 +5,8 @@
                  xmlns:TokeiLibrary="clr-namespace:TokeiLibrary;assembly=TokeiLibrary"
                  xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
                  xmlns:Jobs="clr-namespace:SDE.Editor.Jobs"
-                 Width="650">
+                 Width="650"
+                 Background="{StaticResource TabItemBackground}" Foreground="{StaticResource TextForeground}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
@@ -55,7 +56,7 @@
             <Border />
             <TextBox IsReadOnly="True" Grid.Row="2" Height="40" Grid.ColumnSpan="4" Name="_previewClass" Margin="3" Background="Transparent" BorderThickness="0" AcceptsReturn="True" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Column="0" />
         </Grid>
-        <Grid Name="_footerGrid" ListView:WpfUtils.IsDraggable="True" Grid.Row="2" Height="50" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+        <Grid Name="_footerGrid" ListView:WpfUtils.IsDraggable="True" Grid.Row="2" Height="49" Background="{DynamicResource UIDialogBackground}">
             <Grid Margin="0 0 3 0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto" />

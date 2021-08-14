@@ -6,6 +6,7 @@ using Database;
 using ErrorManager;
 using SDE.ApplicationConfiguration;
 using SDE.Editor.Generic.Lists;
+using SDE.Editor.Jobs;
 using SDE.View;
 using Utilities;
 using Utilities.Extension;
@@ -236,6 +237,117 @@ namespace SDE.Editor.Generic.Parsers.Generic {
 			}
 		}
 
+		public static void TrySetJobsYaml(ReadableTuple<int> tuple, StringBuilder builder, DbAttribute attribute, string defaultValue) {
+			string val = "0x" + tuple.GetValue<string>(attribute);
+
+			if (val != "" && val != defaultValue && val.Length > 2 && val.ToLower() != "0xffffffff") {
+				builder.AppendLine("    Jobs:");
+				
+				int value = FormatConverters.IntOrHexConverter(val);
+
+				if (value == 0) {
+					builder.AppendLine("      All: false");
+					return;
+				}
+
+				if (value > 0) {
+					foreach (var job in DbIOItems.ItemDbJobsYaml) {
+						if ((value & job.Value) == job.Value) {
+							builder.Append("      ");
+							builder.Append(job.Key);
+							builder.AppendLine(": true");
+						}
+					}
+				}
+				else {
+					builder.AppendLine("      All: true");
+
+					foreach (var job in DbIOItems.ItemDbJobsYaml.Skip(1)) {
+						if ((value & job.Value) == 0) {
+							builder.Append("      ");
+							builder.Append(job.Key);
+							builder.AppendLine(": false");
+						}
+					}
+				}
+			}
+		}
+
+		public static void TrySetJobsYaml2(ReadableTuple<int> tuple, StringBuilder builder, DbAttribute attribute, string defaultValue) {
+			string val = "0x" + tuple.GetValue<string>(attribute);
+
+			if (val == "0x") {
+				builder.AppendLine("	Jobs: {");
+				builder.AppendLine("		All: false");
+				builder.AppendLine("	}");
+				return;
+			}
+
+			if (val != "" && val != defaultValue && val.Length > 2 && val.ToLower() != "0xffffffff") {
+				builder.AppendLine("	Jobs: {");
+
+				int value = FormatConverters.IntOrHexConverter(val);
+
+				if (value == 0) {
+					builder.AppendLine("		All: false");
+					builder.AppendLine("	}");
+					return;
+				}
+
+				uint guess = 0;
+				bool isExcept = false;
+
+				// Take a guess!
+				if (Job.IsExcept(value)) {
+					isExcept = true;
+					guess = 0xffffffff;
+
+					foreach (var job in DbIOItems.ItemDbJobsYaml3.Skip(1)) {
+						if ((value & job.Value) == job.Value) {
+							guess &= ~(uint)job.Value;
+						}
+					}
+				}
+				else {
+					Z.F();
+
+					foreach (var job in DbIOItems.ItemDbJobsYaml3.Skip(1)) {
+						if ((value & job.Value) == job.Value) {
+							guess |= (uint)job.Value;
+						}
+					}
+				}
+
+				if ((uint)value != guess) {
+					isExcept = !isExcept;
+				}
+
+				if (isExcept) {
+					value ^= -1;
+					builder.AppendLine("		All: true");
+
+					foreach (var job in DbIOItems.ItemDbJobsYaml2.Skip(1)) {
+						if ((value & job.Value) == job.Value) {
+							builder.Append("		");
+							builder.Append(job.Key);
+							builder.AppendLine(": false");
+						}
+					}
+				}
+				else {
+					foreach (var job in DbIOItems.ItemDbJobsYaml2.Skip(1)) {
+						if ((value & job.Value) == job.Value) {
+							builder.Append("		");
+							builder.Append(job.Key);
+							builder.AppendLine(": true");
+						}
+					}
+				}
+
+				builder.AppendLine("	}");
+			}
+		}
+
 		public static void SetType(ReadableTuple<int> tuple, StringBuilder builder, DbAttribute attribute) {
 			var type = tuple.GetValue<string>(attribute);
 
@@ -250,6 +362,36 @@ namespace SDE.Editor.Generic.Parsers.Generic {
 				return;
 
 			builder.AppendLine("\tType: " + type);
+		}
+
+		public static string ScriptFormatYaml(string val, string indent) {
+			StringBuilder builder = new StringBuilder();
+
+			val = ScriptFormat(val, 0);
+
+			string[] lines = val.Split('\n').Select(p => p.Trim('\r')).Where(p => p != "").ToArray();
+
+			for (int i = 0; i < lines.Length; i++) {
+				int j;
+
+				for (j = 0; j < lines[i].Length; j++) {
+					if (lines[i][j] != '\t')
+						break;
+				}
+
+				if (j > 0) {
+					lines[i] = lines[i].Substring(j);
+
+					for (int k = 0; k < j; k++) {
+						builder.Append("  ");
+					}
+				}
+
+				builder.Append(indent);
+				builder.AppendLine(lines[i]);
+			}
+
+			return builder.ToString().Trim('\r', '\n');
 		}
 
 		public static string ScriptFormat(string val, int indent = 2, bool setBrackets = false) {

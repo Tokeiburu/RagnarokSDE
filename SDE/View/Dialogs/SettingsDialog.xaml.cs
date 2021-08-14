@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using ErrorManager;
 using GRF.IO;
-using GrfToWpfBridge;
 using SDE.ApplicationConfiguration;
 using SDE.Editor;
 using SDE.Editor.Generic.TabsMakerCore;
@@ -20,6 +21,7 @@ using TokeiLibrary.WPF.Styles.ListView;
 using Utilities;
 using Utilities.Extension;
 using Utilities.Services;
+using Binder = GrfToWpfBridge.Binder;
 
 namespace SDE.View.Dialogs {
 	/// <summary>
@@ -36,7 +38,7 @@ namespace SDE.View.Dialogs {
 			_add(_gridComments, ++row, "Add comments in item_avail.txt", "Displays the item names as a comment at the end of the line for item_avail.txt.", () => SdeAppConfiguration.AddCommentForItemAvail, v => SdeAppConfiguration.AddCommentForItemAvail = v);
 			_add(_gridComments, ++row, "Add comments in item_nouse.txt", "Displays the item names as a comment at the end of the line for item_nouse.txt.", () => SdeAppConfiguration.AddCommentForItemNoUse, v => SdeAppConfiguration.AddCommentForItemNoUse = v);
 
-			_add(_gridGeneral, row = 3, "Switch item types 4 and 5 for text based databases (requires a software restart)", "Switches the armor and weapon types when reading the databases.", () => SdeAppConfiguration.RevertItemTypes, v => SdeAppConfiguration.RevertItemTypes = v);
+			_add(_gridGeneral, row = 4, "Switch item types 4 and 5 for text based databases (requires a software restart)", "Switches the armor and weapon types when reading the databases.", () => SdeAppConfiguration.RevertItemTypes, v => SdeAppConfiguration.RevertItemTypes = v);
 			_add(_gridGeneral, ++row, "Always reopen the latest opened project", "Always reopen the most recently opened project when starting the application.", () => SdeAppConfiguration.AlwaysReopenLatestProject, v => SdeAppConfiguration.AlwaysReopenLatestProject = v);
 			_add(_gridGeneral, ++row, "Associate the .sde file extension with this tool", null, () => (SdeAppConfiguration.FileShellAssociated & FileAssociation.Sde) == FileAssociation.Sde, v => {
 				if (v) {
@@ -64,6 +66,7 @@ namespace SDE.View.Dialogs {
 			_add(_gridDbWriter, ++row, "itemInfo.lua : Write identifiedDescriptionName", null, () => SdeAppConfiguration.DbWriterItemInfoIdDescription, v => SdeAppConfiguration.DbWriterItemInfoIdDescription = v);
 			_add(_gridDbWriter, ++row, "itemInfo.lua : Write slotCount", null, () => SdeAppConfiguration.DbWriterItemInfoSlotCount, v => SdeAppConfiguration.DbWriterItemInfoSlotCount = v);
 			_add(_gridDbWriter, ++row, "itemInfo.lua : Write ClassNum", null, () => SdeAppConfiguration.DbWriterItemInfoClassNum, v => SdeAppConfiguration.DbWriterItemInfoClassNum = v);
+			_add(_gridDbWriter, ++row, "itemInfo.lua : Write costume", null, () => SdeAppConfiguration.DbWriterItemInfoIsCostume, v => SdeAppConfiguration.DbWriterItemInfoIsCostume = v);
 			_add(_gridDbWriter, ++row, "item_group : force write in single file", "'Import' fields won't be used when saving the item groups", () => SdeAppConfiguration.DbWriterItemInfoClassNum, v => SdeAppConfiguration.DbWriterItemInfoClassNum = v);
 
 			_add(_gridDialogs, row = 0, "Use integrated dialogs for flags", "If unchecked, this will open dialogs on all the '...' buttons.", () => SdeAppConfiguration.UseIntegratedDialogsForFlags, v => SdeAppConfiguration.UseIntegratedDialogsForFlags = v);
@@ -73,6 +76,24 @@ namespace SDE.View.Dialogs {
 			_add(_gridDialogs, ++row, "Use integrated dialogs for time", "If unchecked, this will open dialogs on all the '...' buttons.", () => SdeAppConfiguration.UseIntegratedDialogsForTime, v => SdeAppConfiguration.UseIntegratedDialogsForTime = v);
 
 			_add(_gridRAthena, row = 0, "Use old rAthena mob mode", "If checked, this will use the old mob mode.", () => ProjectConfiguration.UseOldRAthenaMode, v => ProjectConfiguration.UseOldRAthenaMode = v);
+
+			Binder.Bind(_comboBoxStyles, () => SdeAppConfiguration.ThemeIndex, v => {
+				SdeAppConfiguration.ThemeIndex = v;
+				Application.Current.Resources.MergedDictionaries.RemoveAt(Application.Current.Resources.MergedDictionaries.Count - 1);
+
+				var path = "pack://application:,,,/" + Assembly.GetEntryAssembly().GetName().Name.Replace(" ", "%20") + ";component/WPF/Styles/";
+
+				if (SdeAppConfiguration.ThemeIndex == 0) {
+					path += "StyleLightBlue.xaml";
+				}
+				else if (SdeAppConfiguration.ThemeIndex == 1) {
+					path += "StyleDark.xaml";
+				}
+
+				//Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri(path, UriKind.RelativeOrAbsolute) });
+				Application.Current.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri(path, UriKind.RelativeOrAbsolute) });
+				ErrorHandler.HandleException("For the theme to apply properly, please restart the application.");
+			});
 
 			_loadEncoding();
 			_comboBoxCompression.Init();
@@ -122,12 +143,12 @@ namespace SDE.View.Dialogs {
 					button.Visibility = Visibility.Collapsed;
 					binding.Reset();
 					tb.Text = binding.KeyGesture.DisplayString;
+					SdeAppConfiguration.Remapper.Remove(actionName);
 					b.BorderBrush = WpfUtilities.LostFocusBrush;
 				};
 
 				if (binding.CanReset) {
 					button.Visibility = Visibility.Visible;
-					binding.Reset();
 				}
 
 				WpfUtilities.SetGridPosition(button, 0, 1);
@@ -317,7 +338,7 @@ namespace SDE.View.Dialogs {
 
 			label.MouseEnter += delegate {
 				Mouse.OverrideCursor = Cursors.Hand;
-				label.Foreground = Brushes.Blue;
+				label.Foreground = Application.Current.Resources["MouseOverTextBrush"] as SolidColorBrush;
 				label.SetValue(TextBlock.TextDecorationsProperty, TextDecorations.Underline);
 				label.MouseLeftButtonUp += delegate(object sender, MouseButtonEventArgs e) {
 					if (sender != label) return;
@@ -328,7 +349,7 @@ namespace SDE.View.Dialogs {
 
 			label.MouseLeave += delegate {
 				Mouse.OverrideCursor = null;
-				label.Foreground = Brushes.Black;
+				label.Foreground = Application.Current.Resources["TextForeground"] as SolidColorBrush;
 				label.SetValue(TextBlock.TextDecorationsProperty, null);
 			};
 

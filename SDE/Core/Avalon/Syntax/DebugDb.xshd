@@ -5,6 +5,11 @@
     <Color name="Label" foreground="#000DBA" />
     <Color name="Orange" foreground="#F2981D" />
     <Color name="Goto" fontWeight="bold" foreground="DarkBlue" />
+    <Color name="KeywordsStructure" foreground="Blue" />
+    <Color name="KeywordsDb" fontStyle="italic" foreground="#00B000" />
+    <Color name="KeywordsApi" foreground="#638AFF" />
+    <Color name="KeywordsOthers" foreground="#BCBCBC" />
+    <Color name="KeywordsDigit" foreground="#ff0000" />
 	
 	<!-- This is the main ruleset. -->
 	<RuleSet>
@@ -30,7 +35,7 @@
       </RuleSet>
     </Span>
     
-    <Keywords foreground="Blue">
+    <Keywords color="KeywordsStructure">
       <Word>File:</Word>
       <Word>Database:</Word>
       <Word>Message:</Word>
@@ -39,7 +44,7 @@
       <Word>import</Word>
     </Keywords>
 
-    <Keywords fontStyle="italic" foreground="#00B000">
+    <Keywords color="KeywordsDb">
       <Word>item_db_m</Word>
       <Word>client_items</Word>
       <Word>mob_skill_db_m</Word>
@@ -78,7 +83,7 @@
       <Word>castle_db</Word>
     </Keywords>
 
-    <Keywords foreground="#BCBCBC">
+    <Keywords color="KeywordsOthers">
       <Word>Output from master DB is more recent (will not be saved).</Word>
       <Word>Table not modified (will not be saved).</Word>
       <Word>Table loaded.</Word>
@@ -90,7 +95,7 @@
     </Keywords>-->
 
     <!-- Digits -->
-		<Rule foreground="#ff0000">
+		<Rule color="KeywordsDigit">
             \b0[xX][0-9a-fA-F]+  # hex number
         |    \b
             (    \d+(\.[0-9]+)?   #number with optional floating point

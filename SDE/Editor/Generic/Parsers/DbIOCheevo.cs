@@ -1,15 +1,85 @@
 ﻿using System;
 using System.Globalization;
 using System.Text;
+using SDE.Editor.Engines.Parsers;
 using SDE.Editor.Engines.Parsers.Libconfig;
+using SDE.Editor.Engines.Parsers.Yaml;
 using SDE.Editor.Generic.Core;
 using SDE.Editor.Generic.Lists;
 using SDE.Editor.Generic.Parsers.Generic;
+using Utilities;
 
 namespace SDE.Editor.Generic.Parsers {
 	public sealed class DbIOCheevo {
 		public static void Loader(DbDebugItem<int> debug, AbstractDb<int> db) {
-			if (debug.FileType == FileType.Conf) {
+			if (debug.FileType == FileType.Yaml) {
+				var ele = new YamlParser(debug.FilePath);
+				var table = debug.AbsractDb.Table;
+				var attributeList = debug.AbsractDb.AttributeList;
+
+				if (ele.Output == null || ((ParserArray)ele.Output).Objects.Count == 0 || (ele.Output["copy_paste"] ?? ele.Output["Body"]) == null)
+					return;
+				
+				foreach (var achievement in ele.Output["copy_paste"] ?? ele.Output["Body"]) {
+					try {
+						int cheevoId = Int32.Parse((achievement["ID"] ?? achievement["Id"]).ObjectValue);
+
+						table.SetRaw(cheevoId, ServerCheevoAttributes.Name, achievement["Name"] ?? "");
+						table.SetRaw(cheevoId, ServerCheevoAttributes.GroupId, achievement["Group"] ?? "");
+						table.SetRaw(cheevoId, ServerCheevoAttributes.Score, achievement["Score"] ?? "");
+						table.SetRaw(cheevoId, ServerCheevoAttributes.Map, achievement["Map"] ?? "");
+
+						if (achievement["Reward"] != null) {
+							var reward = achievement["Reward"];
+							table.SetRaw(cheevoId, ServerCheevoAttributes.RewardId, reward["ItemID"] ?? "");
+							table.SetRaw(cheevoId, ServerCheevoAttributes.RewardAmount, reward["Amount"] ?? "");
+							table.SetRaw(cheevoId, ServerCheevoAttributes.RewardTitleId, reward["TitleID"] ?? "");
+							table.SetRaw(cheevoId, ServerCheevoAttributes.RewardScript, (reward["Script"] ?? "").Trim(' ', '\t'));
+						}
+
+						if (achievement["Target"] != null) {
+							int targetId;
+
+							foreach (var target in achievement["Target"]) {
+								targetId = Int32.Parse(target["Id"] ?? "0");
+								table.SetRaw(cheevoId, attributeList[ServerCheevoAttributes.TargetId1.Index + targetId], target["MobID"] ?? "");
+								table.SetRaw(cheevoId, attributeList[ServerCheevoAttributes.TargetCount1.Index + targetId], target["Count"] ?? "");
+							}
+						}
+
+						if (achievement["Condition"] != null) {
+							table.SetRaw(cheevoId, ServerCheevoAttributes.Condition, achievement["Condition"].ObjectValue.Trim(' ', '\t'));
+						}
+
+						if (achievement["Dependent"] != null) {
+							int id;
+							bool first = true;
+							StringBuilder dependency = new StringBuilder();
+
+							foreach (var target in achievement["Dependent"]) {
+								id = Int32.Parse(target["Id"] ?? "0");
+
+								if (first) {
+									dependency.Append(id);
+									first = false;
+								}
+								else {
+									dependency.Append(":" + id);
+								}
+							}
+
+							table.SetRaw(cheevoId, ServerCheevoAttributes.Dependent, dependency.ToString());
+						}
+					}
+					catch {
+						if ((achievement["ID"] ?? achievement["Id"]) == null) {
+							if (!debug.ReportIdException("#", achievement.Line)) return;
+						}
+						else if (!debug.ReportIdException((achievement["ID"] ?? achievement["Id"]), achievement.Line)) return;
+					}
+				}
+			}
+			else if (debug.FileType == FileType.Conf) {
 				var ele = new LibconfigParser(debug.FilePath);
 				var table = debug.AbsractDb.Table;
 				var attributeList = debug.AbsractDb.AttributeList;
@@ -20,7 +90,6 @@ namespace SDE.Editor.Generic.Parsers {
 					table.SetRaw(cheevoId, ServerCheevoAttributes.Name, achievement["name"] ?? "");
 					table.SetRaw(cheevoId, ServerCheevoAttributes.GroupId, achievement["group"] ?? "");
 					table.SetRaw(cheevoId, ServerCheevoAttributes.Score, achievement["score"] ?? "");
-					table.SetRaw(cheevoId, ServerCheevoAttributes.ParamsRequired, achievement["params_required"] ?? "");
 
 					if (achievement["reward"] != null) {
 						foreach (var reward in achievement["reward"]) {
@@ -42,13 +111,8 @@ namespace SDE.Editor.Generic.Parsers {
 						}
 					}
 
-					if (achievement["parameter"] != null) {
-						int parameterId = 0;
-
-						foreach (var target in achievement["parameter"]) {
-							table.SetRaw(cheevoId, attributeList[ServerCheevoAttributes.Parameter1.Index + parameterId], target["param"].ObjectValue + target["operator"].ObjectValue + target["value"].ObjectValue);
-							parameterId++;
-						}
+					if (achievement["condition"] != null) {
+						table.SetRaw(cheevoId, ServerCheevoAttributes.Condition, achievement["condition"].ObjectValue);
 					}
 
 					if (achievement["dependent"] != null) {
@@ -73,7 +137,10 @@ namespace SDE.Editor.Generic.Parsers {
 		}
 
 		public static void Writer(DbDebugItem<int> debug, AbstractDb<int> db) {
-			DbIOMethods.DbIOWriterConf(debug, db, WriteEntry);
+			if (debug.FileType == FileType.Conf)
+				DbIOMethods.DbIOWriter(debug, db, WriteEntry);
+			else if (debug.FileType == FileType.Yaml)
+				DbIOMethods.DbIOWriter(debug, db, WriteEntryYaml);
 		}
 
 		public static void WriteEntry(StringBuilder builder, ReadableTuple<int> tuple) {
@@ -85,61 +152,12 @@ namespace SDE.Editor.Generic.Parsers {
 				builder.AppendLine("\tgroup: \"" + tuple.GetValue<string>(ServerCheevoAttributes.GroupId) + "\"");
 				builder.AppendLine("\tname: \"" + tuple.GetValue<string>(ServerCheevoAttributes.Name) + "\"");
 
-				int count = 0;
+				string condition = tuple.GetValue<string>(ServerCheevoAttributes.Condition);
 
-				for (int i = 0; i < 5; i++) {
-					count += String.IsNullOrEmpty(tuple.GetValue<string>(ServerCheevoAttributes.Parameter1.Index + i)) ? 0 : 1;
+				if (!String.IsNullOrEmpty(condition)) {
+					builder.AppendLine("\tcondition: \"" + condition.Trim('\t', ' ') + "\"");
 				}
-
-				int paramsRequired = String.IsNullOrEmpty(tuple.GetValue<string>(ServerCheevoAttributes.ParamsRequired)) ? count : tuple.GetValue<int>(ServerCheevoAttributes.ParamsRequired);
-
-				if (paramsRequired != count) {
-					builder.AppendLine("\tparams_required: " + paramsRequired);
-				}
-
-				if (count > 0) {
-					int total = 0;
-					builder.AppendLine("\tparameter: (");
-
-					for (int i = 0; i < 5; i++) {
-						if (!String.IsNullOrEmpty(valueS = tuple.GetValue<string>(ServerCheevoAttributes.Parameter1.Index + i))) {
-							total++;
-							builder.AppendLine("\t{");
-							string[] values = null;
-							string op = null;
-							string[] operators = { "==", ">=", "<=", ">", "<", "&" };
-
-							foreach (var ope in operators) {
-								if (valueS.Contains(op = ope)) {
-									values = valueS.Split(new string[] { op }, StringSplitOptions.None);
-									break;
-								}
-							}
-
-							if (values == null || values.Length != 2) {
-								throw new Exception("Invalid parameter: " + i + " for the achievement ID " + tuple.Key);
-							}
-
-							builder.AppendLine("\t\tparam: \"" + values[0] + "\"");
-
-							int id;
-
-							if (Int32.TryParse(values[1], out id)) {
-								builder.AppendLine("\t\tvalue: " + values[1]);
-							}
-							else {
-								builder.AppendLine("\t\tvalue: \"" + values[1] + "\"");
-							}
-
-							builder.AppendLine("\t\toperator: \"" + op + "\"");
-
-							builder.AppendLine(total != count ? "\t}," : "\t}");
-						}
-					}
-
-					builder.AppendLine("\t)");
-				}
-
+				
 				if (!String.IsNullOrEmpty(valueS = tuple.GetValue<string>(ServerCheevoAttributes.Dependent))) {
 					builder.AppendLine("\tdependent: [" + valueS.Replace(":", ", ") + "]");
 				}
@@ -173,7 +191,7 @@ namespace SDE.Editor.Generic.Parsers {
 					builder.AppendLine("\t)");
 				}
 
-				count = 0;
+				int count = 0;
 
 				for (int i = 0; i < 10; i++) {
 					count += (tuple.GetValue<int>(ServerCheevoAttributes.TargetId1.Index + i) != 0) ? 1 : 0;
@@ -209,6 +227,90 @@ namespace SDE.Editor.Generic.Parsers {
 
 				builder.AppendLine("\tscore: " + tuple.GetValue<int>(ServerCheevoAttributes.Score));
 				builder.Append("},");
+			}
+		}
+
+		public static void WriteEntryYaml(StringBuilder builder, ReadableTuple<int> tuple) {
+			if (tuple != null) {
+				string valueS;
+
+				builder.AppendLine("  - Id: " + tuple.GetKey<int>().ToString(CultureInfo.InvariantCulture));
+				builder.AppendLine("    Group: \"" + tuple.GetValue<string>(ServerCheevoAttributes.GroupId) + "\"");
+				builder.AppendLine("    Name: \"" + tuple.GetValue<string>(ServerCheevoAttributes.Name) + "\"");
+
+				if (tuple.GetValue<string>(ServerCheevoAttributes.Map) != "") {
+					builder.Append("    Map: \"" + tuple.GetValue<string>(ServerCheevoAttributes.Map) + "\"");
+				}
+
+				string condition = tuple.GetValue<string>(ServerCheevoAttributes.Condition);
+
+				if (!String.IsNullOrEmpty(condition)) {
+					builder.AppendLine("    Condition: \"" + condition.Trim('\t', ' ') + "\"");
+				}
+
+				if (!String.IsNullOrEmpty(valueS = tuple.GetValue<string>(ServerCheevoAttributes.Dependent))) {
+					builder.AppendLine("    Dependent: [" + valueS.Replace(":", ", ") + "]");
+				}
+
+				int rewardId = tuple.GetValue<int>(ServerCheevoAttributes.RewardId);
+				int amountId = tuple.GetValue<int>(ServerCheevoAttributes.RewardAmount);
+				string script = tuple.GetValue<string>(ServerCheevoAttributes.RewardScript);
+				int titleId = tuple.GetValue<int>(ServerCheevoAttributes.RewardTitleId);
+
+				if (rewardId > 0 || !String.IsNullOrEmpty(script) || titleId > 0) {
+					builder.AppendLine("    Reward:");
+
+					if (rewardId > 0) {
+						builder.AppendLine("      ItemID: " + rewardId);
+					}
+
+					if (amountId > 1) {
+						builder.AppendLine("      Amount: " + amountId);
+					}
+
+					if (!String.IsNullOrEmpty(script)) {
+						builder.AppendLine("      Script: \" " + script.Trim(' ') + " \"");
+					}
+
+					if (titleId > 0) {
+						builder.AppendLine("      TitleID: " + titleId);
+					}
+				}
+
+				int count = 0;
+
+				for (int i = 0; i < 10; i++) {
+					count += (tuple.GetValue<int>(ServerCheevoAttributes.TargetId1.Index + i) != 0) ? 1 : 0;
+				}
+
+				if (count > 0) {
+					builder.AppendLine("    Target:");
+
+					for (int i = 0; i < 10; i += 2) {
+						int mobId = tuple.GetValue<int>(ServerCheevoAttributes.TargetId1.Index + i);
+						int targetCount = tuple.GetValue<int>(ServerCheevoAttributes.TargetId1.Index + i + 1);
+
+						if (mobId != 0 || targetCount != 0) {
+							bool addedList = false;
+
+							if (mobId != 0) {
+								builder.AppendLine("      - MobID: " + mobId);
+								addedList = true;
+							}
+
+							if (targetCount != 0) {
+								if (!addedList) {
+									builder.AppendLine("      - Count: " + targetCount);
+								}
+								else {
+									builder.AppendLine("        Count: " + targetCount);
+								}
+							}
+						}
+					}
+				}
+
+				builder.Append("    Score: " + tuple.GetValue<int>(ServerCheevoAttributes.Score));
 			}
 		}
 	}

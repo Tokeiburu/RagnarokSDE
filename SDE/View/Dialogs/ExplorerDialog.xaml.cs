@@ -55,7 +55,7 @@ namespace SDE.View.Dialogs {
 				new ListViewDataTemplateHelper.RangeColumnInfo { Header = "Name", DisplayExpression = "Name", MinWidth = 100, ToolTipBinding = "Name", TextAlignment = TextAlignment.Left, IsFill = true },
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = "Changed", DisplayExpression = "Changed", FixedWidth = 150, ToolTipBinding = "Changed", TextAlignment = TextAlignment.Left },
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = "Rights", DisplayExpression = "Rights", FixedWidth = 100, ToolTipBinding = "Rights", TextAlignment = TextAlignment.Left }
-			}, new DefaultListViewComparer<FtpEntry>(), new string[] { "Default", "Black" });
+			}, new DefaultListViewComparer<FtpEntry>(), new string[] { "Default", "{DynamicResource TextForeground}" });
 
 			_validateFileManager();
 			_setListing("/");

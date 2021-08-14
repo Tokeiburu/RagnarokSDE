@@ -6,6 +6,7 @@
              xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary" Padding="0"
              xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
              xmlns:view="clr-namespace:SDE.View"
+             SnapsToDevicePixels="true"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="50" >
     <UserControl.Resources>
         <view:WidthAdjusterConverter x:Key="widthConverter" />
@@ -17,7 +18,7 @@
                 <MenuItem Name="_menuItemsSelect" ListView:WpfUtils.ImagePath="arrowdown.png" Header="Select in explorer" Click="_menuItemsSelect_Click" />
             </ContextMenu>
         </Border.ContextMenu>
-        <Grid Margin="1.5">
+        <Grid Margin="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto" />
                 <ColumnDefinition Width="120" />
@@ -37,7 +38,7 @@
             <Rectangle Name="_tRectangleOverlay" Fill="Transparent" Grid.Column="0" Grid.ColumnSpan="2"  />
             <Styles:PathBrowser x:Name="_tbText" Grid.Column="3" UseSavePath="True" Filter="Common Files (*.txt;*.lua;*.lub)|*.txt;*.lua;*.lub|Text Files (*.txt)|*.txt|Lua Files (*.lua)|*.lua|Lub Files (*.lub)|*.lub" BrowseMode="File" SavePathUniqueName="Server database editor - TVI - Browse" />
             <Button Name="_buttonSftp" Visibility="Collapsed" ListView:WpfUtils.ImagePath="sftp.png" Grid.Row="1" Grid.Column="4" Height="25" Width="25" HorizontalAlignment="Right" Margin="0 0 3 0" />
-            <Button Name="_buttonReset" ListView:WpfUtils.ImagePath="reset.png" Click="_buttonReset_Click" Grid.Row="1" Grid.Column="5" Height="25" Width="25" HorizontalAlignment="Right" />
+            <Button Name="_buttonReset" ListView:WpfUtils.ImagePath="reset.png" Click="_buttonReset_Click" Grid.Row="1" Grid.Column="5" Height="25" Width="25" HorizontalAlignment="Center" VerticalAlignment="Center" />
         </Grid>
     </Border>
 </UserControl>

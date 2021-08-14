@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using Database;
 using ErrorManager;
 using GRF.System;
@@ -25,7 +26,7 @@ using Utilities;
 using Extensions = SDE.Core.Extensions;
 
 namespace SDE.Editor.Generic.UI.CustomControls {
-	public class QueryMobSkills<TKey, TValue> : ICustomControl<TKey, TValue> where TValue : Tuple {
+	public class QueryMobSkills<TKey, TValue> : ICustomControl<TKey, TValue> where TValue : Database.Tuple {
 		private readonly int _row;
 		private Table<string, ReadableTuple<string>> _iSkillMobsTable;
 		private Table<int, ReadableTuple<int>> _iSkillsTable;
@@ -51,6 +52,7 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 
 			Label label = new Label();
 			label.Content = "Mob skills";
+			label.SetValue(TextBlock.ForegroundProperty, Application.Current.Resources["TextForeground"] as Brush);
 			label.FontStyle = FontStyles.Italic;
 			label.Padding = new Thickness(0);
 			label.Margin = new Thickness(3);
@@ -65,11 +67,12 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 			_lv.FocusVisualStyle = null;
 			_lv.Margin = new Thickness(3);
 			_lv.BorderThickness = new Thickness(1);
+			_lv.Background = Application.Current.Resources["TabItemBackground"] as Brush;
 
-			Extensions.GenerateListViewTemplate(_lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			ListViewDataTemplateHelper.GenerateListViewTemplateNew(_lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = "Skill", DisplayExpression = "Name", SearchGetAccessor = "Name", ToolTipBinding = "SkillId", FixedWidth = 60, TextWrapping = TextWrapping.Wrap },
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = "Condition", DisplayExpression = "Condition", SearchGetAccessor = "Condition", ToolTipBinding = "Condition", IsFill = true, TextAlignment = TextAlignment.Left, TextWrapping = TextWrapping.Wrap }
-			}, new DefaultListViewComparer<MobSkillView>(), new string[] { "Modified", "Green", "Added", "Blue", "Default", "Black" });
+			}, new DefaultListViewComparer<MobSkillView>(), new string[] { "Default", "{DynamicResource TextForeground}" });
 
 			_lv.ContextMenu = new ContextMenu();
 			_lv.MouseDoubleClick += new MouseButtonEventHandler(_lv_MouseDoubleClick);

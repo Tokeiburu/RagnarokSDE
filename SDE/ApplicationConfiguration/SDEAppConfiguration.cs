@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Windows.Controls;
@@ -62,7 +61,7 @@ namespace SDE.ApplicationConfiguration {
 		#region Program's configuration and information
 
 		public static string PublicVersion {
-			get { return "1.1.8"; }
+			get { return "1.2.1.3"; }
 		}
 
 		public static string Author {
@@ -89,6 +88,7 @@ namespace SDE.ApplicationConfiguration {
 		private static readonly BufferedProperty<bool> _dbWriterItemInfoIdDescription = new BufferedProperty<bool>(ConfigAsker, "[Server database editor - Db Writer - ItemInfo id desc]", true, FormatConverters.BooleanConverter);
 		private static readonly BufferedProperty<bool> _dbWriterItemInfoUnDescription = new BufferedProperty<bool>(ConfigAsker, "[Server database editor - Db Writer - ItemInfo un desc]", true, FormatConverters.BooleanConverter);
 		private static readonly BufferedProperty<bool> _dbWriterItemInfoSlotCount = new BufferedProperty<bool>(ConfigAsker, "[Server database editor - Db Writer - ItemInfo slot count]", true, FormatConverters.BooleanConverter);
+		private static readonly BufferedProperty<bool> _dbWriterItemInfoIsCostume = new BufferedProperty<bool>(ConfigAsker, "[Server database editor - Db Writer - ItemInfo is costume]", true, FormatConverters.BooleanConverter);
 		private static readonly BufferedProperty<bool> _dbWriterItemInfoClassNum = new BufferedProperty<bool>(ConfigAsker, "[Server database editor - Db Writer - ItemInfo class num]", true, FormatConverters.BooleanConverter);
 		private static readonly BufferedProperty<bool> _dbWriterGroupItemSingle = new BufferedProperty<bool>(ConfigAsker, "[Server database editor - Db Writer - group_item single]", true, FormatConverters.BooleanConverter);
 
@@ -123,6 +123,11 @@ namespace SDE.ApplicationConfiguration {
 		public static int PatchId {
 			get { return Int32.Parse(ConfigAsker["[Server database editor - Patch]", "0"]); }
 			set { ConfigAsker["[Server database editor - Patch]"] = value.ToString(CultureInfo.InvariantCulture); }
+		}
+
+		public static int ThemeIndex {
+			get { return Int32.Parse(ConfigAsker["[Server database editor - ThemeIndex]", "0"]); }
+			set { ConfigAsker["[Server database editor - ThemeIndex]"] = value.ToString(CultureInfo.InvariantCulture); }
 		}
 
 		public static int EncodingCodepageClient {
@@ -440,6 +445,11 @@ namespace SDE.ApplicationConfiguration {
 			set { ConfigAsker["[Server database editor - Application latest file name]"] = value; }
 		}
 
+		public static string MapCachePath {
+			get { return ConfigAsker["[Server database editor - Mapcache latest file name]", Configuration.ApplicationPath]; }
+			set { ConfigAsker["[Server database editor - Mapcache latest file name]"] = value; }
+		}
+
 		public static string AppLastPathSql {
 			get { return ConfigAsker["[Server database editor - Application latest sql]", AppLastPath]; }
 			set { ConfigAsker["[Server database editor - Application latest sql]"] = value; }
@@ -533,6 +543,11 @@ namespace SDE.ApplicationConfiguration {
 			set { _dbWriterItemInfoSlotCount.Set(value); }
 		}
 
+		public static bool DbWriterItemInfoIsCostume {
+			get { return _dbWriterItemInfoIsCostume.Get(); }
+			set { _dbWriterItemInfoIsCostume.Set(value); }
+		}
+
 		public static bool DbWriterItemInfoClassNum {
 			get { return _dbWriterItemInfoClassNum.Get(); }
 			set { _dbWriterItemInfoClassNum.Set(value); }
@@ -542,13 +557,6 @@ namespace SDE.ApplicationConfiguration {
 			get { return _dbWriterGroupItemSingle.Get(); }
 			set { _dbWriterGroupItemSingle.Set(value); }
 		}
-
-		//private static readonly BufferedProperty<string> _autoCompleteWeight = new BufferedProperty<string>(ConfigAsker, "[Server database editor - Autocomplete - Name - Weight]", "Weight", FormatConverters.StringConverter);
-
-		//public static string AutoCompleteWeight {
-		//    get { return _autoCompleteWeight.Get(); }
-		//    set { _autoCompleteWeight.Set(value); }
-		//}
 
 		public static bool AlwaysOverwriteFiles {
 			get { return Boolean.Parse(ConfigAsker["[Server database editor - Always overwrite files]", true.ToString()]); }
@@ -772,7 +780,7 @@ namespace SDE.ApplicationConfiguration {
 			}
 		}
 
-		private static int _processId = 0;
+		private static int _processId;
 
 		public static int ProcessId {
 			get {

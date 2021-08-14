@@ -7,7 +7,7 @@ namespace SDE.Editor.Jobs {
 	public class JobList {
 		internal static bool IsOpened = true;
 
-		public static Job AllJobOld = new Job((((1 << 26) - 1) ^ (1 << 13)) ^ (1 << 20), 0, new string[] { "All Jobs " });
+		public static Job AllJobOld = new Job((long)((((1 << 26) - 1) ^ (1 << 13)) ^ (1 << 20) ^ (1 << 29) ^ (1 << 30)) | 0x80000000, 0, new string[] { "All Jobs " });
 		public static List<Job> AllJobs = new List<Job>();
 
 
@@ -73,9 +73,11 @@ namespace SDE.Editor.Jobs {
 		public static Job Rebellion = new Job(1 << 30, 1 << 0, new string[] { "Rebellion", null }, Gunslinger, "rebellion");
 
 		// Dorams
-		public static Job Summoner = new Job(1 << 31, 1 << 0, new string[] { "Doram race", null }, "rebellion");
+		public static Job Summoner = new Job(0x80000000, 1 << 0, new string[] { "Doram race", null }, null, @"°áÈ¥_¿©");
+		public static Job BabySummoner = new Job(0x80000000, 1 << 2, new string[] { "Baby Doram race" }, null, "¹Ùµå:¹«Èñ");
 
 		// 2nd_1 jobs
+		public static Job SuperNovice = new Job(1 << 20, 1 << 0, new string[] { "Super Novice", null }, Novice, "±â»ç");
 		public static Job Knight = new Job(1 << 7, 1 << 0, new string[] { "Knight", null }, Swordman, "±â»ç");
 		public static Job Priest = new Job(1 << 8, 1 << 0, new string[] { "Priest", null }, Acolyte, "¼ºÅõ»ç");
 		public static Job Wizard = new Job(1 << 9, 1 << 0, new string[] { "Wizard", null }, Mage, "À§Àúµå");
@@ -135,10 +137,10 @@ namespace SDE.Editor.Jobs {
 
 		// Baby - 3rd_2 jobs
 		public static Job BabyRoyalGuard = new Job(1 << 14, 1 << 5, new string[] { "Baby Royal Guard", null }, Paladin, "°¡µå");
-		public static Job BabyShura = new Job(1 << 15, 1 << 5, new string[] { "Baby Shura", null }, Champion, "½´¶ó");
+		public static Job BabyShura = new Job(1 << 15, 1 << 5, new string[] { "Baby Sura", null }, Champion, "½´¶ó");
 		public static Job BabySorcerer = new Job(1 << 16, 1 << 5, new string[] { "Baby Sorcerer", null }, Professor, "¼Ò¼­·¯");
 		public static Job BabyShadowChaser = new Job(1 << 17, 1 << 5, new string[] { "Baby Shadow Chaser", null }, Stalker, "½¦µµ¿ìÃ¼ÀÌ¼­");
-		public static Job BabyGenetic = new Job(1 << 18, 1 << 5, new string[] { "Baby Geneticist", null }, Creator, "Á¦³×¸¯");
+		public static Job BabyGenetic = new Job(1 << 18, 1 << 5, new string[] { "Baby Genetic", null }, Creator, "Á¦³×¸¯");
 		public static Job BabyMinstrelWanderer = new Job(1 << 19, 1 << 5, new string[] { "Baby Minstrel", "Baby Wanderer" }, ClowyGypsy, "¹Î½ºÆ®·²:¿ø´õ·¯");
 
 
@@ -155,11 +157,14 @@ namespace SDE.Editor.Jobs {
 
 		// 3rd_2 jobs°Ç³Ê
 		public static Job RoyalGuard = new Job(1 << 14, 1 << 3, new string[] { "Royal Guard", null }, Paladin, "°¡µå");
-		public static Job Shura = new Job(1 << 15, 1 << 3, new string[] { "Shura", null }, Champion, "½´¶ó");
+		public static Job Shura = new Job(1 << 15, 1 << 3, new string[] { "Sura", null }, Champion, "½´¶ó");
 		public static Job Sorcerer = new Job(1 << 16, 1 << 3, new string[] { "Sorcerer", null }, Professor, "¼Ò¼­·¯");
 		public static Job ShadowChaser = new Job(1 << 17, 1 << 3, new string[] { "Shadow Chaser", null }, Stalker, "½¦µµ¿ìÃ¼ÀÌ¼­");
-		public static Job Genetic = new Job(1 << 18, 1 << 3, new string[] { "Geneticist", null }, Creator, "Á¦³×¸¯");
+		public static Job Genetic = new Job(1 << 18, 1 << 3, new string[] { "Genetic", null }, Creator, "Á¦³×¸¯");
 		public static Job MinstrelWanderer = new Job(1 << 19, 1 << 3, new string[] { "Minstrel", "Wanderer" }, ClowyGypsy, "¹Î½ºÆ®·²:¿ø´õ·¯");
+
+		public static Job StarEmperor = new Job(1 << 22, 1 << 3, new string[] { "Star Emperor", null }, Taekwon, "±Ç¼º");
+		public static Job SoulReaper = new Job(1 << 23, 1 << 3, new string[] { "Soul Reaper", null }, Taekwon, "¼Ò¿ï¸µÄ¿");
 
 
 		// 
@@ -172,7 +177,7 @@ namespace SDE.Editor.Jobs {
 		//  Special classes
 		//__________________________________________
 		public static Job AllClasses = new Job(-1, 63, new string[] { "Every Job", null });
-		public static Job AllClassesExceptThird = new Job(-1, 7, new string[] { "Every Job exceptThird", null });
+		public static Job AllClassesExceptThird = new Job(-1, 7, new string[] { "Every Job except Third", null });
 
 		public static Job ArcherClass = new Job(Archer.Id | Hunter.Id | BardDancer.Id, 0, new string[] { "Archer Class", null });
 		public static Job SwordmanClass = new Job(Swordman.Id | Crusader.Id | Knight.Id, 0, new string[] { "Swordman Class", null });
@@ -192,11 +197,11 @@ namespace SDE.Editor.Jobs {
 		public static Job GunslingerClass = new Job(Gunslinger.Id | Rebellion.Id, 0, new string[] { "Gunslinger Class", null });
 		public static Job NinjaClass = new Job(Ninja.Id | KagerouOboro.Id, 0, new string[] { "Ninja Class", null });
 
-		public static Job EveryJobExceptNoviceOld = new Job(ArcherClass.Id | SwordmanClass.Id | MageClass.Id | AcolyteClass.Id | MerchantClass.Id | ThiefClass.Id | TaekwonClass.Id | Gunslinger.Id | Ninja.Id, 63, new string[] { "Every Job exceptNovice", null });
-		public static Job EveryJobOld = new Job(ArcherClass.Id | SwordmanClass.Id | MageClass.Id | AcolyteClass.Id | MerchantClass.Id | ThiefClass.Id | TaekwonClass.Id | Gunslinger.Id | Ninja.Id | Novice.Id, 63, new string[] { "Every Job", null });
+		public static Job EveryJobExceptNoviceOld = new Job(ArcherClass.Id | SwordmanClass.Id | MageClass.Id | AcolyteClass.Id | MerchantClass.Id | ThiefClass.Id | TaekwonClass.Id | Gunslinger.Id | Ninja.Id | Rebellion.Id | KagerouOboro.Id | Summoner.Id, 63, new string[] { "Every Job except Novice", null });
+		public static Job EveryJobOld = new Job(ArcherClass.Id | SwordmanClass.Id | MageClass.Id | AcolyteClass.Id | MerchantClass.Id | ThiefClass.Id | TaekwonClass.Id | Gunslinger.Id | Ninja.Id | Novice.Id | Rebellion.Id | KagerouOboro.Id| Summoner.Id, 63, new string[] { "Every Job", null });
 
-		public static Job EveryJobExceptNovice = new Job(ArcherClass.Id | SwordmanClass.Id | MageClass.Id | AcolyteClass.Id | MerchantClass.Id | ThiefClass.Id | TaekwonClass.Id | GunslingerClass.Id | NinjaClass.Id, 63, new string[] { "Every Job exceptNovice", null });
-		public static Job EveryJob = new Job(ArcherClass.Id | SwordmanClass.Id | MageClass.Id | AcolyteClass.Id | MerchantClass.Id | ThiefClass.Id | TaekwonClass.Id | GunslingerClass.Id | NinjaClass.Id | Novice.Id, 63, new string[] { "Every Job", null });
+		public static Job EveryJobExceptNovice = new Job(ArcherClass.Id | SwordmanClass.Id | MageClass.Id | AcolyteClass.Id | MerchantClass.Id | ThiefClass.Id | TaekwonClass.Id | GunslingerClass.Id | NinjaClass.Id | Rebellion.Id | KagerouOboro.Id | Summoner.Id, 63, new string[] { "Every Job except Novice", null });
+		public static Job EveryJob = new Job(ArcherClass.Id | SwordmanClass.Id | MageClass.Id | AcolyteClass.Id | MerchantClass.Id | ThiefClass.Id | TaekwonClass.Id | GunslingerClass.Id | NinjaClass.Id | Novice.Id | Rebellion.Id | KagerouOboro.Id | Summoner.Id, 63, new string[] { "Every Job", null });
 
 		public static Job EveryJobExceptExtendedAndNovice = new Job(ArcherClass.Id | SwordmanClass.Id | MageClass.Id | AcolyteClass.Id | MerchantClass.Id | ThiefClass.Id, 63, new string[] { "Every Job", null });
 
@@ -215,27 +220,38 @@ namespace SDE.Editor.Jobs {
 			Paladin.Id | Champion.Id | Professor.Id | Stalker.Id | Creator.Id | ClowyGypsy.Id, 0, new string[] { "Rebirth 3rd Class", null });
 
 		public static Job EveryTransJobOld = new Job(EveryJobOld.Id & ~(TaekwonClass.Id | GunslingerClass.Id | NinjaClass.Id), 1 << 1, new string[] { "Every Trans Job", null });
-		public static Job EveryTransJobExceptNoviceOld = new Job(EveryTransJobOld.Id & ~Novice.Id, 1 << 1, new string[] { "Every Trans Job exceptNovice", null });
+		public static Job EveryTransJobExceptNoviceOld = new Job(EveryTransJobOld.Id & ~Novice.Id, 1 << 1, new string[] { "Every Trans Job except Novice", null });
 
 		public static Job EveryTransJob = new Job(EveryJob.Id & ~(TaekwonClass.Id | GunslingerClass.Id | NinjaClass.Id), 1 << 1, new string[] { "Every Trans Job", null });
-		public static Job EveryTransJobExceptNovice = new Job(EveryTransJob.Id & ~Novice.Id, 1 << 1, new string[] { "Every Trans Job exceptNovice", null });
+		public static Job EveryTransJobExceptNovice = new Job(EveryTransJob.Id & ~Novice.Id, 1 << 1, new string[] { "Every Trans Job except Novice", null });
 
 		static JobList() {
 			IsOpened = false;
 		}
 
-		public static string GetStringJobFromHex(string hex, int upper) {
-			return GetStringJobFromHex(_stringHexToInt(hex), upper, 2);
+		public static string GetStringJobFromHex(string hex, int upper, int equipLevel) {
+			return GetStringJobFromHex(_stringHexToInt(hex), upper, 2, equipLevel);
 		}
 
-		private static int _stringHexToInt(string hex) {
+		private static long _stringHexToInt(string hex) {
 			if (hex.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
 				hex = hex.Substring(2);
 
 			if (hex == "")
-				hex = "ffffffff";
+				hex = "ffffffffffffffff";
 
-			return Convert.ToInt32(hex, 16);
+			if (hex.Length <= 8) {
+				int value32 = Convert.ToInt32(hex, 16);
+
+				if (Job.IsExcept(value32)) {
+					// Negative job
+					if (hex.Length == 8) {
+						hex = "ffffffff" + hex;
+					}
+				}
+			}
+
+			return Convert.ToInt64(hex, 16);
 		}
 
 		public static string GenderString(int gender) {
@@ -246,11 +262,11 @@ namespace SDE.Editor.Jobs {
 			return "";
 		}
 
-		public static string GetStringJobFromHex(string hex, int upper, int gender) {
-			return GetStringJobFromHex(_stringHexToInt(hex), upper, gender);
+		public static string GetStringJobFromHex(string hex, int upper, int gender, int equipLevel) {
+			return GetStringJobFromHex(_stringHexToInt(hex), upper, gender, equipLevel);
 		}
 
-		private static string _getStringJobFromHexExcept(int hexValue, int upper, int gender) {
+		private static string _getStringJobFromHexExcept(long hexValue, int upper, int gender, int equipLevel) {
 			JobGroup group = JobGroup.Get(upper);
 			List<Job> jobs = new List<Job>();
 
@@ -258,13 +274,17 @@ namespace SDE.Editor.Jobs {
 
 			string output = "Every {0}";
 
+			//if (hexValue < 0) {
+			//	throw new Exception("Job cannot be negative.");
+			//}
+
 			var subCategory = group.GetRestrictedString(new Job(hexValue, upper, new string[] { "", null }));
 
 			if (subCategory == null) {
 				jobs.AddRange(AllJobs.Where(job => (job.Id & hexValue) == job.Id));
 				jobs = AllJobs.Where(p => p.Upper == 1 && jobs.All(q => p.Id != q.Id)).ToList();
-				hexValue = jobs.Aggregate(0, (current1, job) => current1 | job.Id);
-				return GetStringJobFromHex(hexValue, upper, gender);
+				hexValue = JobAggregate(0, jobs, true);
+				return GetStringJobFromHex(hexValue, upper, gender, equipLevel);
 			}
 
 			if (subCategory == "")
@@ -273,10 +293,10 @@ namespace SDE.Editor.Jobs {
 			subCategory = subCategory.Replace("Class", "Job").Trim(' ');
 
 			jobs.AddRange(AllJobs.Where(job => (job.Id & hexValue) == job.Id));
-			hexValue = jobs.Aggregate(0, (current1, job) => current1 | job.Id);
+			hexValue = JobAggregate(0, jobs, true);
 
 			string except = "";
-			except = _generate(except, hexValue, group, gender);
+			except = _generate(except, hexValue, group, gender, equipLevel);
 
 			output = output.Trim(' ');
 
@@ -287,34 +307,33 @@ namespace SDE.Editor.Jobs {
 			return String.Format(output, subCategory).Trim(new char[] { ' ', ',' }).Trim(',');
 		}
 
-		private static string _generate(string output, int hexValue, JobGroup group, int gender) {
+		private static string _generate(string output, long hexValue, JobGroup group, int gender, int equipLevel) {
 			if ((hexValue & 1) == 1) {
 				output += Job.Get(1, group).Name + ", ";
 			}
-			output = _checkFor(output, hexValue, Swordman.Id, Knight.Id, Crusader.Id, group, gender);
-			output = _checkFor(output, hexValue, Mage.Id, Wizard.Id, Sage.Id, group, gender);
-			output = _checkFor(output, hexValue, Archer.Id, Hunter.Id, BardDancer.Id, group, gender);
-			output = _checkFor(output, hexValue, Acolyte.Id, Priest.Id, Monk.Id, group, gender);
-			output = _checkFor(output, hexValue, Merchant.Id, Blacksmith.Id, Alchemist.Id, group, gender);
-			output = _checkFor(output, hexValue, Thief.Id, Assassin.Id, Rogue.Id, group, gender);
-			output = _checkFor(output, hexValue, Taekwon.Id, StarGladiator.Id, SoulLinker.Id, group, gender);
+			output = _checkFor(output, hexValue, Swordman.Id, Knight.Id, Crusader.Id, group, gender, equipLevel);
+			output = _checkFor(output, hexValue, Mage.Id, Wizard.Id, Sage.Id, group, gender, equipLevel);
+			output = _checkFor(output, hexValue, Archer.Id, Hunter.Id, BardDancer.Id, group, gender, equipLevel);
+			output = _checkFor(output, hexValue, Acolyte.Id, Priest.Id, Monk.Id, group, gender, equipLevel);
+			output = _checkFor(output, hexValue, Merchant.Id, Blacksmith.Id, Alchemist.Id, group, gender, equipLevel);
+			output = _checkFor(output, hexValue, Thief.Id, Assassin.Id, Rogue.Id, group, gender, equipLevel);
+			output = _checkFor(output, hexValue, Taekwon.Id, StarGladiator.Id, SoulLinker.Id, group, gender, equipLevel);
 
-			output = _checkFor(output, hexValue, Gunslinger, group);
-			output = _checkFor(output, hexValue, Ninja, group);
+			output = _checkFor(output, hexValue, Gunslinger, group, equipLevel);
+			output = _checkFor(output, hexValue, Rebellion, group, equipLevel);
+			output = _checkFor(output, hexValue, Ninja, group, equipLevel);
+			output = _checkFor(output, hexValue, KagerouOboro, group, equipLevel);
+			output = _checkFor(output, hexValue, Summoner, group, equipLevel);
 			return output;
 		}
 
-		public static string GetStringJobFromHex(int hexValue, int upper, int gender) {
+		public static string GetStringJobFromHex(long hexValue, int upper, int gender, int equipLevel) {
 			JobGroup group = JobGroup.Get(upper);
 
 			List<Job> jobs = new List<Job>();
 
-			if (hexValue == -2147483648) {
-				return "Doram race";
-			}
-
-			if (hexValue < 0) {
-				return _getStringJobFromHexExcept(hexValue, upper, gender);
+			if (Job.IsExcept(hexValue)) {
+				return _getStringJobFromHexExcept(hexValue, upper, gender, equipLevel);
 			}
 
 			jobs.AddRange(AllJobs.Where(job => (job.Id & hexValue) == job.Id));
@@ -327,11 +346,11 @@ namespace SDE.Editor.Jobs {
 			}
 
 			output = GenderString(gender);
-			output = _generate(output, hexValue, group, gender);
+			output = _generate(output, hexValue, group, gender, equipLevel);
 			return output.Trim(new char[] { ' ', ',' }).Trim(',');
 		}
 
-		private static IEnumerable<Job> _restrict(int id, int jobId, JobGroup group) {
+		private static IEnumerable<Job> _restrict(long id, long jobId, JobGroup group) {
 			List<Job> jobs = AllJobs.Where(p => p.Id == jobId && (id & p.Id) == p.Id && (p.Upper & group.Id) == p.Upper).ToList();
 			return jobs;
 		}
@@ -372,7 +391,7 @@ namespace SDE.Editor.Jobs {
 			return jobs.Distinct().ToList();
 		}
 
-		private static string _checkFor(string output, int hexValue, Job job, JobGroup group) {
+		private static string _checkFor(string output, long hexValue, Job job, JobGroup group, int equipLevel) {
 			if ((hexValue & job.Id) == job.Id) {
 				output += Job.Get(job.Id, group).Name + ", ";
 			}
@@ -402,8 +421,8 @@ namespace SDE.Editor.Jobs {
 			return false;
 		}
 
-		private static string _checkFor(string output, int hexValue, int parentId, int child1Id, int child2Id, JobGroup group, int gender) {
-			int familyId = parentId | child1Id | child2Id;
+		private static string _checkFor(string output, long hexValue, long parentId, long child1Id, long child2Id, JobGroup group, int gender, int equipLevel) {
+			long familyId = parentId | child1Id | child2Id;
 
 			if (group.IsOnlySubsetOf(JobGroup.Renewal)) {
 				// Remove first class, it's not supposed to be there...
@@ -449,50 +468,68 @@ namespace SDE.Editor.Jobs {
 			}
 
 			if ((hexValue & child1Id) == child1Id && (hexValue & child2Id) == child2Id) {
-				return output + Job.Get(child1Id, group).GetName(gender) + ", " + Job.Get(child2Id, group).GetName(gender) + ", ";
+				return output + Job.Get(child1Id, group, equipLevel).GetName(gender) + ", " + Job.Get(child2Id, group, equipLevel).GetName(gender) + ", ";
 			}
 
 			if ((hexValue & child1Id) == child1Id && (hexValue & parentId) == parentId) {
-				return output + Job.Get(parentId, group).GetName(gender) + ", " + Job.Get(child1Id, group).GetName(gender) + ", ";
+				return output + Job.Get(parentId, group, equipLevel).GetName(gender) + ", " + Job.Get(child1Id, group, equipLevel).GetName(gender) + ", ";
 			}
 
 			if ((hexValue & child2Id) == child2Id && (hexValue & parentId) == parentId) {
-				return output + Job.Get(parentId, group).GetName(gender) + ", " + Job.Get(child2Id, group).GetName(gender) + ", ";
+				return output + Job.Get(parentId, group, equipLevel).GetName(gender) + ", " + Job.Get(child2Id, group, equipLevel).GetName(gender) + ", ";
 			}
 
 			if ((hexValue & child1Id) == child1Id) {
-				return output + Job.Get(child1Id, group).GetName(gender) + ", ";
+				return output + Job.Get(child1Id, group, equipLevel).GetName(gender) + ", ";
 			}
 
 			if ((hexValue & child2Id) == child2Id) {
-				return output + Job.Get(child2Id, group).GetName(gender) + ", ";
+				return output + Job.Get(child2Id, group, equipLevel).GetName(gender) + ", ";
 			}
 
 			if ((hexValue & parentId) == parentId) {
-				return output + Job.Get(parentId, group).GetName(gender) + ", ";
+				return output + Job.Get(parentId, group, equipLevel).GetName(gender) + ", ";
 			}
 
 			return output;
 		}
 
 		public static string GetHexJob(string value) {
-			int result = GetApplicableJobs(value).Aggregate(0, (current, job) => current | job.Id);
+			long result = JobAggregate(0, GetApplicableJobs(value), true);
 
 			if (result == AllJobOld.Id) {
 				return String.Format("0x{0:X8}", -1);
 			}
 
-			return String.Format("0x{0:X8}", result);
+			string hexJob = String.Format("0x{0:X8}", result);
+
+			if (hexJob.Length > 8) {
+				return "0x" + hexJob.Substring(hexJob.Length - 8);
+			}
+
+			return "0x" + hexJob;
 		}
 
 		public static string GetHexJob(List<Job> jobs) {
-			int result = jobs.Aggregate(0, (current, job) => current | job.Id);
-			return String.Format("0x{0:X8}", result);
+			long result = JobAggregate(0, jobs, true);
+			string hexJob = String.Format("0x{0:X8}", result);
+
+			if (hexJob.Length > 8) {
+				return "0x" + hexJob.Substring(hexJob.Length - 8);
+			}
+
+			return "0x" + hexJob;
 		}
 
 		public static string GetNegativeHexJob(List<Job> jobs) {
-			int result = jobs.Aggregate(-1, (current, job) => current & ~job.Id);
-			return String.Format("0x{0:X8}", result);
+			long result = JobAggregate(-1, jobs, false);
+			string hexJob = String.Format("{0:X8}", result);
+
+			if (hexJob.Length > 8) {
+				return "0x" + hexJob.Substring(hexJob.Length - 8);
+			}
+
+			return "0x" + hexJob;
 		}
 
 		public static string GetHexJobReverse(string value) {
@@ -500,9 +537,24 @@ namespace SDE.Editor.Jobs {
 
 			List<Job> notApplicableJobs = AllJobs.Where(p => p.Parents.Contains(Novice)).Concat(new Job[] { Novice }).Where(p => !jobs.Contains(p)).ToList();
 
-			int result = notApplicableJobs.Aggregate(0, (current, job) => current | job.Id);
+			long result = JobAggregate(0, notApplicableJobs, true);
 			result ^= -1;
 			return String.Format("0x{0:X8}", result);
+		}
+
+		public static long JobAggregate(long start, List<Job> jobs, bool or) {
+			long result = start;
+
+			for (int i = 0; i < jobs.Count; i++) {
+				if (or) {
+					result |= jobs[i].Id;
+				}
+				else {
+					result &= ~jobs[i].Id;
+				}
+			}
+
+			return result;
 		}
 
 		public static List<Job> GetApplicableJobsFromHex(string hex) {
@@ -600,7 +652,7 @@ namespace SDE.Editor.Jobs {
 					_compare(stringJob, "All Job") ||
 					_compare(stringJob, "All") ||
 					_compare(stringJob, "All Jobs")) {
-					jobs.AddRange(_getAllChildrenJobs("Novice").Concat(new Job[] { GetJob("Novice") }));
+					jobs.AddRange(_getAllChildrenJobs("Novice").Concat(new Job[] { GetJob("Novice"), GetJob("Doram race") }));
 					previousJob = null;
 				}
 					//else if (

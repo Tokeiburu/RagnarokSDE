@@ -186,7 +186,7 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 			ApplicationShortcut.Link(ApplicationShortcut.Cut, Cut, _lv);
 
 			foreach (var update in _dp.Updates) {
-				Tuple<DbAttribute, FrameworkElement> x = update;
+				Utilities.Extension.Tuple<DbAttribute, FrameworkElement> x = update;
 
 				if (x.Item1.DataType == typeof(bool)) {
 					CheckBox element = (CheckBox)x.Item2;

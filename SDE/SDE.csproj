@@ -10,11 +10,12 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SDE</RootNamespace>
     <AssemblyName>SDE</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -61,24 +62,23 @@
     <StartupObject>SDE.GRFEditorMain</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ColorPicker, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\Librairies\ColorPicker.dll</HintPath>
+    <Reference Include="ColorPicker">
+      <HintPath>Files\ColorPicker.dll</HintPath>
     </Reference>
-    <Reference Include="Database, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\Librairies\Database.dll</HintPath>
+    <Reference Include="Database">
+      <HintPath>Files\Database.dll</HintPath>
     </Reference>
-    <Reference Include="ErrorManager, Version=1.2.5494.34248, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\Librairies\ErrorManager.dll</HintPath>
+    <Reference Include="ErrorManager">
+      <HintPath>Files\ErrorManager.dll</HintPath>
     </Reference>
     <Reference Include="Ftp">
       <HintPath>Files\Ftp.dll</HintPath>
     </Reference>
-    <Reference Include="GRF, Version=1.2.6171.1173, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Librairies\GRF.dll</HintPath>
+    <Reference Include="GRF">
+      <HintPath>Files\GRF.dll</HintPath>
     </Reference>
-    <Reference Include="GrfToWpfBridge, Version=1.0.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\Librairies\GrfToWpfBridge.dll</HintPath>
+    <Reference Include="GrfToWpfBridge">
+      <HintPath>Files\GrfToWpfBridge.dll</HintPath>
     </Reference>
     <Reference Include="ICSharpCode.AvalonEdit">
       <HintPath>Files\ICSharpCode.AvalonEdit.dll</HintPath>
@@ -92,28 +92,25 @@
     <Reference Include="Microsoft.Dynamic">
       <HintPath>Files\Microsoft.Dynamic.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Scripting">
-      <HintPath>Files\Microsoft.Scripting.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Scripting.Core">
-      <HintPath>Files\Microsoft.Scripting.Core.dll</HintPath>
-    </Reference>
+    <Reference Include="Microsoft.Scripting, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Scripting.Core, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" />
     <Reference Include="Org.Mentalis.Security">
       <HintPath>Files\Org.Mentalis.Security.dll</HintPath>
     </Reference>
     <Reference Include="PresentationFramework.Aero" />
     <Reference Include="System" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="Tamir.SharpSSH">
       <HintPath>Files\Tamir.SharpSSH.dll</HintPath>
     </Reference>
-    <Reference Include="TokeiLibrary, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\Librairies\TokeiLibrary.dll</HintPath>
+    <Reference Include="TokeiLibrary">
+      <HintPath>Files\TokeiLibrary.dll</HintPath>
     </Reference>
-    <Reference Include="Utilities, Version=1.2.6171.1170, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Librairies\Utilities.dll</HintPath>
+    <Reference Include="Utilities">
+      <HintPath>Files\Utilities.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
@@ -140,12 +137,14 @@
     <Compile Include="Core\ResourceString.cs" />
     <Compile Include="Editor\Achievement\CheevoGeneratorEngine.cs" />
     <Compile Include="Editor\Engines\BackupsEngine\BackupThread.cs" />
+    <Compile Include="Editor\Engines\FlagsManager.cs" />
     <Compile Include="Editor\Engines\FtpFileManager.cs" />
     <Compile Include="Editor\Engines\FtpUrlInfo.cs" />
     <Compile Include="Editor\Engines\LuaEngine\AccessoryTable.cs" />
     <Compile Include="Editor\Engines\Parsers\Libconfig\LibconfigParser.cs" />
-    <Compile Include="Editor\Engines\Parsers\Libconfig\LibconfigObject.cs" />
+    <Compile Include="Editor\Engines\Parsers\ParserObject.cs" />
     <Compile Include="Editor\Engines\Parsers\TextLineParser.cs" />
+    <Compile Include="Editor\Engines\Parsers\Yaml\YamlParser.cs" />
     <Compile Include="Editor\Engines\RepairEngine\CiError.cs" />
     <Compile Include="Editor\Engines\RepairEngine\ClientItemsValidation.cs" />
     <Compile Include="Editor\Engines\RepairEngine\ResourceError.cs" />
@@ -154,12 +153,16 @@
     <Compile Include="Editor\Engines\RepairEngine\TableError.cs" />
     <Compile Include="Editor\Engines\RepairEngine\ValidationErrors.cs" />
     <Compile Include="Editor\Engines\ScriptInterpreter.cs" />
+    <Compile Include="Editor\Generic\Parsers\DbIOCastle.cs" />
+    <Compile Include="Editor\Generic\Parsers\Generic\Constants.cs" />
+    <Compile Include="Editor\Generic\Parsers\DbIOPet.cs" />
     <Compile Include="Editor\Generic\Parsers\DbIOCheevo.cs" />
     <Compile Include="Editor\Generic\Parsers\DbIOClientCheevo.cs" />
     <Compile Include="Editor\Generic\Parsers\DbIOClientItems.cs" />
     <Compile Include="Editor\Generic\Parsers\DbIOClientQuests.cs" />
     <Compile Include="Editor\Generic\Parsers\DbIOConstants.cs" />
     <Compile Include="Editor\Generic\Parsers\DbIOMobSkills.cs" />
+    <Compile Include="Editor\Generic\Parsers\Generic\DbIOUtils.cs" />
     <Compile Include="Editor\Generic\Parsers\Generic\DbIOFormatting.cs" />
     <Compile Include="Editor\Generic\Parsers\DbIOItemGroups.cs" />
     <Compile Include="Editor\Generic\Parsers\DbIOItems.cs" />
@@ -167,8 +170,11 @@
     <Compile Include="Editor\Generic\Parsers\DbIOMobGroups.cs" />
     <Compile Include="Editor\Generic\Parsers\DbIOMobs.cs" />
     <Compile Include="Editor\Generic\Parsers\DbIOSkills.cs" />
+    <Compile Include="Editor\Generic\UI\CustomControls\CustomEditableView.cs" />
+    <Compile Include="Editor\Generic\UI\CustomControls\CustomEvolutionProperty.cs" />
     <Compile Include="Editor\Generic\UI\FormatConverters\CustomMobGroupDisplay.cs" />
     <Compile Include="Editor\Generic\UI\FormatConverters\CustomSubTable.cs" />
+    <Compile Include="Editor\Items\MobGeneratorEngine.cs" />
     <Compile Include="SdeStrings.cs" />
     <Compile Include="Core\Utf8Checker.cs" />
     <Compile Include="Core\VirtualFileDataObject.cs" />
@@ -195,7 +201,7 @@
     <Compile Include="Editor\Engines\BackupsEngine\BackupInfo.cs" />
     <Compile Include="Editor\Engines\DatabaseEngine\GenericDbCommand.cs" />
     <Compile Include="Editor\Engines\RepairEngine\DbValidationEngine.cs" />
-    <Compile Include="Editor\Engines\FtpHelper.cs" />
+    <Compile Include="Editor\Engines\IOHelper.cs" />
     <Compile Include="Editor\Engines\LuaEngine\LuaHelper.cs" />
     <Compile Include="Editor\Engines\PreviewEngine\IViewIdPreview.cs" />
     <Compile Include="Editor\Engines\PreviewEngine\PreviewHelper.cs" />
@@ -226,11 +232,30 @@
     <Compile Include="Editor\Items\Shop.cs" />
     <Compile Include="Editor\Jobs\BaseJob.cs" />
     <Compile Include="Editor\ReplaceTableFields.cs" />
+    <Compile Include="Tools\SDEMapcache\Commands\AddMapCommand.cs" />
+    <Compile Include="Tools\SDEMapcache\Commands\CommandsHolder.cs" />
+    <Compile Include="Tools\SDEMapcache\Commands\DeleteMapCommand.cs" />
+    <Compile Include="Tools\SDEMapcache\Commands\MapcacheGroupCommand.cs" />
+    <Compile Include="Tools\SDEMapcache\Commands\IMapcacheCommand.cs" />
+    <Compile Include="Tools\SDEMapcache\MapcacheDialog.xaml.cs">
+      <DependentUpon>MapcacheDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Tools\SDEMapcache\Mapcache.cs" />
+    <Compile Include="Tools\SDEMapcache\MapInfo.cs" />
     <Compile Include="View\Controls\DbSearchPanel.xaml.cs">
       <DependentUpon>DbSearchPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Dialogs\CheevoResourceDialog.xaml.cs">
       <DependentUpon>CheevoResourceDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\ConvertItemIdsDialog.xaml.cs">
+      <DependentUpon>ConvertItemIdsDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\LevelEnumDialog.xaml.cs">
+      <DependentUpon>LevelEnumDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Dialogs\MobAdjustDialog.xaml.cs">
+      <DependentUpon>MobAdjustDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\ObjectView\AccessoryItemView.cs" />
     <Compile Include="View\Controls\ClickSelectTextBox.cs" />
@@ -268,6 +293,7 @@
     <Compile Include="View\Controls\QuickColorSelector.xaml.cs">
       <DependentUpon>QuickColorSelector.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\ObjectView\EvolutionView.cs" />
     <Compile Include="View\ObjectView\ValidationErrorView.cs" />
     <Compile Include="View\Dialogs\ViewIdPreviewDialog.xaml.cs">
       <DependentUpon>ViewIdPreviewDialog.xaml</DependentUpon>
@@ -312,7 +338,7 @@
     <Compile Include="Editor\Generic\TabsMakerCore\GSearchEngineFilter.cs" />
     <Compile Include="Editor\Jobs\Job.cs" />
     <Compile Include="Core\SdeRecentFiles.cs" />
-    <Compile Include="Core\ViewItems\DebugItemView.cs" />
+    <Compile Include="View\ObjectView\DebugItemView.cs" />
     <Compile Include="Editor\Jobs\JobList.cs" />
     <Compile Include="Editor\Engines\DatabaseEngine\CommandsHolder.cs" />
     <Compile Include="Editor\Engines\DatabaseEngine\DatabaseItemSorter.cs" />
@@ -405,7 +431,7 @@
     <Compile Include="View\Dialogs\TradeEditDialog.xaml.cs">
       <DependentUpon>TradeEditDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Core\ViewItems\BackupView.cs" />
+    <Compile Include="View\ObjectView\BackupView.cs" />
     <Compile Include="WPF\Converters.cs" />
     <Compile Include="View\Controls\LeftComboBox.cs" />
     <Compile Include="View\MultiGrfExplorer.xaml.cs">
@@ -492,11 +518,27 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Tools\SDEMapcache\MapcacheDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="View\Controls\DbSearchPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Dialogs\CheevoResourceDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Dialogs\ConvertItemIdsDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Dialogs\LevelEnumDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Dialogs\MobAdjustDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -645,6 +687,14 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="View\Controls\ToggleMemoryButton.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="WPF\Styles\StyleDark.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="WPF\Styles\StyleLightBlue.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -867,11 +917,24 @@
   <ItemGroup>
     <Resource Include="Resources\splash.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\cache.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\collection_bg_dark.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\def.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\sword.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.MonthStamp.Increment" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.MonthStamp.Increment" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup>

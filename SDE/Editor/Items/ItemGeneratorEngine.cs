@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using Database;
 using Database.Commands;
+using SDE.Editor.Engines;
 using SDE.Editor.Engines.Parsers;
 using SDE.Editor.Generic;
 using SDE.Editor.Generic.Core;
@@ -14,7 +15,7 @@ using Utilities.Services;
 
 namespace SDE.Editor.Items {
 	public class ItemGeneratorEngine {
-		private bool _emptyFill(DbAttribute attribute, Tuple item) {
+		private bool _emptyFill(DbAttribute attribute, Database.Tuple item) {
 			string value = item.GetValue<string>(attribute);
 
 			if (ProjectConfiguration.AutocompleteFillOnlyEmptyFields) {
@@ -91,6 +92,12 @@ namespace SDE.Editor.Items {
 			//		break;
 			//}
 
+			DbAttribute equipLevelAttribute = ServerItemAttributes.EquipLevel;
+
+			if (tupleSource.GetIntNoThrow(ServerItemAttributes.EquipLevelMin) > tupleSource.GetIntNoThrow(ServerItemAttributes.EquipLevel)) {
+				equipLevelAttribute = ServerItemAttributes.EquipLevelMin;
+			}
+
 			switch(itemType) {
 				case TypeType.Weapon:
 					string type = _findWeaponType(tupleSource) ?? "Weapon";
@@ -130,7 +137,7 @@ namespace SDE.Editor.Items {
 					_autoAdd(ServerItemAttributes.Attack, ParameterHolderKeys.Attack, tupleSource, holder);
 					_autoAddWeight(tupleSource, holder);
 					_autoAdd(ServerItemAttributes.WeaponLevel, ParameterHolderKeys.WeaponLevel, tupleSource, holder);
-					_autoAddJob(tupleSource, holder);
+					_autoAddJob(tupleSource, holder, _getInt(equipLevelAttribute, tupleSource));
 					_autoAddElement(tupleSource, holder);
 					break;
 				case TypeType.Ammo:
@@ -184,12 +191,12 @@ namespace SDE.Editor.Items {
 					_autoAdd(ServerItemAttributes.Defense, ParameterHolderKeys.Defense, tupleSource, holder);
 					_autoAddEquippedOn(ServerItemAttributes.Location, ParameterHolderKeys.Location, tupleSource, holder);
 					_autoAddWeight(tupleSource, holder);
-					_autoAddJob(tupleSource, holder);
+					_autoAddJob(tupleSource, holder, _getInt(equipLevelAttribute, tupleSource));
 					break;
 				case TypeType.Card:
 					holder.Values[ParameterHolderKeys.Class] = "Card";
 					_autoAddCompound(ServerItemAttributes.Location, ParameterHolderKeys.CompoundOn, tupleSource, holder);
-					_autoAdd(ServerItemAttributes.EquipLevel, ParameterHolderKeys.RequiredLevel, tupleSource, holder, 1);
+					_autoAdd(equipLevelAttribute, ParameterHolderKeys.RequiredLevel, tupleSource, holder, 1);
 					_autoAddWeight(tupleSource, holder);
 
 					if (!item.GetValue<bool>(ClientItemAttributes.IsCard))
@@ -267,7 +274,7 @@ namespace SDE.Editor.Items {
 					break;
 			}
 
-			_autoAdd(ServerItemAttributes.EquipLevel, ParameterHolderKeys.RequiredLevel, tupleSource, holder, 1);
+			_autoAdd(equipLevelAttribute, ParameterHolderKeys.RequiredLevel, tupleSource, holder, 1);
 
 			holder.Values[ParameterHolderKeys.Description] = description == "" ? ProjectConfiguration.AutocompleteDescNotSet : description;
 
@@ -355,12 +362,12 @@ namespace SDE.Editor.Items {
 			return _armorUnDisplayName[ansi];
 		}
 
-		private bool _isNotNullDifferent(string newValue, DbAttribute attribute, Tuple item) {
+		private bool _isNotNullDifferent(string newValue, DbAttribute attribute, Database.Tuple item) {
 			if (string.IsNullOrEmpty(newValue)) return false;
 			return newValue != item.GetValue<string>(attribute);
 		}
 
-		private bool _overridableString(Tuple tupleSource, DbAttribute attribute, params string[] strings) {
+		private bool _overridableString(Database.Tuple tupleSource, DbAttribute attribute, params string[] strings) {
 			string value = tupleSource.GetValue<string>(attribute);
 			return strings.Any(s => value.IndexOf(s, StringComparison.OrdinalIgnoreCase) > -1);
 		}
@@ -474,7 +481,15 @@ namespace SDE.Editor.Items {
 				holder.Values[para] = "Shield";
 			}
 			else if (_is(val, 8, 128)) {
-				holder.Values[para] = "Accessory";
+				if (val == 8) {
+					holder.Values[para] = "Accessory (Right)";
+				}
+				else if (val == 128) {
+					holder.Values[para] = "Accessory (Left)";
+				}
+				else {
+					holder.Values[para] = "Accessory";
+				}
 			}
 			else if (_is(val, 16)) {
 				holder.Values[para] = "Armor";
@@ -538,8 +553,17 @@ namespace SDE.Editor.Items {
 			if (_is(location, 4))
 				return "Garment";
 
-			if (_is(location, 8, 128))
+			if (_is(location, 8, 128)) {
+				if (location == 8) {
+					return "Accessory (Right)";
+				}
+				
+				if (location == 128) {
+					return "Accessory (Left)";
+				}
+
 				return "Accessory";
+			}
 
 			return null;
 		}
@@ -584,9 +608,9 @@ namespace SDE.Editor.Items {
 			}
 		}
 
-		private void _autoAddJob(ReadableTuple<int> tupleSource, ParameterHolder holder) {
+		private void _autoAddJob(ReadableTuple<int> tupleSource, ParameterHolder holder, int equipLevel) {
 			var val = tupleSource.GetValue<string>(ServerItemAttributes.ApplicableJob);
-			string applicationJob = JobList.GetStringJobFromHex(val, _getUpper(tupleSource), _getGender(tupleSource));
+			string applicationJob = JobList.GetStringJobFromHex(val, _getUpper(tupleSource), _getGender(tupleSource), equipLevel);
 
 			//if (!String.IsNullOrEmpty(applicationJob)) {
 			holder.Values[ParameterHolderKeys.ApplicableJob] = applicationJob;
@@ -622,7 +646,7 @@ namespace SDE.Editor.Items {
 			}
 		}
 
-		private int _getInt(DbAttribute attribute, Tuple tupleSource) {
+		private int _getInt(DbAttribute attribute, Database.Tuple tupleSource) {
 			var sValue = tupleSource.GetValue<string>(attribute);
 			int ival;
 
@@ -643,7 +667,7 @@ namespace SDE.Editor.Items {
 			"Two-handed Mace",
 			"Rod", // 10
 			"Bow",
-			"Knukle",
+			"Knuckle",
 			"Instrument",
 			"Whip",
 			"Book", // 15
@@ -702,7 +726,7 @@ namespace SDE.Editor.Items {
 			{ "One handed Staff", 10 },
 			{ "1-handed Staff", 10 },
 			{ "Bow", 11 },
-			{ "Knukle", 12 },
+			{ "Knuckle", 12 },
 			{ "Claw", 12 },
 			{ "Instrument", 13 },
 			{ "Musical Instrument", 13 },
@@ -759,6 +783,17 @@ namespace SDE.Editor.Items {
 
 		private string _findWeaponType(ReadableTuple<int> tupleSource) {
 			var viewId = _getInt(ServerItemAttributes.ClassNumber, tupleSource);
+			var viewId2 = _getInt(ServerItemAttributes.SubType, tupleSource);
+
+			if (viewId2 > 0) {
+				var flagsData = FlagsManager.GetFlag<WeaponType>();
+				var v = flagsData.Values.FirstOrDefault(p => p.Value == viewId2);
+
+				if (v != null) {
+					var index = flagsData.Values.IndexOf(v);
+					return WeaponTypes[index];
+				}
+			}
 
 			if (viewId > 0 && viewId < WeaponTypes.Count) {
 				return WeaponTypes[viewId];

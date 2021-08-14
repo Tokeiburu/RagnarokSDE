@@ -8,7 +8,8 @@
                  xmlns:WPF1="clr-namespace:SDE.WPF"
                  xmlns:WpfBugFix="clr-namespace:TokeiLibrary.WpfBugFix;assembly=TokeiLibrary"
                  xmlns:controls="clr-namespace:SDE.View.Controls"
-                 Height="350" Width="360">
+                 Height="350" Width="360"
+                 Background="{StaticResource TabItemBackground}" Foreground="{StaticResource TextForeground}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -23,7 +24,7 @@
             <WpfBugFix:RangeListView TextSearch.TextPath="[0]" FocusVisualStyle="{x:Null}" BorderThickness="0" Grid.Row="1" ListView:WpfUtils.IsGridSortable="True" Name="_listView" VirtualizingStackPanel.IsVirtualizing="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
             </WpfBugFix:RangeListView>
         </Grid>
-        <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="50" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+        <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="49" Background="{DynamicResource UIDialogBackground}">
             <DockPanel HorizontalAlignment="Right" Margin="0 0 3 0">
                 <Button Name="_buttonOk" Click="_buttonOk_Click" Content="Ok" Height="25" Margin="3" MinWidth="100" Grid.Column="2" />
                 <Button Name="_buttonCancel" Click="_buttonCancel_Click" Content="Cancel" Height="25" Margin="3" MinWidth="100" />

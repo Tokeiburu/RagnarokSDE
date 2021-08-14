@@ -1,5 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using SDE.ApplicationConfiguration;
+using TokeiLibrary;
 
 namespace SDE.Editor.Generic.UI.CustomControls {
 	/// <summary>
@@ -10,6 +12,10 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 			Box = nameBox;
 			InitializeComponent();
 			Margin = new Thickness(3);
+
+			if (SdeAppConfiguration.ThemeIndex == 1) {
+				_resImage.Source = ApplicationManager.GetResourceImage("collection_bg_dark.png");
+			}
 		}
 
 		public Image PreviewImage {

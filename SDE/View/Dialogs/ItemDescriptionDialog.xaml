@@ -4,7 +4,8 @@
               xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
                  xmlns:TokeiLibrary="clr-namespace:TokeiLibrary;assembly=TokeiLibrary"
                  xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
-                 xmlns:Jobs="clr-namespace:SDE.Editor.Jobs">
+                 xmlns:Jobs="clr-namespace:SDE.Editor.Jobs"
+                 Background="{StaticResource TabItemBackground}" Foreground="{StaticResource TextForeground}">
     <Grid>
         <StackPanel>
             <Grid>
@@ -32,7 +33,7 @@
                             <ColumnDefinition Width="130" />
                         </Grid.ColumnDefinitions>
                         <ScrollViewer Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" VerticalScrollBarVisibility="Auto" Margin="3">
-                            <RichTextBox IsReadOnly="True" Name="_rtbItemDescription" BorderThickness="0" HorizontalAlignment="Left" VerticalAlignment="Top" >
+                            <RichTextBox IsReadOnly="True" Name="_rtbItemDescription" BorderThickness="0" HorizontalAlignment="Left" VerticalAlignment="Top" Background="Transparent" >
                                 <RichTextBox.Resources>
                                     <Style TargetType="{x:Type Paragraph}">
                                         <Setter Property="Margin" Value="0"/>
@@ -79,7 +80,7 @@
                     </Grid>
                 </StackPanel>
             </Grid>
-            <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="50" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+            <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="49" Background="{DynamicResource UIDialogBackground}">
                 <DockPanel HorizontalAlignment="Right" Margin="0 0 3 0">
                     <Button Name="_buttonApply" Click="_buttonApply_Click" Content="Apply" Height="25" Margin="3" MinWidth="100" />
                     <Button Name="_buttonOk" Click="_buttonOk_Click" Content="Ok" Height="25" Margin="3" MinWidth="100" />

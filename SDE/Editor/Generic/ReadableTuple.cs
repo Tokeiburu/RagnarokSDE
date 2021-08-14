@@ -5,6 +5,7 @@ using ErrorManager;
 using SDE.Editor.Generic.Parsers.Generic;
 using Utilities;
 using Utilities.Extension;
+using Tuple = Database.Tuple;
 
 namespace SDE.Editor.Generic {
 	/// <summary>

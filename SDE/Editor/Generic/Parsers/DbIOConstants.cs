@@ -20,14 +20,14 @@ namespace SDE.Editor.Generic.Parsers {
 
 				foreach (var constant in ele.Output["copy_paste"] ?? ele.Output["constants_db"]) {
 					try {
-						var keyValue = constant as LibconfigKeyValue;
+						var keyValue = constant as ParserKeyValue;
 
 						if (keyValue != null) {
 							if (keyValue.Key == "comment__")
 								continue;
 
-							if (keyValue.Value is LibconfigArrayBase) {
-								var arrayList = (LibconfigArrayBase)keyValue.Value;
+							if (keyValue.Value is ParserArrayBase) {
+								var arrayList = (ParserArrayBase)keyValue.Value;
 
 								table.SetRaw((TKey)(object)keyValue.Key, ServerConstantsAttributes.Deprecated, arrayList["Deprecated"] ?? "false");
 								table.SetRaw((TKey)(object)keyValue.Key, ServerConstantsAttributes.Value, arrayList["Value"] ?? "0");
@@ -78,7 +78,7 @@ namespace SDE.Editor.Generic.Parsers {
 		public static void Writer<TKey>(DbDebugItem<TKey> debug, AbstractDb<TKey> db) {
 			if (debug.FileType == FileType.Conf) {
 				try {
-					var lines = new LibconfigParser(debug.OldPath, LibconfigMode.Write);
+					var lines = new LibconfigParser(debug.OldPath, ParserMode.Write);
 					lines.Remove(db);
 
 					foreach (ReadableTuple<TKey> tuple in db.Table.FastItems.Where(p => !p.Normal).OrderBy(p => p.GetKey<TKey>())) {

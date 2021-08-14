@@ -16,6 +16,7 @@ using Utilities.Extension;
 namespace SDE.Editor.Generic.Core {
 	public static class DbPathLocator {
 		private static readonly TkDictionary<string, string> _storedFiles = new TkDictionary<string, string>();
+		private static readonly TkDictionary<string, DateTime> _lastModified = new TkDictionary<string, DateTime>();
 
 		static DbPathLocator() {
 			TemporaryFilesManager.UniquePattern("sdb_store_{0:0000}.dat");
@@ -25,28 +26,21 @@ namespace SDE.Editor.Generic.Core {
 			if (path == null)
 				return;
 
-			if (FtpHelper.Exists(path)) {
+			if (IOHelper.Exists(path)) {
 				string temp = TemporaryFilesManager.GetTemporaryFilePath("sdb_store_{0:0000}.dat");
 				_storedFiles[path] = temp;
-				FtpHelper.Copy(path, temp);
+				_lastModified[path] = new FileInfo(temp).LastWriteTime;
+				IOHelper.Copy(path, temp);
 			}
 			else {
+				_lastModified[path] = default(DateTime);
 				_storedFiles[path] = null;
 			}
 		}
 
 		public static void ClearStoredFiles() {
 			_storedFiles.Clear();
-		}
-
-		public static void UpdateStoredFiles() {
-			foreach (var pair in _storedFiles) {
-				if (FtpHelper.Exists(pair.Key)) {
-					if (FtpHelper.Delete(pair.Value)) {
-						FtpHelper.Copy(pair.Key, pair.Value);
-					}
-				}
-			}
+			_lastModified.Clear();
 		}
 
 		public static string GetStoredFile(string path) {
@@ -54,6 +48,20 @@ namespace SDE.Editor.Generic.Core {
 				return null;
 
 			return _storedFiles[path];
+		}
+
+		public static DateTime GetLastModifiedTime(string path) {
+			if (path == null)
+				return default(DateTime);
+
+			return _lastModified[path];
+		}
+
+		public static void SetLastModifiedTime(string path, DateTime time) {
+			if (path == null)
+				return;
+
+			_lastModified[path] = time;
 		}
 
 		public static bool GenericErrorHandler(ref int numError, object item) {
@@ -77,7 +85,7 @@ namespace SDE.Editor.Generic.Core {
 				string path = ProjectConfiguration.DatabasePath;
 
 				while (path != null) {
-					if (FtpHelper.Exists(GrfPath.Combine(path, db))) {
+					if (IOHelper.Exists(GrfPath.Combine(path, db))) {
 						return GrfPath.Combine(path, db);
 					}
 
@@ -93,18 +101,18 @@ namespace SDE.Editor.Generic.Core {
 
 		private static string _getInParentPath(string fileInput) {
 			string path = GrfPath.GetDirectoryName(ProjectConfiguration.DatabasePath);
-			string[] files = fileInput.GetExtension() == null ? new string[] { fileInput + ".txt", fileInput + ".conf" } : new string[] { fileInput };
-			return files.Select(file => GrfPath.CombineUrl(path, file)).FirstOrDefault(FtpHelper.Exists);
+			string[] files = fileInput.GetExtension() == null ? new string[] { fileInput + ".yml", fileInput + ".txt", fileInput + ".conf" } : new string[] { fileInput };
+			return files.Select(file => GrfPath.CombineUrl(path, file)).FirstOrDefault(IOHelper.Exists);
 		}
 
 		private static string _getInCurrentPath(string fileInput) {
 			string path = ProjectConfiguration.DatabasePath;
-			string[] files = fileInput.GetExtension() == null ? new string[] { fileInput + ".txt", fileInput + ".conf" } : new string[] { fileInput };
-			return files.Select(file => GrfPath.CombineUrl(path, file)).FirstOrDefault(FtpHelper.Exists);
+			string[] files = fileInput.GetExtension() == null ? new string[] { fileInput + ".yml", fileInput + ".txt", fileInput + ".conf" } : new string[] { fileInput };
+			return files.Select(file => GrfPath.CombineUrl(path, file)).FirstOrDefault(IOHelper.Exists);
 		}
 
 		public static string DetectPath(string toString) {
-			if (FtpHelper.Exists(toString))
+			if (IOHelper.Exists(toString))
 				return toString;
 
 			string path = _getInCurrentPath(toString);
@@ -114,6 +122,16 @@ namespace SDE.Editor.Generic.Core {
 
 			path = _getInParentPath(toString);
 			return path;
+		}
+
+		private static bool _yamlMob = false;
+
+		public static void SetYamlMob(bool val) {
+			_yamlMob = val;
+		}
+
+		public static bool IsYamlMob() {
+			return _yamlMob;
 		}
 
 		public static string DetectPath(ServerDbs toString, bool allowAlernative = true) {
@@ -133,7 +151,7 @@ namespace SDE.Editor.Generic.Core {
 				}
 			}
 
-			if (FtpHelper.Exists(toString))
+			if (IOHelper.Exists(toString))
 				return toString;
 
 			string path = _getInCurrentPath(toString);
@@ -158,6 +176,9 @@ namespace SDE.Editor.Generic.Core {
 		/// </summary>
 		/// <returns>The current server type</returns>
 		public static ServerType GetServerType() {
+			if (GetIsNova())
+				return ServerType.RAthena;
+
 			return DetectPath(ServerDbs.Items).IsExtension(".conf") ? ServerType.Hercules : ServerType.RAthena;
 		}
 
@@ -167,7 +188,7 @@ namespace SDE.Editor.Generic.Core {
 		/// <param name="path">The path.</param>
 		/// <returns>The file type</returns>
 		public static FileType GetFileType(string path) {
-			return path.IsExtension(".conf") ? FileType.Conf : FileType.Txt;
+			return path.IsExtension(".conf") ? FileType.Conf : (path.IsExtension(".yml") ? FileType.Yaml : FileType.Txt);
 		}
 
 		/// <summary>
@@ -184,8 +205,16 @@ namespace SDE.Editor.Generic.Core {
 			return true;
 		}
 
+		/// <summary>
+		/// Determines if the current server is NovaRO or not.
+		/// </summary>
+		/// <returns></returns>
+		public static bool GetIsNova() {
+			return File.Exists(GrfPath.CombineUrl(Path.GetDirectoryName(ProjectConfiguration.DatabasePath), "lapine_db.conf"));
+		}
+
 		public static bool UseAlternative(ServerDbs toString) {
-			if (FtpHelper.Exists(toString))
+			if (IOHelper.Exists(toString))
 				return false;
 
 			string path = _getInCurrentPath(toString);

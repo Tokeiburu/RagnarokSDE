@@ -83,7 +83,7 @@ namespace SDE.Editor.Generic.Parsers {
 
 			var dico = (Dictionary<int, ReadableTuple<int>>)table.GetRaw(groupId, ServerMobGroupAttributes.Table);
 
-			foreach (string[] elements in TextFileHelper.GetElementsByCommas(FtpHelper.ReadAllBytes(debug.FilePath))) {
+			foreach (string[] elements in TextFileHelper.GetElementsByCommas(IOHelper.ReadAllBytes(debug.FilePath))) {
 				try {
 					if (!hasGuessedAttributes) {
 						db.Attached["Scanned"] = null;

@@ -14,7 +14,6 @@ using GRF.IO;
 using GRF.Threading;
 using SDE.ApplicationConfiguration;
 using SDE.Core;
-using SDE.Core.ViewItems;
 using SDE.Editor;
 using SDE.Editor.Engines.Parsers;
 using SDE.Editor.Engines.TabNavigationEngine;
@@ -23,10 +22,13 @@ using SDE.Editor.Generic.Core;
 using SDE.Editor.Generic.Lists;
 using SDE.Editor.Generic.Parsers;
 using SDE.Editor.Generic.TabsMakerCore;
+using SDE.Tools.SDEMapcache;
 using SDE.View.Dialogs;
+using SDE.View.ObjectView;
 using TokeiLibrary;
 using TokeiLibrary.WPF;
 using TokeiLibrary.WPF.Styles;
+using Utilities.Extension;
 using Utilities.Services;
 using Debug = Utilities.Debug;
 
@@ -421,6 +423,63 @@ namespace SDE.View {
 			}
 		}
 
+		private void _menuItemQuestExport_Click(object sender, RoutedEventArgs e) {
+			try {
+				string file = PathRequest.SaveFileCde("fileName", "OngoingQuestInfoList_Sakray.lub");
+
+				if (file != null) {
+					StringBuilder b = new StringBuilder();
+
+					b.AppendLine("QuestInfoList = {}");
+					b.AppendLine("QuestInfoList = {");
+
+					var itemDb = Instance.ProjectDatabase.GetMetaTable<int>(ServerDbs.CQuests);
+
+					foreach (var item in itemDb.OrderBy(p => p.Key)) {
+						b.Append("	[");
+						b.Append(item.Key);
+						b.AppendLine("] = {");
+
+						b.Append("		Title = \"");
+						b.Append((item.GetValue<string>(ClientQuestsAttributes.Name) ?? "").Escape(EscapeMode.Normal));
+						b.AppendLine("\",");
+
+						b.Append("		Description = { \"");
+						b.Append((item.GetValue<string>(ClientQuestsAttributes.FullDesc) ?? "").Escape(EscapeMode.Normal));
+						b.AppendLine("\" },");
+
+						string summary = (item.GetValue<string>(ClientQuestsAttributes.ShortDesc) ?? "").Escape(EscapeMode.Normal);
+						summary = summary.Replace("<ITEM>", "").Replace("</ITEM>", "");
+
+						if (summary.Contains("<INFO")) {
+							int idx = 0;
+
+							while ((idx = summary.IndexOf("<INFO", idx, System.StringComparison.Ordinal)) > -1) {
+								int endIdx = summary.IndexOf("</INFO>", idx + 5, System.StringComparison.Ordinal);
+								int oldLen = summary.Length;
+
+								summary = summary.Substring(0, idx) + summary.Substring(endIdx + "</INFO>".Length);
+								idx = endIdx + 5 - (oldLen - summary.Length);
+							}
+						}
+
+						b.Append("		Summary = \"");
+						b.Append(summary);
+						b.AppendLine("\"");
+
+						b.AppendLine("	},");
+					}
+
+					b.AppendLine("}");
+					File.WriteAllText(file, b.ToString());
+					OpeningService.FileOrFolder(file);
+				}
+			}
+			catch (Exception err) {
+				ErrorHandler.HandleException(err);
+			}
+		}
+
 		private void _menuItemEditLuaSettings_Click(object sender, RoutedEventArgs e) {
 			try {
 				WindowProvider.Show(new LuaTableDialog(_clientDatabase), new Control[] { _menuItemEditLuaSettings, _buttonLuaSettings }, this);
@@ -507,6 +566,33 @@ namespace SDE.View {
 			}
 		}
 
+		private void _menuItemConvertItemIds_Click(object sender, RoutedEventArgs e) {
+			try {
+				WindowProvider.Show(new ConvertItemIdsDialog(), _menuItemConvertItemIds, this);
+			}
+			catch (Exception err) {
+				ErrorHandler.HandleException(err);
+			}
+		}
+
+		private void _menuItemMapCache_Click(object sender, RoutedEventArgs e) {
+			try {
+				WindowProvider.Show(new MapcacheDialog(null), _menuItemMapCache, this);
+			}
+			catch (Exception err) {
+				ErrorHandler.HandleException(err);
+			}
+		}
+
+		private void _menuItemMobStats_Click(object sender, RoutedEventArgs e) {
+			try {
+				WindowProvider.Show(new MobAdjustDialog(this), _menuItemMobStats, this);
+			}
+			catch (Exception err) {
+				ErrorHandler.HandleException(err);
+			}
+		}
+		
 		private void _menuItemUpdateClientQuests_Click(object sender, RoutedEventArgs e) {
 			try {
 				var tab = FindTopmostTab();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -16,7 +17,7 @@ namespace SDE.View.Dialogs {
 	}
 
 	public static class InputWindowHelper {
-		public static void Edit(Window dialog, TextBox tb, Button button) {
+		public static void Edit(Window dialog, TextBox tb, Button button, bool canIntegrated = true) {
 			IInputWindow inputWindow = (IInputWindow) dialog;
 
 			bool isScript = dialog is ScriptEditDialog && SdeAppConfiguration.UseIntegratedDialogsForScripts;
@@ -27,7 +28,7 @@ namespace SDE.View.Dialogs {
 			bool isRate = dialog is RateEditDialog;
 			bool isOther = !(dialog is ScriptEditDialog || dialog is LevelEditDialog || dialog is GenericFlagDialog || dialog is JobEditDialog || dialog is TimeEditDialog) && SdeAppConfiguration.UseIntegratedDialogsForFlags;
 
-			if (isScript || isLevel || isFlag || isJob || isTime || isRate || isOther) {
+			if (canIntegrated && (isScript || isLevel || isFlag || isJob || isTime || isRate || isOther)) {
 				inputWindow.Footer.Visibility = Visibility.Collapsed;
 				dialog.WindowStyle = WindowStyle.None;
 				var content = dialog.Content;
@@ -50,7 +51,15 @@ namespace SDE.View.Dialogs {
 
 					button.IsEnabled = false;
 					dialog.WindowStartupLocation = WindowStartupLocation.Manual;
+					
+					int dpiXI = (int)typeof(SystemParameters).GetProperty("DpiX", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null, null);
+					double dpiX = dpiXI;
+					double ratio = dpiX / 96;
 
+					p.X /= ratio;
+					p.Y /= ratio;
+
+					// The dialog's position scales with the DPI
 					dialog.Left = p.X - dialog.MinWidth + button.ActualWidth;
 					dialog.Top = p.Y + button.ActualHeight;
 

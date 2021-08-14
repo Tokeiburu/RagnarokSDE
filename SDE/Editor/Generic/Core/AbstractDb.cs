@@ -113,6 +113,8 @@ namespace SDE.Editor.Generic.Core {
 		public virtual void OnLoadFromClipboard(DbDebugItem<TKey> debug, string text, string path, AbstractDb<TKey> abstractDb) {
 			if (text.StartsWith("{") || text.Contains("(\r\n\t") || text.Contains("(\n\t") || path.IsExtension(".conf"))
 				debug.FileType = FileType.Conf;
+			else if (text.StartsWith("  - "))
+				debug.FileType = FileType.Yaml;
 			else
 				debug.FileType = FileType.Txt;
 		}
@@ -134,7 +136,7 @@ namespace SDE.Editor.Generic.Core {
 
 		public override void WriteDb(string dbPath, string subPath, ServerType serverType, FileType fileType = FileType.Detect) {
 			DbDebugItem<TKey> debug = new DbDebugItem<TKey>(this);
-
+			
 			if (!debug.Write(dbPath, subPath, serverType, fileType)) return;
 			if ((fileType & FileType.Sql) == FileType.Sql && DbWriterSql != null) {
 				DbWriterSql(debug, this);

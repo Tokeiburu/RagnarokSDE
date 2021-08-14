@@ -12,6 +12,7 @@ using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Rendering;
 using ICSharpCode.AvalonEdit.Search;
+using SDE.ApplicationConfiguration;
 using TokeiLibrary;
 
 namespace SDE.View.Controls {
@@ -48,6 +49,10 @@ namespace SDE.View.Controls {
 
 		public SearchPanel() {
 			InitializeComponent();
+
+			if (SdeAppConfiguration.ThemeIndex == 1) {
+				_unclickableBorder.Margin = new Thickness(-6, -4, -6, -4);
+			}
 
 			_isSearch = true;
 

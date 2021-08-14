@@ -1,16 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using ErrorManager;
 using GRF.Core.GroupedGrf;
 using GRF.IO;
 using GRF.Threading;
-using GrfToWpfBridge;
 using GrfToWpfBridge.Application;
 using SDE.ApplicationConfiguration;
 using SDE.Editor;
@@ -25,6 +28,7 @@ using TokeiLibrary.WPF.Styles;
 using TokeiLibrary.WPF.Styles.ListView;
 using Utilities;
 using Utilities.Services;
+using Binder = GrfToWpfBridge.Binder;
 
 namespace SDE.View {
 	public partial class SdeEditor : TkWindow {
@@ -67,7 +71,7 @@ namespace SDE.View {
 				_cbClientDbSync.IsChecked = ProjectConfiguration.SynchronizeWithClientDatabases;
 				_metaGrfViewer.LoadResourcesInfo();
 				_asyncOperation.SetAndRunOperation(new GrfThread(_updateMetaGrf, this, 200, null, false, true));
-				FtpHelper.Close();
+				IOHelper.Close();
 			}
 			catch (Exception err) {
 				ErrorHandler.HandleException(err);
@@ -341,6 +345,7 @@ namespace SDE.View {
 				_mainTabControl.Dispatch(p => p.IsEnabled = true);
 			}
 		}
+
 		private void _reloadDatabase(bool alreadyAsync) {
 			try {
 				if (!alreadyAsync) {

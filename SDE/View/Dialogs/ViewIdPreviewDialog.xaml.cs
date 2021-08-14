@@ -21,7 +21,7 @@ namespace SDE.View.Dialogs {
 		public static bool IsOpened = false;
 		private readonly SdeEditor _editor;
 		private GDbTab _tab;
-		private Tuple _lastTuple;
+		private Database.Tuple _lastTuple;
 		private readonly PreviewHelper _helper;
 
 		public ViewIdPreviewDialog(SdeEditor editor, GDbTab tab) : base("View ID preview", "eye.png", SizeToContent.Manual, ResizeMode.CanResize) {
@@ -42,9 +42,9 @@ namespace SDE.View.Dialogs {
 				IsOpened = true;
 			};
 
-			Extensions.GenerateListViewTemplate(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			ListViewDataTemplateHelper.GenerateListViewTemplateNew(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 				new ListViewDataTemplateHelper.RangeColumnInfo {Header = "Job Name", DisplayExpression = "Name", SearchGetAccessor = "Name", IsFill = true, ToolTipBinding = "Name", TextWrapping = TextWrapping.Wrap}
-			}, null, new string[] {"Normal", "Black"});
+			}, null, new string[] { "Normal", "{DynamicResource TextForeground}" });
 
 			_tupleUpdate();
 		}

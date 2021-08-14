@@ -100,7 +100,7 @@ namespace SDE.Editor.Writers {
 				builder.Append(_newLine);
 			}
 
-			FtpHelper.WriteAllText(path, builder.ToString());
+			IOHelper.WriteAllText(path, builder.ToString());
 		}
 
 		public virtual void Remove(BaseDb gdb) {

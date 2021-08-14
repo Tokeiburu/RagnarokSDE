@@ -53,11 +53,8 @@ namespace SDE.Tools.ActViewer {
 
 			try {
 				_fancyButtons = new FancyButton[] {_fancyButton0, _fancyButton1, _fancyButton2, _fancyButton3, _fancyButton4, _fancyButton5, _fancyButton6, _fancyButton7}.ToList();
-				byte[] pixels = ApplicationManager.GetResource("arrow.png");
-				BitmapSource image = new GrfImage(ref pixels).Cast<BitmapSource>();
-
-				byte[] pixels2 = ApplicationManager.GetResource("arrowoblique.png");
-				BitmapSource image2 = new GrfImage(ref pixels2).Cast<BitmapSource>();
+				BitmapSource image = ApplicationManager.GetResourceImage("arrow.png");
+				BitmapSource image2 = ApplicationManager.GetResourceImage("arrowoblique.png");
 
 				_fancyButton0.ImageIcon.Source = image;
 				_fancyButton0.ImageIcon.RenderTransformOrigin = new Point(0.5, 0.5);

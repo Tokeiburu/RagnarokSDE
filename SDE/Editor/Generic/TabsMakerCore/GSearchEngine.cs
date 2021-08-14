@@ -25,7 +25,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 	/// </summary>
 	/// <typeparam name="TKey">The type of the key.</typeparam>
 	/// <typeparam name="TValue">The type of the value.</typeparam>
-	public partial class GSearchEngine<TKey, TValue> where TValue : Tuple {
+	public partial class GSearchEngine<TKey, TValue> where TValue : Database.Tuple {
 		#region Delegates
 		public delegate void CDEEventHandler(object sender, List<TValue> modified);
 		#endregion
@@ -50,6 +50,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 		private CheckBox _cbModified;
 		private Func<List<TValue>> _getItemsFunction;
 		private readonly List<ComboBox> _resetFields = new List<ComboBox>();
+		private DbSearchPanel _panel;
 
 		public GSearchEngine(string tabName, GTabSettings<TKey, TValue> settings) {
 			_settings = settings;
@@ -195,6 +196,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 		private void _addSearch(Grid searchGrid, string display, FrameworkElement element, int row, int column, bool isItalic = false) {
 			Label label = new Label();
 			label.Content = display;
+			label.SetValue(TextBlock.ForegroundProperty, Application.Current.Resources["TextForeground"] as Brush);
 
 			if (isItalic)
 				label.FontStyle = FontStyles.Italic;
@@ -223,6 +225,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 				display.Padding = new Thickness(0);
 				display.Content = attribute.DisplayName;
 				display.VerticalAlignment = VerticalAlignment.Center;
+				display.SetValue(TextBlock.ForegroundProperty, Application.Current.Resources["TextForeground"] as Brush);
 
 				ComboBox box = new ComboBox();
 				_resetFields.Add(box);
@@ -275,16 +278,18 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 		private CheckBox _addSearchAttributeSub(Grid searchGrid, string attribute, int row, int column) {
 			CheckBox box = new CheckBox();
 			box.Margin = new Thickness(3);
+			box.SetValue(TextBlock.ForegroundProperty, Application.Current.Resources["TextForeground"] as Brush);
 
 			TextBlock block = new TextBlock { Text = attribute };
+			block.SetValue(TextBlock.ForegroundProperty, Application.Current.Resources["TextForeground"] as Brush);
 			box.MouseEnter += delegate {
-				block.Foreground = new SolidColorBrush(Color.FromArgb(255, 5, 119, 193));
+				block.Foreground = Application.Current.Resources["MouseOverTextBrush"] as Brush;
 				block.Cursor = Cursors.Hand;
 				block.TextDecorations = TextDecorations.Underline;
 			};
 
 			box.MouseLeave += delegate {
-				block.Foreground = Brushes.Black;
+				block.Foreground = Application.Current.Resources["TextForeground"] as Brush;
 				block.Cursor = Cursors.Arrow;
 				block.TextDecorations = null;
 			};
@@ -319,6 +324,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 			_items = view;
 			_getItemsFunction = getItemsFunction;
 			_tbSearchItems = panel._searchTextBox;
+			_panel = panel;
 			panel._buttonResetSearch.Click += (sender, args) => Reset();
 			ApplicationShortcut.Link(ApplicationShortcut.Search, () => {
 				panel._searchTextBox.SelectAll();

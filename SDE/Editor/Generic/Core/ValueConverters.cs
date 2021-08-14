@@ -1,15 +1,42 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Database;
 using SDE.ApplicationConfiguration;
 using SDE.Editor.Generic.Lists;
 using SDE.Editor.Items;
+using SDE.View;
+using SDE.View.ObjectView;
 using Utilities;
 using Utilities.Extension;
 using Utilities.Services;
 
 namespace SDE.Editor.Generic.Core {
+	public static class ValueAccessors {
+		public static IAccessor GetDisplayString = new PetDbDisplayAccessor();
+
+		#region Nested type: PetDbDisplayAccessor
+		public class PetDbDisplayAccessor : IAccessor {
+			#region IAccessor Members
+			public object Get(Database.Tuple source, object value) {
+				if (value == null || (value is string && (string)value == "")) {
+					var mobDb = SdeEditor.Instance.ProjectDatabase.GetMetaTable<int>(ServerDbs.Mobs);
+					var mobTuple = mobDb.TryGetTuple(source.GetKey<int>());
+
+					if (mobTuple != null) {
+						value = mobTuple.GetStringValue(ServerMobAttributes.IRoName.Index);
+						source.SetRawValue(ServerPetAttributes.JName, value);
+					}
+				}
+
+				return value;
+			}
+			#endregion
+		}
+		#endregion
+	}
+
 	public static class ValueConverters {
 		public static IValueConverter GetSetZeroString = new StringZeroDefaultConverter();
 		public static IValueConverter StringTrimEmptyDefault = new StringTrimEmptyConverter();
@@ -19,9 +46,12 @@ namespace SDE.Editor.Generic.Core {
 		public static IValueConverter GetBooleanSetIntString = new BaseBooleanConverter("1", "0", "0");
 		public static IValueConverter GetIntSetSkillAttackString = new MappedValuesConverter(new string[] { "none", "weapon", "magic", "misc" }, null);
 		public static IValueConverter GetIntSetConditionTypeString = new MappedValuesConverter(new string[] { "always", "onspawn", "myhpltmaxrate", "myhpinrate", "mystatuson", "mystatusoff", "friendhpltmaxrate", "friendhpinrate", "friendstatuson", "friendstatusoff", "attackpcgt", "attackpcge", "slavelt", "slavele", "closedattacked", "longrangeattacked", "skillused", "afterskill", "casttargeted", "rudeattacked" }, null);
-		public static IValueConverter GetIntSetTargetString = new MappedValuesConverter(new string[] { "target", "self", "friend", "master", "randomtarget", "around1", "around2", "around3", "around4", "around5", "around6", "around7", "around8", "around" }, null);
+		public static IValueConverter GetIntSetTargetString = new MappedValuesConverter(new string[] { "target", "self", "friend", "master", "randomtarget", "around1", "around2", "around3", "around4", "around5", "around6", "around7", "around8", "around", "nontophate", "tophate", "secondhate", "lasthate", "tank", "dps", "healer", "support", "nontank", "nondps", "nonhealer", "nonsupport" }, null);
 		public static IValueConverter GetIntSetRequiredStateString = new MappedValuesConverter(new string[] { "none", "move_enable", "recover_weight_rate", "water", "cart", "riding", "falcon", "sight", "hiding", "cloaking", "explosionspirits", "cartboost", "shield", "warg", "dragon", "ridingwarg", "mado", "poisonweapon", "rollingcutter", "elementalspirit", "mh_fighting", "mh_grappling", "peco" }, null);
 		public static IValueConverter GetIntSetStateTypeString = new MappedValuesConverter(new string[] { "any", "idle", "walk", "dead", "loot", "attack", "angry", "chase", "follow", "anytarget" }, null);
+		public static IValueConverter GetIntSetRaceTypeString = new MappedValuesConverter(Enum.GetNames(typeof(QuestRaceType)), null);
+		public static IValueConverter GetIntSetSizeTypeString = new MappedValuesConverter(Enum.GetNames(typeof(QuestSizeType)), null);
+		public static IValueConverter GetIntSetElementTypeString = new MappedValuesConverter(Enum.GetNames(typeof(QuestElementType)), null);
 		public static IValueConverter GetIntSetZeroString = new IntZeroDefaultConverter();
 		public static IValueConverter GetIntSetZeroStringType = new IntZeroDefaultTypeConverter();
 		public static IValueConverter GetIntSetEmptyString = new IntMinus1DefaultConverter();
@@ -36,6 +66,7 @@ namespace SDE.Editor.Generic.Core {
 		public static IValueConverter GetSetDisplayString = new ItemCdeDisplayConverter();
 		public static IValueConverter GetSetDescriptionString = new ItemCdeDescriptionConverter();
 		public static IValueConverter GetSetParameters = new ItemCdeParametersConverter();
+		public static IValueConverter GetSetEvolution = new EvolutionConverter();
 
 		public static T ParseToInt<T>(string val) {
 			if ((val.StartsWith("0x") || val.StartsWith("0X"))) {
@@ -51,7 +82,7 @@ namespace SDE.Editor.Generic.Core {
 		#region Nested type: ApplicableJobConverter
 		public class ApplicableJobConverter : IValueConverter {
 			#region IValueConverter Members
-			public object ConvertTo(Tuple source, object value) {
+			public object ConvertTo(Database.Tuple source, object value) {
 				if (value == null) {
 					return "0xFFFFFFFF";
 				}
@@ -67,7 +98,7 @@ namespace SDE.Editor.Generic.Core {
 				return "0x" + val.ToUpper();
 			}
 
-			public T ConvertFrom<T>(Tuple source, object value) {
+			public T ConvertFrom<T>(Database.Tuple source, object value) {
 				if (typeof(T) == typeof(int)) {
 					if (value == null)
 						return (T)(object)-1;
@@ -109,7 +140,7 @@ namespace SDE.Editor.Generic.Core {
 			}
 
 			#region IValueConverter Members
-			public object ConvertTo(Tuple source, object value) {
+			public object ConvertTo(Database.Tuple source, object value) {
 				if (value == null) {
 					return _default;
 				}
@@ -128,7 +159,7 @@ namespace SDE.Editor.Generic.Core {
 				return Boolean.Parse((string)value) ? _true : _false;
 			}
 
-			public T ConvertFrom<T>(Tuple source, object value) {
+			public T ConvertFrom<T>(Database.Tuple source, object value) {
 				if (typeof(T) == typeof(bool)) {
 					if (value == null)
 						return (T)(object)false;
@@ -216,7 +247,7 @@ namespace SDE.Editor.Generic.Core {
 			}
 
 			#region IValueConverter Members
-			public object ConvertTo(Tuple source, object value) {
+			public object ConvertTo(Database.Tuple source, object value) {
 				if (value == null) {
 					return _compose;
 				}
@@ -236,7 +267,7 @@ namespace SDE.Editor.Generic.Core {
 				return _leftSpace + val + _rightSpace;
 			}
 
-			public T ConvertFrom<T>(Tuple source, object value) {
+			public T ConvertFrom<T>(Database.Tuple source, object value) {
 				if (value == null)
 					return (T)(object)"";
 
@@ -256,7 +287,7 @@ namespace SDE.Editor.Generic.Core {
 		#region Nested type: GenderConverter
 		public class GenderConverter : IValueConverter {
 			#region IValueConverter Members
-			public object ConvertTo(Tuple source, object value) {
+			public object ConvertTo(Database.Tuple source, object value) {
 				if (value == null) {
 					return "";
 				}
@@ -272,7 +303,7 @@ namespace SDE.Editor.Generic.Core {
 				return value;
 			}
 
-			public T ConvertFrom<T>(Tuple source, object value) {
+			public T ConvertFrom<T>(Database.Tuple source, object value) {
 				if (typeof(T) == typeof(string)) {
 					if (value == null)
 						return (T)(object)"-1";
@@ -320,7 +351,7 @@ namespace SDE.Editor.Generic.Core {
 		#region Nested type: HexToIntConverter
 		public class HexToIntConverter : IValueConverter {
 			#region IValueConverter Members
-			public object ConvertTo(Tuple source, object value) {
+			public object ConvertTo(Database.Tuple source, object value) {
 				if (value == null) {
 					return "0";
 				}
@@ -339,7 +370,7 @@ namespace SDE.Editor.Generic.Core {
 				return val;
 			}
 
-			public T ConvertFrom<T>(Tuple source, object value) {
+			public T ConvertFrom<T>(Database.Tuple source, object value) {
 				if (value == null)
 					return (T)(object)"";
 
@@ -374,7 +405,7 @@ namespace SDE.Editor.Generic.Core {
 		#region Nested type: IntMinus1DefaultConverter
 		public class IntMinus1DefaultConverter : IValueConverter {
 			#region IValueConverter Members
-			public object ConvertTo(Tuple source, object value) {
+			public object ConvertTo(Database.Tuple source, object value) {
 				if (value == null) {
 					return "";
 				}
@@ -385,7 +416,7 @@ namespace SDE.Editor.Generic.Core {
 				return value.ToString();
 			}
 
-			public T ConvertFrom<T>(Tuple source, object value) {
+			public T ConvertFrom<T>(Database.Tuple source, object value) {
 				if (typeof(T) == typeof(string)) {
 					if (value == null)
 						return (T)(object)"-1";
@@ -433,7 +464,7 @@ namespace SDE.Editor.Generic.Core {
 		#region Nested type: IntZeroDefaultConverter
 		public class IntZeroDefaultConverter : IValueConverter {
 			#region IValueConverter Members
-			public object ConvertTo(Tuple source, object value) {
+			public object ConvertTo(Database.Tuple source, object value) {
 				if (value == null) {
 					return "0";
 				}
@@ -444,7 +475,7 @@ namespace SDE.Editor.Generic.Core {
 				return value;
 			}
 
-			public T ConvertFrom<T>(Tuple source, object value) {
+			public T ConvertFrom<T>(Database.Tuple source, object value) {
 				if (typeof(T) == typeof(string)) {
 					if (value == null)
 						return (T)(object)"0";
@@ -493,7 +524,7 @@ namespace SDE.Editor.Generic.Core {
 		#region Nested type: IntZeroDefaultTypeConverter
 		public class IntZeroDefaultTypeConverter : IValueConverter {
 			#region IValueConverter Members
-			public object ConvertTo(Tuple source, object value) {
+			public object ConvertTo(Database.Tuple source, object value) {
 				if (source == null) return value;
 
 				if (value == null) {
@@ -522,7 +553,7 @@ namespace SDE.Editor.Generic.Core {
 				return value;
 			}
 
-			public T ConvertFrom<T>(Tuple source, object value) {
+			public T ConvertFrom<T>(Database.Tuple source, object value) {
 				if (typeof(T) == typeof(string)) {
 					if (value == null)
 						return (T)(object)"0";
@@ -571,7 +602,7 @@ namespace SDE.Editor.Generic.Core {
 		#region Nested type: ItemCdeDescriptionConverter
 		public class ItemCdeDescriptionConverter : IValueConverter {
 			#region IValueConverter Members
-			public object ConvertTo(Tuple source, object value) {
+			public object ConvertTo(Database.Tuple source, object value) {
 				string newObject = value.ToString();
 
 				if (!newObject.StartsWith("\r\n")) {
@@ -588,7 +619,7 @@ namespace SDE.Editor.Generic.Core {
 				return newObject;
 			}
 
-			public T ConvertFrom<T>(Tuple source, object toReturn) {
+			public T ConvertFrom<T>(Database.Tuple source, object toReturn) {
 				if (toReturn == null)
 					return (T)(object)"";
 
@@ -601,11 +632,11 @@ namespace SDE.Editor.Generic.Core {
 		#region Nested type: ItemCdeDisplayConverter
 		public class ItemCdeDisplayConverter : IValueConverter {
 			#region IValueConverter Members
-			public object ConvertTo(Tuple source, object value) {
+			public object ConvertTo(Database.Tuple source, object value) {
 				return value;
 			}
 
-			public T ConvertFrom<T>(Tuple source, object value) {
+			public T ConvertFrom<T>(Database.Tuple source, object value) {
 				return (T)(object)(value == null ? "" : value.ToString());
 			}
 			#endregion
@@ -615,11 +646,11 @@ namespace SDE.Editor.Generic.Core {
 		#region Nested type: ItemCdeParametersConverter
 		public class ItemCdeParametersConverter : IValueConverter {
 			#region IValueConverter Members
-			public object ConvertTo(Tuple source, object value) {
+			public object ConvertTo(Database.Tuple source, object value) {
 				return value;
 			}
 
-			public T ConvertFrom<T>(Tuple source, object value) {
+			public T ConvertFrom<T>(Database.Tuple source, object value) {
 				if (value == null) {
 					value = new ParameterHolder(source);
 					source.SetRawValue(ClientItemAttributes.Parameters, value);
@@ -634,7 +665,7 @@ namespace SDE.Editor.Generic.Core {
 		#region Nested type: ItemCdeResourceConverter
 		public class ItemCdeResourceConverter : IValueConverter {
 			#region IValueConverter Members
-			public object ConvertTo(Tuple source, object value) {
+			public object ConvertTo(Database.Tuple source, object value) {
 				string newPath = (value ?? "").ToString();
 
 				// Convert the string back to the display encoding
@@ -655,7 +686,7 @@ namespace SDE.Editor.Generic.Core {
 				return newPath.ToDisplayEncoding(false);
 			}
 
-			public T ConvertFrom<T>(Tuple source, object value) {
+			public T ConvertFrom<T>(Database.Tuple source, object value) {
 				return (T)(object)(value == null ? "" : value.ToString().ToEncoding(SdeAppConfiguration.EncodingResDisplay));
 			}
 			#endregion
@@ -669,11 +700,11 @@ namespace SDE.Editor.Generic.Core {
 		#region Nested type: ItemCdeUniversalConverter
 		public class ItemCdeUniversalConverter : IValueConverter {
 			#region IValueConverter Members
-			public object ConvertTo(Tuple source, object value) {
+			public object ConvertTo(Database.Tuple source, object value) {
 				return (value ?? "").ToString().ToDisplayEncoding(false);
 			}
 
-			public T ConvertFrom<T>(Tuple source, object value) {
+			public T ConvertFrom<T>(Database.Tuple source, object value) {
 				return (T)(object)(value == null ? "" : value.ToString().ToEncoding(EncodingService.DisplayEncoding));
 			}
 			#endregion
@@ -709,7 +740,7 @@ namespace SDE.Editor.Generic.Core {
 			public bool AllowSetEmpty { get; set; }
 
 			#region IValueConverter Members
-			public object ConvertTo(Tuple source, object value) {
+			public object ConvertTo(Database.Tuple source, object value) {
 				if (value == null) {
 					if (AllowSetEmpty) {
 						return DefaultString;
@@ -753,7 +784,7 @@ namespace SDE.Editor.Generic.Core {
 				return value;
 			}
 
-			public T ConvertFrom<T>(Tuple source, object value) {
+			public T ConvertFrom<T>(Database.Tuple source, object value) {
 				// Returns an int
 
 				if (typeof(T) == StringType) {
@@ -843,7 +874,7 @@ namespace SDE.Editor.Generic.Core {
 		#region Nested type: RefineableConverter
 		public class RefineableConverter : IValueConverter {
 			#region IValueConverter Members
-			public object ConvertTo(Tuple source, object value) {
+			public object ConvertTo(Database.Tuple source, object value) {
 				if (source == null) return value;
 
 				string returnedValue;
@@ -875,7 +906,7 @@ namespace SDE.Editor.Generic.Core {
 				return returnedValue;
 			}
 
-			public T ConvertFrom<T>(Tuple source, object value) {
+			public T ConvertFrom<T>(Database.Tuple source, object value) {
 				int itemType = source.GetValue<int>(ServerItemAttributes.Type);
 
 				if (value == null)
@@ -950,7 +981,7 @@ namespace SDE.Editor.Generic.Core {
 		#region Nested type: StringTrimEmptyConverter
 		public class StringTrimEmptyConverter : IValueConverter {
 			#region IValueConverter Members
-			public object ConvertTo(Tuple source, object value) {
+			public object ConvertTo(Database.Tuple source, object value) {
 				if (value == null) {
 					return "0";
 				}
@@ -960,7 +991,7 @@ namespace SDE.Editor.Generic.Core {
 				return val.Trim(new char[] { '\t', ' ' });
 			}
 
-			public T ConvertFrom<T>(Tuple source, object value) {
+			public T ConvertFrom<T>(Database.Tuple source, object value) {
 				if (typeof(T) == typeof(string)) {
 					if (value == null)
 						return (T)(object)"";
@@ -993,7 +1024,7 @@ namespace SDE.Editor.Generic.Core {
 		#region Nested type: StringRemoveQuotesConverter
 		public class StringRemoveQuotesConverter : IValueConverter {
 			#region IValueConverter Members
-			public object ConvertTo(Tuple source, object value) {
+			public object ConvertTo(Database.Tuple source, object value) {
 				if (value == null) {
 					return "";
 				}
@@ -1003,7 +1034,7 @@ namespace SDE.Editor.Generic.Core {
 				return "\"" + val.Trim(new char[] { '\t', ' ' }) + "\"";
 			}
 
-			public T ConvertFrom<T>(Tuple source, object value) {
+			public T ConvertFrom<T>(Database.Tuple source, object value) {
 				if (typeof(T) == typeof(string)) {
 					if (value == null)
 						return (T)(object)"";
@@ -1036,11 +1067,11 @@ namespace SDE.Editor.Generic.Core {
 		#region Nested type: StringZeroDefaultConverter
 		public class StringZeroDefaultConverter : IValueConverter {
 			#region IValueConverter Members
-			public object ConvertTo(Tuple source, object value) {
+			public object ConvertTo(Database.Tuple source, object value) {
 				if (value == null) {
 					return "0";
 				}
-
+				
 				if (value is int) {
 					return value.ToString();
 				}
@@ -1053,7 +1084,7 @@ namespace SDE.Editor.Generic.Core {
 				return value;
 			}
 
-			public T ConvertFrom<T>(Tuple source, object value) {
+			public T ConvertFrom<T>(Database.Tuple source, object value) {
 				try {
 					if (typeof(T) == typeof(string)) {
 						if (value == null)
@@ -1096,6 +1127,25 @@ namespace SDE.Editor.Generic.Core {
 				catch {
 					return default(T);
 				}
+			}
+			#endregion
+		}
+		#endregion
+
+		#region Nested type: EvolutionConverter
+		public class EvolutionConverter : IValueConverter {
+			#region IValueConverter Members
+			public object ConvertTo(Database.Tuple source, object value) {
+				return value;
+			}
+
+			public T ConvertFrom<T>(Database.Tuple source, object value) {
+				if (value == null) {
+					value = new Evolution();
+					source.SetRawValue(ServerPetAttributes.Evolution, value);
+				}
+
+				return (T)value;
 			}
 			#endregion
 		}

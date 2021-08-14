@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using Database;
 using ErrorManager;
@@ -86,11 +87,17 @@ namespace SDE.Editor.Engines {
 // ReSharper restore InconsistentNaming
 	}
 
+	public class ScriptFlagsData {
+		public long this[string flag] {
+			get { return FlagsManager.GetFlagValue(flag); }
+		}
+	}
+
 	public class ScriptInterpreter {
 		private readonly ScriptEngine _mEngine = Python.CreateEngine();
 		private GDbTab _core;
 		private ScriptScope _mScope;
-		private ObservableList<Tuple> _selected;
+		private ObservableList<Database.Tuple> _selected;
 		private BaseTable _selectedDb;
 		private bool _selectionChanged;
 
@@ -103,6 +110,7 @@ namespace SDE.Editor.Engines {
 			string output = "";
 			_core = core;
 			Script script = new Script();
+			ScriptFlagsData flagParser = new ScriptFlagsData();
 
 			try {
 				TableHelper.EnableTupleTrace = true;
@@ -110,9 +118,9 @@ namespace SDE.Editor.Engines {
 				if (_core == null)
 					throw new Exception("No database tab selected.");
 
-				_selected = new ObservableList<Tuple>();
+				_selected = new ObservableList<Database.Tuple>();
 
-				foreach (var tuple in _core._listView.SelectedItems.OfType<Tuple>().OrderBy(p => p)) {
+				foreach (var tuple in _core._listView.SelectedItems.OfType<Database.Tuple>().OrderBy(p => p)) {
 					_selected.Add(tuple);
 				}
 
@@ -152,6 +160,7 @@ namespace SDE.Editor.Engines {
 				_mScope.SetVariable("selection", _selected);
 				_mScope.SetVariable("database", _core.ProjectDatabase);
 				_mScope.SetVariable("script", script);
+				_mScope.SetVariable("Flags", flagParser);
 
 				//_mScope.SetVariable("ServerDbs", DynamicHelpers.GetPythonTypeFromType(typeof(ServerDbs)));
 				_selectedDb = null;
@@ -179,6 +188,10 @@ namespace SDE.Editor.Engines {
 						string line = reader.ReadLine();
 
 						if (line == null) continue;
+
+						if (line.Contains("Flags.")) {
+							line = Regex.Replace(line, @"Flags\.(\w+)", "Flags[\"$1\"]");
+						}
 
 						writer.WriteLine(EncodingService.FromAnyTo(line, encoding));
 					}

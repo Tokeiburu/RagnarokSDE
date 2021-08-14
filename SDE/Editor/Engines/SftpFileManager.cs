@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using GRF.IO;
 using GRF.System;
+using SDE.Editor.Engines.Parsers;
 using SDE.Editor.Generic.Core;
 using Tamir.SharpSsh;
 using Tamir.SharpSsh.jsch;
@@ -177,6 +179,23 @@ namespace SDE.Editor.Engines {
 			_db.Set(temp, urlSource.Path, entry);
 
 			return File.ReadAllBytes(temp);
+		}
+
+		public override IEnumerable<string> ReadAllLines(string path, Encoding encoding) {
+			var data = ReadAllBytes(path);
+
+			if (data != null) {
+				using (StreamReader reader = TextFileHelper.SetAndLoadReader(data, encoding)) {
+					while (!reader.EndOfStream) {
+						string line = TextFileHelper.ReadNextLine(reader);
+
+						if (TextFileHelper.SaveLastLine)
+							TextFileHelper.LastLineRead = line;
+
+						yield return line;
+					}
+				}
+			}
 		}
 
 		public override Stream OpenRead(string path) {

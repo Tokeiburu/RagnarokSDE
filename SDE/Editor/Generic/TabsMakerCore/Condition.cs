@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Database;
 using GRF.FileFormats.LubFormat;
+using SDE.Editor.Engines;
 using Utilities;
 using Utilities.Extension;
 
@@ -144,6 +146,36 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 			return new Func<TValue, string, double>((t, s) => 0);
 		}
 
+		public override Func<long> ToLong(FlagTypeData settings) {
+			if (_comparison >= RelationalComparison.BinaryAnd) {
+				var predicateLeft = _leftCondition.ToLong(settings);
+				var predicateRight = _rightCondition.ToLong(settings);
+
+				switch (_comparison) {
+					case RelationalComparison.BinaryAnd:
+						return new Func<long>(() => predicateLeft() & predicateRight());
+					case RelationalComparison.BinaryOr:
+						return new Func<long>(() => predicateLeft() | predicateRight());
+					case RelationalComparison.BinaryRightShift:
+						return new Func<long>(() => predicateLeft() >> (int)predicateRight());
+					case RelationalComparison.BinaryLeftShift:
+						return new Func<long>(() => predicateLeft() << (int)predicateRight());
+					case RelationalComparison.Add:
+						return new Func<long>(() => predicateLeft() + predicateRight());
+					case RelationalComparison.Minus:
+						return new Func<long>(() => predicateLeft() - predicateRight());
+					case RelationalComparison.Mult:
+						return new Func<long>(() => predicateLeft() * predicateRight());
+					case RelationalComparison.Div:
+						return new Func<long>(() => predicateLeft() / predicateRight());
+					case RelationalComparison.Mod:
+						return new Func<long>(() => predicateLeft() % predicateRight());
+				}
+			}
+
+			return new Func<long>(() => 0);
+		}
+
 		public override Func<TValue, string, bool> ToPredicate<TKey, TValue>(GTabSettings<TKey, TValue> settings) {
 			Func<TValue, string, bool> leftCondition = (t, s) => false;
 			Func<TValue, string, bool> rightCondition = (t, s) => false;
@@ -171,6 +203,18 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 					return (t, s) => leftCondition(t, s) && rightCondition(t, s);
 				case RelationalComparison.Or:
 					return (t, s) => leftCondition(t, s) || rightCondition(t, s);
+				case RelationalComparison.Contains:
+					if (isLeftInt || isRightInt) {
+						return (t, s) => left(t, s).ToString(CultureInfo.InvariantCulture).IndexOf(right(t, s).ToString(CultureInfo.InvariantCulture), 0, StringComparison.OrdinalIgnoreCase) > -1;
+					}
+
+					return (t, s) => valueLeft(t, s).IndexOf(valueRight(t, s), 0, StringComparison.OrdinalIgnoreCase) > -1;
+				case RelationalComparison.Exclude:
+					if (isLeftInt || isRightInt) {
+						return (t, s) => left(t, s).ToString(CultureInfo.InvariantCulture).IndexOf(right(t, s).ToString(CultureInfo.InvariantCulture), 0, StringComparison.OrdinalIgnoreCase) == -1;
+					}
+
+					return (t, s) => valueLeft(t, s).IndexOf(valueRight(t, s), 0, StringComparison.OrdinalIgnoreCase) == -1;
 				case RelationalComparison.Eq:
 					if (isLeftInt || isRightInt) {
 						return (t, s) => left(t, s) == right(t, s);
@@ -239,6 +283,12 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 				case "==":
 					_comparison = RelationalComparison.Eq;
 					break;
+				case "⊃":
+					_comparison = RelationalComparison.Contains;
+					break;
+				case "⊅":
+					_comparison = RelationalComparison.Exclude;
+					break;
 				case "~=":
 					_comparison = RelationalComparison.NotEq;
 					break;
@@ -275,6 +325,9 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 				case "|":
 					_comparison = RelationalComparison.BinaryOr;
 					break;
+				case "~":
+					_comparison = RelationalComparison.Not;
+					break;
 				case ">>":
 					_comparison = RelationalComparison.BinaryRightShift;
 					break;
@@ -304,6 +357,12 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 					break;
 				case RelationalComparison.NotEq:
 					_comparison = RelationalComparison.Eq;
+					break;
+				case RelationalComparison.Contains:
+					_comparison = RelationalComparison.Exclude;
+					break;
+				case RelationalComparison.Exclude:
+					_comparison = RelationalComparison.Contains;
 					break;
 				case RelationalComparison.Ge:
 					_comparison = RelationalComparison.Lt;
@@ -372,6 +431,10 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 					return " == ";
 				case RelationalComparison.NotEq:
 					return " ~= ";
+				case RelationalComparison.Contains:
+					return " ⊃ ";
+				case RelationalComparison.Exclude:
+					return " ⊅ ";
 				case RelationalComparison.Ge:
 					return " >= ";
 				case RelationalComparison.Gt:
@@ -396,6 +459,8 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 					return " & ";
 				case RelationalComparison.BinaryOr:
 					return " | ";
+				case RelationalComparison.Not:
+					return " ~";
 				case RelationalComparison.BinaryRightShift:
 					return " >> ";
 				case RelationalComparison.BinaryLeftShift:
@@ -492,6 +557,10 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 			return new Func<TValue, string, bool>((t, s) => b);
 		}
 
+		public override Func<long> ToLong(FlagTypeData settings) {
+			return new Func<long>(() => settings.Name2Value[Value]);
+		}
+
 		public override Func<TValue, string, double> ToInt<TKey, TValue>(GTabSettings<TKey, TValue> settings, out bool isInt) {
 			isInt = false;
 
@@ -538,6 +607,13 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 				}
 
 				return new Func<TValue, string, double>((t, s) => 0);
+			}
+
+			if (Value.StartsWith("Flags.")) {
+				string f = Value.ReplaceFirst("Flags.", "");
+				isInt = true;
+				long val = FlagsManager.GetFlagValue(f);
+				return new Func<TValue, string, double>((t, s) => val);
 			}
 
 			double ival;
@@ -633,6 +709,68 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 		}
 	}
 
+	public class UnaryNotCondition : Condition {
+		public bool IsReversed { get; private set; }
+		public Condition Condition { get; set; }
+
+		public UnaryNotCondition(string value) {
+			Condition = ConditionLogic.GetCondition(value);
+		}
+
+		public UnaryNotCondition(Condition value) {
+			Condition = value;
+		}
+
+		internal override void Reverse(int deep) {
+			if (deep < 0) return;
+			IsReversed = !IsReversed;
+		}
+
+		protected override string _getStringValue() {
+			UnaryNotCondition nC = Condition as UnaryNotCondition;
+			if (nC != null) {
+				if (!IsReversed && !nC.IsReversed) {
+					return Condition;
+				}
+			}
+
+			if (IsReversed && !(Condition is RelationalCondition)) {
+				return Condition;
+			}
+
+			if (!IsReversed) {
+				if (Condition is RelationalCondition || Condition is BooleanCondition)
+					return Condition.Reverse();
+			}
+
+			return IsReversed ? Condition : Condition.Reverse();
+		}
+
+		public override Condition Copy() {
+			return new UnaryNotCondition(Condition.Copy()) { IsReversed = this.IsReversed, Prefix = this.Prefix, Suffix = this.Suffix };
+		}
+
+		public override Func<TValue, string, bool> ToPredicate<TKey, TValue>(GTabSettings<TKey, TValue> settings) {
+			var predicate = Condition.ToPredicate(settings);
+			return new Func<TValue, string, bool>((t, s) => IsReversed ? predicate(t, s) : !predicate(t, s));
+		}
+
+		public override Func<TValue, string, string> ToValue<TKey, TValue>(GTabSettings<TKey, TValue> settings) {
+			var predicate = ToPredicate(settings);
+			return (t, s) => predicate(t, s).ToString();
+		}
+
+		public override Func<TValue, string, double> ToInt<TKey, TValue>(GTabSettings<TKey, TValue> settings, out bool isInt) {
+			var predicate = Condition.ToInt(settings, out isInt);
+			return new Func<TValue, string, double>((t, s) => IsReversed ? predicate(t, s) : ~(int)predicate(t, s));
+		}
+
+		public override Func<long> ToLong(FlagTypeData settings) {
+			var predicate = Condition.ToLong(settings);
+			return new Func<long>(() => IsReversed ? predicate() : ~predicate());
+		}
+	}
+
 	public static class ConditionLogic {
 		private static readonly string[] _prefixes = { "while ", "if " };
 		private static readonly string[] _suffixes = { " do", " then" };
@@ -657,7 +795,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 
 		private static Condition _getCondition(string value) {
 			Condition condition;
-
+			
 			if (value == "true" || value == "false") {
 				condition = new BooleanCondition(value);
 			}
@@ -669,6 +807,9 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 				}
 				else if (values.Length == 1 && values[0].StartsWith("not(") && values[0].EndsWith(")")) {
 					condition = new NotCondition(values[0].Substring(4, values[0].Length - 5));
+				}
+				else if (values.Length == 1 && values[0].StartsWith("~")) {
+					condition = new UnaryNotCondition(values[0].Substring(1, values[0].Length - 1).Trim(' '));
 				}
 				else if (values.Length == 1) {
 					condition = new VariableCondition(values[0]);
@@ -716,7 +857,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 		}
 
 		public static bool IsConditionCharacterWithoutSpace(char c) {
-			return c == '=' || c == '<' || c == '>' || c == '~' || c == '&' || c == '|' || c == '+' || c == '/' || c == '*' || c == '-' || c == '%' || c == '^';
+			return c == '=' || c == '<' || c == '>' || c == '~' || c == '&' || c == '|' || c == '+' || c == '/' || c == '*' || c == '-' || c == '%' || c == '^' || c == '⊃' || c == '⊅';
 		}
 
 		private static string _getAffix(string value, string[] affixes, out string oAffix) {
@@ -772,6 +913,8 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 						values.Add(value.Substring(endIndex, value.Length - endIndex));
 					}
 				}
+				else if (value[i] == '~' && i < value.Length - 1 && value[i + 1] != '=') {
+				}
 				else if (IsConditionCharacterWithoutSpace(value[i])) {
 					startIndex = i;
 
@@ -781,6 +924,9 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 
 					while (IsConditionCharacterWithoutSpace(value[i])) {
 						i++;
+
+						if (value[i] == '~')
+							break;
 					}
 
 					values.Add(value.Substring(startIndex, i - startIndex));
@@ -817,14 +963,18 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 
 		public abstract Condition Copy();
 
-		public abstract Func<TValue, string, bool> ToPredicate<TKey, TValue>(GTabSettings<TKey, TValue> settings) where TValue : Tuple;
+		public abstract Func<TValue, string, bool> ToPredicate<TKey, TValue>(GTabSettings<TKey, TValue> settings) where TValue : Database.Tuple;
 
-		public virtual Func<TValue, string, double> ToInt<TKey, TValue>(GTabSettings<TKey, TValue> settings, out bool isInt) where TValue : Tuple {
+		public virtual Func<TValue, string, double> ToInt<TKey, TValue>(GTabSettings<TKey, TValue> settings, out bool isInt) where TValue : Database.Tuple {
 			isInt = false;
 			return new Func<TValue, string, double>((t, s) => 0);
 		}
 
-		public abstract Func<TValue, string, string> ToValue<TKey, TValue>(GTabSettings<TKey, TValue> settings) where TValue : Tuple;
+		public virtual Func<long> ToLong(FlagTypeData settings) {
+			return new Func<long>(() => 0);
+		}
+
+		public abstract Func<TValue, string, string> ToValue<TKey, TValue>(GTabSettings<TKey, TValue> settings) where TValue : Database.Tuple;
 	}
 
 	public enum PrintMode {
@@ -836,6 +986,8 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 		None,
 		Le,
 		Lt,
+		Contains,
+		Exclude,
 		Eq,
 		NotEq,
 		Ge,
@@ -852,5 +1004,6 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 		Div,
 		Mod,
 		Pow,
+		Not,
 	}
 }

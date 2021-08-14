@@ -1,0 +1,82 @@
+﻿<Styles:TkWindow x:Class="SDE.Tools.SDEMapcache.MapcacheDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
+                 xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
+                 xmlns:wpfBugFix="clr-namespace:TokeiLibrary.WpfBugFix;assembly=TokeiLibrary"
+                 xmlns:controls="clr-namespace:SDE.View.Controls"
+                 Width="530" Height="450">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <Grid Name="_jobGrid">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+                <Menu Height="30" AllowDrop="True">
+                    <MenuItem Margin="0 0 0 0">
+                        <MenuItem.Header>
+                            <Label Content="File" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="-5 0 -5 0" />
+                        </MenuItem.Header>
+                        <MenuItem Name="_menuItemNew" ListView:WpfUtils.ImagePath="empty.png" Header="New" InputGestureText="Ctrl-N" Click="_menuItemNew_Click" />
+                        <Separator />
+                        <MenuItem Name="_menuItemOpenFrom" ListView:WpfUtils.ImagePath="newFile.png" Header="Open..." InputGestureText="Ctrl-O" Click="_menuItemOpenFrom_Click" />
+                        <MenuItem Name="_menuItemRecentFiles" ListView:WpfUtils.ImagePath="empty.png" Header="Open recent" />
+                        <Separator />
+                        <MenuItem Name="_menuItemSave" ListView:WpfUtils.ImagePath="save.png" Header="Save" InputGestureText="Ctrl-S" Click="_menuItemSave_Click" />
+                        <MenuItem Name="_menuItemSaveAs" ListView:WpfUtils.ImagePath="empty.png" Header="Save as..." Click="_menuItemSaveAs_Click" />
+                        <Separator />
+                        <MenuItem Name="_menuItemCloseGrf" ListView:WpfUtils.ImagePath="empty.png" Header="Close mapcache" Click="_menuItemCloseGrf_Click" />
+                        <Separator />
+                        <MenuItem Name="_menuItemSelect" ListView:WpfUtils.ImagePath="arrowdown.png" Header="Select" Click="_menuItemSelect_Click" />
+                        <Separator />
+                        <MenuItem Name="_menuItemAbout" ListView:WpfUtils.ImagePath="help.png" Header="About..." Click="_menuItemAbout_Click" />
+                        <MenuItem Name="_menuItemQuit" ListView:WpfUtils.ImagePath="empty.png" Header="Quit" Click="_menuItemQuit_Click" />
+                    </MenuItem>
+                    <MenuItem VerticalAlignment="Center" Visibility="Visible">
+                        <MenuItem.Header>
+                            <Label Content="Edit" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="-5 0 -5 0" />
+                        </MenuItem.Header>
+                        <MenuItem Name="_buttonUndo" ListView:WpfUtils.ImagePath="undo.png" IsEnabled="false" Header="Undo" InputGestureText="Ctrl-Z" Click="_buttonUndo_Click" />
+                        <MenuItem Name="_buttonRedo" ListView:WpfUtils.ImagePath="redo.png" IsEnabled="false" Header="Redo" InputGestureText="Ctrl-Y" Click="_buttonRedo_Click" />
+                        <Separator />
+                        <MenuItem Name="_menuItemMerge" ListView:WpfUtils.ImagePath="convert.png" Header="Merge..." InputGestureText="Ctrl-M" Click="_menuItemMerge_Click" />
+                        <Separator />
+                        <MenuItem Name="_menuItemAdd" ListView:WpfUtils.ImagePath="add.png" Header="Add maps..." Click="_menuItemAdd_Click" />
+                        <MenuItem Name="_menuItemDelete" ListView:WpfUtils.ImagePath="delete.png" Header="Remove selected maps" Click="_menuItemDelete_Click" />
+                    </MenuItem>
+                </Menu>
+                <DockPanel Grid.Row="0" HorizontalAlignment="Left" Margin="75 0 0 0">
+                    <controls:ToggleMemoryButton x:Name="_tmbUndo" IsEnabled="false" PrimaryButtonImagePath="undo.png" DisplayFormat="Undo {0} action" />
+                    <controls:ToggleMemoryButton x:Name="_tmbRedo" IsEnabled="false" PrimaryButtonImagePath="redo.png" DisplayFormat="Redo {0} action" />
+                </DockPanel>
+                <Styles:TkProgressBar Grid.Row="0" Name="_progressBar" Width="300" HorizontalAlignment="Right" Margin="0 0 3 0"  />
+                <Border Grid.Row="1" BorderBrush="#909090" BorderThickness="0 1 0 0" MouseDown="Border_MouseDown">
+                    <wpfBugFix:RangeListView DragEnter="_listView_DragEnter" Foreground="Black" Drop="_listView_Drop" TextSearch.TextPath="MapName" 
+                                             SelectionMode="Extended" AllowDrop="True" ListView:WpfUtils.IsGridSortable="True" FocusVisualStyle="{x:Null}" 
+                                             BorderThickness="0" Name="_listView" VirtualizingStackPanel.IsVirtualizing="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <wpfBugFix:RangeListView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Name="_miDelete" Click="_miDelete_Click" Header="Delete" ListView:WpfUtils.ImagePath="delete.png" />
+                            </ContextMenu>
+                        </wpfBugFix:RangeListView.ContextMenu>
+                    </wpfBugFix:RangeListView>
+                </Border>
+                <Border Grid.Row="2" BorderBrush="#909090" BorderThickness="0 1 0 0" MouseDown="Border_MouseDown">
+                    <Grid Background="#EFEFEF">
+                        <DockPanel MinWidth="450" HorizontalAlignment="Left">
+                            <Label Name="_labelMapCount" Content="Map count: 0" Width="120" Margin="3" Padding="0" HorizontalAlignment="Left" />
+                            <Label Name="_labelMapAdded" Content="Added: 0" Width="120" Margin="3" Padding="0" HorizontalAlignment="Left" />
+                            <Label Name="_labelSize" Content="File size: 0 B" Width="150" Margin="3" Padding="0" HorizontalAlignment="Left" />
+                        </DockPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</Styles:TkWindow>

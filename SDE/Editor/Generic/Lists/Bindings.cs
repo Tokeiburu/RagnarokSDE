@@ -10,7 +10,7 @@ namespace SDE.Editor.Generic.Lists {
 	/// Bindings are normally used to change the display of the list view
 	public class ComboBinding : IBinding {
 		#region IBinding Members
-		public Tuple Tuple { get; set; }
+		public Database.Tuple Tuple { get; set; }
 		public DbAttribute AttachedAttribute { get; set; }
 		#endregion
 
@@ -34,7 +34,7 @@ namespace SDE.Editor.Generic.Lists {
 					output.Add("");
 				}
 				else {
-					Tuple tuple = btable.TryGetTuple(val);
+					Database.Tuple tuple = btable.TryGetTuple(val);
 
 					if (tuple == null)
 						output.Add("Unknown");
@@ -49,7 +49,7 @@ namespace SDE.Editor.Generic.Lists {
 
 	public class ItemGroupBinding : IBinding {
 		#region IBinding Members
-		public Tuple Tuple { get; set; }
+		public Database.Tuple Tuple { get; set; }
 		public DbAttribute AttachedAttribute { get; set; }
 		#endregion
 
@@ -82,7 +82,7 @@ namespace SDE.Editor.Generic.Lists {
 
 	public class DropPercentageBinding : IBinding {
 		#region IBinding Members
-		public Tuple Tuple { get; set; }
+		public Database.Tuple Tuple { get; set; }
 		public DbAttribute AttachedAttribute { get; set; }
 		#endregion
 
@@ -115,7 +115,7 @@ namespace SDE.Editor.Generic.Lists {
 
 	public class DropPercentageMobBinding : IBinding {
 		#region IBinding Members
-		public Tuple Tuple { get; set; }
+		public Database.Tuple Tuple { get; set; }
 		public DbAttribute AttachedAttribute { get; set; }
 		#endregion
 
@@ -155,7 +155,7 @@ namespace SDE.Editor.Generic.Lists {
 
 	public class ItemGroupSubBinding : IBinding {
 		#region IBinding Members
-		public Tuple Tuple { get; set; }
+		public Database.Tuple Tuple { get; set; }
 		public DbAttribute AttachedAttribute { get; set; }
 		#endregion
 
@@ -176,7 +176,7 @@ namespace SDE.Editor.Generic.Lists {
 
 	public class MobGroupsBinding : IBinding {
 		#region IBinding Members
-		public Tuple Tuple { get; set; }
+		public Database.Tuple Tuple { get; set; }
 		public DbAttribute AttachedAttribute { get; set; }
 		#endregion
 
@@ -200,7 +200,7 @@ namespace SDE.Editor.Generic.Lists {
 
 	public class MobBinding : IBinding {
 		#region IBinding Members
-		public Tuple Tuple { get; set; }
+		public Database.Tuple Tuple { get; set; }
 		public DbAttribute AttachedAttribute { get; set; }
 		#endregion
 
@@ -226,7 +226,7 @@ namespace SDE.Editor.Generic.Lists {
 
 	public class SkillBinding : IBinding {
 		#region IBinding Members
-		public Tuple Tuple { get; set; }
+		public Database.Tuple Tuple { get; set; }
 		public DbAttribute AttachedAttribute { get; set; }
 		#endregion
 

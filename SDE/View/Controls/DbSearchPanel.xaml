@@ -16,13 +16,7 @@
                     <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
                 <controls:LeftComboBox Grid.ColumnSpan="3" Height="0" x:Name="_cbSubMenu" VerticalAlignment="Bottom" >
-                    <wpfBugFix:UnclickableBorder x:Name="_unclickableBorder" Margin="-4, -2, -4, -2" Focusable="False" BorderThickness="1" BorderBrush="#9AA6B6" FocusVisualStyle="{x:Null}">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                <GradientStop Offset="0" Color="#DEDEDE" />
-                                <GradientStop Offset="0.5" Color="White" />
-                            </LinearGradientBrush>
-                        </Border.Background>
+                    <wpfBugFix:UnclickableBorder x:Name="_unclickableBorder" Margin="-6, -2, -6, -2" Focusable="False" BorderThickness="1" BorderBrush="{StaticResource GSearchEngineExtendBorder}" Background="{StaticResource GSearchEngineExtendBackground}" FocusVisualStyle="{x:Null}">
                         <Grid Name="_gridSearchContent" MaxWidth="{Binding Path=ActualWidth, ElementName=_cbSubMenu}" Width="{Binding Path=ActualWidth, ElementName=_cbSubMenu}" Margin="2">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition />
@@ -33,7 +27,7 @@
                         </Grid>
                     </wpfBugFix:UnclickableBorder>
                 </controls:LeftComboBox>
-                <TextBox AcceptsReturn="False" AcceptsTab="False" Padding="3" BorderThickness="0" Name="_searchTextBox" VerticalAlignment="Center" />
+                <TextBox AcceptsReturn="False" AcceptsTab="False" Padding="2" BorderThickness="0" Name="_searchTextBox" VerticalAlignment="Center" />
                 <TextBlock  Name="_labelFind" Margin="3 0 0 0" VerticalAlignment="Center" Text="Search..." FontStyle="Italic" Foreground="Gray" IsHitTestVisible="False" />
                 <styles:FancyButton Background="{Binding ElementName=_searchTextBox, Path=Background}" Grid.Column="1" x:Name="_buttonResetSearch" HorizontalAlignment="Right" ImagePath="reset.png" />
                 <Border Grid.Column="2" HorizontalAlignment="Right" BorderBrush="White" Width="{Binding Source={x:Static SystemParameters.VerticalScrollBarWidth}}" BorderThickness="0">

@@ -8,7 +8,7 @@
              xmlns:controls="clr-namespace:SDE.View.Controls"
              FontSize="10"
              mc:Ignorable="d" >
-    <Grid Background="White" >
+    <Grid Background="{StaticResource TabItemBackground}" >
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="auto" />

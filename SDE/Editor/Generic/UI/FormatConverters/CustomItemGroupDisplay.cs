@@ -12,12 +12,12 @@ using Utilities.IndexProviders;
 namespace SDE.Editor.Generic.UI.FormatConverters {
 	public class CustomItemGroupDisplay<TKey> : CustomSubTable<TKey> {
 		public override void OnInitListView() {
-			Extensions.GenerateListViewTemplate(_lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			ListViewDataTemplateHelper.GenerateListViewTemplateNew(_lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = ServerItemGroupSubAttributes.Id.DisplayName, DisplayExpression = "[" + ServerItemGroupSubAttributes.Id.Index + "]", SearchGetAccessor = ServerItemGroupSubAttributes.Id.AttributeName, FixedWidth = 60, TextAlignment = TextAlignment.Right, ToolTipBinding = "[" + ServerItemGroupSubAttributes.Id.Index + "]" },
 				new ListViewDataTemplateHelper.RangeColumnInfo { Header = ServerItemGroupSubAttributes.Name.DisplayName, DisplayExpression = "[" + ServerItemGroupSubAttributes.Name.Index + "]", SearchGetAccessor = ServerItemGroupSubAttributes.Name.AttributeName, IsFill = true, ToolTipBinding = "[" + ServerItemGroupSubAttributes.Name.Index + "]", MinWidth = 100, TextWrapping = TextWrapping.Wrap },
 				new ListViewDataTemplateHelper.RangeColumnInfo { Header = "Freq", DisplayExpression = "[" + ServerItemGroupSubAttributes.Rate.Index + "]", SearchGetAccessor = ServerItemGroupSubAttributes.Rate.AttributeName, FixedWidth = 40, TextAlignment = TextAlignment.Right, ToolTipBinding = "[" + ServerItemGroupSubAttributes.Rate.Index + "]" },
 				new ListViewDataTemplateHelper.RangeColumnInfo { Header = "Drop %", DisplayExpression = "[" + ServerItemGroupSubAttributes.DropPerc.Index + "]", SearchGetAccessor = ServerItemGroupSubAttributes.Rate.AttributeName, FixedWidth = 60, TextAlignment = TextAlignment.Right, ToolTipBinding = "[" + ServerItemGroupSubAttributes.DropPerc.Index + "]" },
-			}, new DatabaseItemSorter(_configuration.SubTableAttributeList), new string[] { "Deleted", "Red", "Modified", "Green", "Added", "Blue", "Normal", "Black" }, "generateStyle", "false");
+			}, new DatabaseItemSorter(_configuration.SubTableAttributeList), new string[] { "Deleted", "{DynamicResource CellBrushRemoved}", "Modified", "{DynamicResource CellBrushModified}", "Added", "{DynamicResource CellBrushAdded}", "Normal", "{DynamicResource TextForeground}" });
 		}
 
 		public override void OnDeplayTable() {

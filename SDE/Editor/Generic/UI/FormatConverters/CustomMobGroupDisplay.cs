@@ -13,13 +13,13 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 	public class CustomMobGroupDisplay<TKey> : CustomSubTable<TKey> {
 		public override void OnInitListView() {
 			//Extensions.GenerateListViewTemplateNew
-			Extensions.GenerateListViewTemplate(_lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			ListViewDataTemplateHelper.GenerateListViewTemplateNew(_lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = ServerMobGroupSubAttributes.Id.DisplayName, DisplayExpression = "[" + ServerMobGroupSubAttributes.Id.Index + "]", SearchGetAccessor = ServerMobGroupSubAttributes.Id.AttributeName, FixedWidth = 60, TextAlignment = TextAlignment.Right, ToolTipBinding = "[" + ServerMobGroupSubAttributes.Id.Index + "]" },
 				new ListViewDataTemplateHelper.RangeColumnInfo { Header = ServerMobGroupSubAttributes.DummyName.DisplayName, DisplayExpression = "[" + ServerMobGroupSubAttributes.DummyName.Index + "]", SearchGetAccessor = ServerMobGroupSubAttributes.DummyName.AttributeName, IsFill = true, ToolTipBinding = "[" + ServerMobGroupSubAttributes.DummyName.Index + "]", MinWidth = 100, TextWrapping = TextWrapping.Wrap },
 				new ListViewDataTemplateHelper.RangeColumnInfo { Header = "Freq", DisplayExpression = "[" + ServerMobGroupSubAttributes.Rate.Index + "]", SearchGetAccessor = ServerMobGroupSubAttributes.Rate.AttributeName, FixedWidth = 60, TextAlignment = TextAlignment.Right, ToolTipBinding = "[" + ServerMobGroupSubAttributes.Rate.Index + "]" },
 				new ListViewDataTemplateHelper.RangeColumnInfo { Header = "Drop %", DisplayExpression = "[" + ServerMobGroupSubAttributes.DropPerc.Index + "]", SearchGetAccessor = ServerMobGroupSubAttributes.Rate.AttributeName, MinWidth = 60, TextAlignment = TextAlignment.Right, ToolTipBinding = "[" + ServerMobGroupSubAttributes.DropPerc.Index + "]" },
 				//new ListViewDataTemplateHelper.RangeColumnInfo {Header = "Drop %", DisplayExpression = "[" + ServerMobGroupSubAttributes.DropPerc.Index + "]", SearchGetAccessor = ServerMobGroupSubAttributes.Rate.AttributeName, IsFill = true, MinWidth = 100, TextWrapping = TextWrapping.Wrap},
-			}, new DatabaseItemSorter(_configuration.SubTableAttributeList), new string[] { "Deleted", "Red", "Modified", "Green", "Added", "Blue", "Normal", "Black" }, "generateStyle", "false");
+			}, new DatabaseItemSorter(_configuration.SubTableAttributeList), new string[] { "Deleted", "{DynamicResource CellBrushRemoved}", "Modified", "{DynamicResource CellBrushModified}", "Added", "{DynamicResource CellBrushAdded}", "Normal", "{DynamicResource TextForeground}" });
 			//_lv.ItemContainerStyle = null;
 
 			//new ListViewDataTemplateHelper.GeneralColumnInfo { Header = Settings.AttId.DisplayName, DisplayExpression = "[" + Settings.AttId.Index + "]", SearchGetAccessor = Settings.AttId.AttributeName, FixedWidth = Settings.AttIdWidth, TextAlignment = TextAlignment.Right, ToolTipBinding = "[" + Settings.AttId.Index + "]" },

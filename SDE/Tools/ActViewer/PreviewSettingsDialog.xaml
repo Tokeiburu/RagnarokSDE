@@ -4,17 +4,18 @@
               xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
                  xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
                  xmlns:TokeiLibrary="clr-namespace:TokeiLibrary;assembly=TokeiLibrary"
-                 xmlns:controls="clr-namespace:SDE.View.Controls"
+                 xmlns:controls="clr-namespace:SDE.View.Controls" Background="{StaticResource TabItemBackground}"
+                  Foreground="{StaticResource TextForeground}"
                  MaxWidth="470" MinWidth="470" MinHeight="375" MaxHeight="375">
-    <Grid Background="White">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
-        <Border Background="#F7F9FD">
+        <Border Background="{DynamicResource ResourceKey=TabControlBackground}">
             <Grid>
-                <TabControl Style="{DynamicResource ResourceKey=TabControlStyled}" Background="White">
-                    <TabItem Header="Editor colors" Style="{DynamicResource ResourceKey=TabItemStyled}">
+                <TabControl Style="{DynamicResource ResourceKey=TabControlStyled}" Focusable="True" FocusVisualStyle="{x:Null}">
+                    <TabItem Header="Editor colors" Style="{DynamicResource ResourceKey=TabItemStyled}" Foreground="{StaticResource TextForeground}">
                         <StackPanel>
                             <StackPanel>
                                 <Label Content="Editor colors" FontWeight="Bold" FontSize="16" Margin="3 10 0 5" />
@@ -103,7 +104,7 @@
                 </TabControl>
             </Grid>
         </Border>
-        <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="2" Height="40" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+        <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="2" Height="40" Background="{DynamicResource UIDialogBackground}">
             <DockPanel HorizontalAlignment="Right" Margin="0 0 3 0">
                 <Button Content="Ok" Height="25" Margin="3" Width="100" Click="_buttonClose" />
             </DockPanel>

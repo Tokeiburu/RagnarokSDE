@@ -9,5 +9,6 @@ namespace SDE.Editor.Generic.Core {
 		Sql = 1 << 3,
 		Detect = 1 << 4,
 		Lua = 1 << 5,
+		Yaml = 1 << 6,
 	}
 }

@@ -21,7 +21,7 @@ using Utilities.Extension;
 using Utilities.Services;
 
 namespace SDE.Editor.Generic.UI.CustomControls {
-	public class CustomResourceProperty<TKey, TValue> : ICustomControl<TKey, TValue> where TValue : Tuple {
+	public class CustomResourceProperty<TKey, TValue> : ICustomControl<TKey, TValue> where TValue : Database.Tuple {
 		private readonly DbAttribute _attribute;
 		private readonly string _ext;
 		private readonly string _grfPath1;
@@ -204,20 +204,26 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 					byte[] data = _tab.ProjectDatabase.MetaGrf.GetDataBuffered(EncodingService.FromAnyToDisplayEncoding(GrfPath.Combine(_grfPath1, _textBox.Text.ExpandString()) + _ext));
 
 					if (data != null) {
-						WpfUtilities.TextBoxOk(_textBox);
+						_textBox.Dispatch(p => p.Background = Application.Current.Resources["GSearchEngineOk"] as Brush);
+
 						_wrapper1.Image = ImageProvider.GetImage(data, _ext);
 						_wrapper1.Image.MakePinkTransparent();
+
+						if (_wrapper1.Image.GrfImageType == GrfImageType.Bgr24) {
+							_wrapper1.Image.Convert(GrfImageType.Bgra32);
+						}
+
 						_imageResource.Tag = _textBox.Text;
 						_imageResource.Source = _wrapper1.Image.Cast<BitmapSource>();
 					}
 					else {
-						WpfUtilities.TextBoxError(_textBox);
+						_textBox.Dispatch(p => p.Background = Application.Current.Resources["GSearchEngineError"] as Brush);
 						_wrapper1.Image = null;
 						_imageResource.Source = null;
 					}
 				}
 				catch (ArgumentException) {
-					WpfUtilities.TextBoxError(_textBox);
+					_textBox.Dispatch(p => p.Background = Application.Current.Resources["GSearchEngineError"] as Brush);
 					_wrapper1.Image = null;
 					_imageResource.Source = null;
 				}
@@ -242,8 +248,8 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 					_imagePreview.Source = null;
 				}
 			}
-			catch (Exception err) {
-				ErrorHandler.HandleException(err);
+			catch {
+				//ErrorHandler.HandleException(err);
 			}
 		}
 	}

@@ -17,6 +17,10 @@ namespace SDE.Editor.Generic {
 		private List<ReadableTuple<TKey>> _bufferedItems = new List<ReadableTuple<TKey>>();
 		private bool _bufferedTable;
 
+		public int TablesCount {
+			get { return _tables.Count; }
+		}
+
 		public MetaTable(AttributeList list, bool unsafeContext = false) : base(list, unsafeContext) {
 			_commands = new MetaCommandsHolder<TKey>(null);
 		}

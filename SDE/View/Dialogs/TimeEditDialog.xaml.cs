@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using SDE.ApplicationConfiguration;
+using TokeiLibrary;
 using TokeiLibrary.WPF.Styles;
 using Utilities.Extension;
 
@@ -16,8 +17,9 @@ namespace SDE.View.Dialogs {
 		private readonly List<TextBox> _boxes = new List<TextBox>();
 		private int _value;
 		private bool _seconds;
+		private readonly bool _allowFixed;
 
-		public TimeEditDialog(string text, bool seconds = false)
+		public TimeEditDialog(string text, bool seconds = false, bool allowFixed = false)
 			: base("Time edit", "cde.ico", SizeToContent.WidthAndHeight, ResizeMode.CanResize) {
 			InitializeComponent();
 
@@ -30,8 +32,44 @@ namespace SDE.View.Dialogs {
 			_boxes.Add(_tbDays);
 
 			_seconds = seconds;
+			_allowFixed = allowFixed;
 
-			if (seconds) {
+			if (_allowFixed) {
+				_cbFixedTime.Visibility = Visibility.Visible;
+				WpfUtilities.AddFocus(_cbFixedTime);
+
+				_tbMiliseconds.Visibility = Visibility.Collapsed;
+				_lms.Visibility = Visibility.Collapsed;
+				_lse.Content = "s";
+
+				_upperGrid.ColumnDefinitions[9] = new ColumnDefinition { Width = new GridLength(0) };
+				_upperGrid.ColumnDefinitions[10] = new ColumnDefinition { Width = new GridLength(0) };
+
+				_upperGrid.Width = 300;
+
+				bool isFixed = true;
+				string day = "";
+				string hour = "";
+				string minute = "";
+				string second = "";
+
+				_extractTime(text, ref day, ref hour, ref minute, ref second, ref isFixed);
+
+				_tbDays.Text = day;
+				_tbHours.Text = hour;
+				_tbMinutes.Text = minute;
+				_tbSeconds.Text = second;
+				_cbFixedTime.IsChecked = isFixed;
+
+				_cbFixedTime.Checked += delegate {
+					_update();
+				};
+
+				_cbFixedTime.Unchecked += delegate {
+					_update();
+				};
+			}
+			else if (seconds) {
 				_tbMiliseconds.Visibility = Visibility.Collapsed;
 				_lms.Visibility = Visibility.Collapsed;
 				_lse.Content = "s";
@@ -74,8 +112,63 @@ namespace SDE.View.Dialogs {
 			};
 		}
 
+		private void _extractTime(string text, ref string day, ref string hour, ref string minute, ref string second, ref bool isFixed) {
+			int value = 0;
+			int index = 0;
+
+			for (int i = 0; i < text.Length; i++) {
+				if (text[i] == '+') {
+					isFixed = false;
+				}
+				else if (char.IsDigit(text[i])) {
+					value = value * 10 * index + (text[i] - '0');
+					index++;
+				}
+				else {
+					switch(text[i]) {
+						case 'd':
+							day = value.ToString(CultureInfo.InvariantCulture);
+							value = index = 0;
+							break;
+						case 'h':
+							hour = value.ToString(CultureInfo.InvariantCulture);
+							value = index = 0;
+							break;
+						case 'm':
+							if (i + 1 >= text.Length || text[i + 1] != 'n')
+								break;
+
+							minute = value.ToString(CultureInfo.InvariantCulture);
+							value = index = 0;
+							break;
+						case 's':
+							if (i + 1 >= text.Length || text[i + 1] != 'n')
+								break;
+
+							second = value.ToString(CultureInfo.InvariantCulture);
+							value = index = 0;
+							break;
+						default:
+							value = index = 0;
+							break;
+					}
+				}
+			}
+		}
+
 		public string Text {
-			get { return _value.ToString(CultureInfo.InvariantCulture); }
+			get {
+				if (_allowFixed) {
+					return (_cbFixedTime.IsChecked == true ? "" : "+") +
+						(_tbDays.Text != "" ? _tbDays.Text + "d" : "") + 
+						(_tbHours.Text != "" ? _tbHours.Text + "h" : "") +
+						(_tbMinutes.Text != "" ? _tbMinutes.Text + "mn" : "") +
+						(_tbSeconds.Text != "" ? _tbSeconds.Text + "s" : "")
+						;
+				}
+
+				return _value.ToString(CultureInfo.InvariantCulture);
+			}
 		}
 
 		public Grid Footer { get { return _footerGrid; } }
@@ -91,16 +184,18 @@ namespace SDE.View.Dialogs {
 		}
 
 		private void _update() {
-			int mil = _tbMiliseconds.Text.ToInt();
-			int sec = _tbSeconds.Text.ToInt();
-			int min = _tbMinutes.Text.ToInt();
-			int hrs = _tbHours.Text.ToInt();
-			int day = _tbDays.Text.ToInt();
+			if (!_allowFixed) {
+				int mil = _tbMiliseconds.Text.ToInt();
+				int sec = _tbSeconds.Text.ToInt();
+				int min = _tbMinutes.Text.ToInt();
+				int hrs = _tbHours.Text.ToInt();
+				int day = _tbDays.Text.ToInt();
 
-			_value = min * 60000 + sec * 1000 + mil;
+				_value = min * 60000 + sec * 1000 + mil;
 
-			if (_seconds) {
-				_value = day * 86400 + hrs * 3600 + min * 60 + sec;
+				if (_seconds) {
+					_value = day * 86400 + hrs * 3600 + min * 60 + sec;
+				}
 			}
 
 			OnValueChanged();

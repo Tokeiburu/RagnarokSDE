@@ -4,7 +4,7 @@
               xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
                  xmlns:TokeiLibrary="clr-namespace:TokeiLibrary;assembly=TokeiLibrary"
                  xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
-                 xmlns:controls="clr-namespace:SDE.View.Controls">
+                 xmlns:controls="clr-namespace:SDE.View.Controls" Background="{StaticResource TabItemBackground}" Foreground="{StaticResource TextForeground}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -23,7 +23,7 @@
 
                 <DockPanel>
                     <Label Content="Based on" VerticalAlignment="Center" />
-                    <TextBlock Name="_tbBasedOn" VerticalAlignment="Center" Text="None" Foreground="Blue" Margin="0 3 3 3" />
+                    <TextBlock Name="_tbBasedOn" VerticalAlignment="Center" Text="None" Foreground="{StaticResource CellBrushAdded}" Margin="0 3 3 3" />
                     <Image VerticalAlignment="Center" Name="_imReset" MouseLeftButtonUp="_imReset_MouseLeftButtonUp" ListView:WpfUtils.ImagePath="reset.png" HorizontalAlignment="Left" Visibility="Collapsed" ToolTip="Sets the source to None." Margin="3" />
                     <Button Name="_buttonSearch" Click="_buttonSearch_Click" Content="..." HorizontalAlignment="Left" Height="22" Width="22" Margin="3" />
                 </DockPanel>
@@ -35,7 +35,7 @@
                 </DockPanel>
             </StackPanel>
         </Grid>
-        <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="50" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+        <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="1" Height="49" Background="{DynamicResource UIDialogBackground}">
             <Grid Margin="0 0 3 0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto" />

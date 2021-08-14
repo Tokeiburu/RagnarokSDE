@@ -120,32 +120,6 @@ namespace SDE.Editor.Generic.UI.FormatConverters {
 		}
 	}
 
-	public class CustomParamsRequiredProperty : CustomPreviewProperty {
-		public override void OnUpdate() {
-			try {
-				if (_textBox.Text == "" && !_textBox.IsFocused) {
-					_textPreview.Visibility = Visibility.Visible;
-
-					int count = 0;
-
-					for (int i = 0; i < 5; i++) {
-						string value = ((ReadableTuple<int>)_tab.List.SelectedItem).GetStringValue(ServerCheevoAttributes.Parameter1.Index + i);
-
-						if (!String.IsNullOrEmpty(value))
-							count++;
-					}
-
-					_textPreview.Text = String.Format("{0}", count);
-				}
-				else {
-					_textPreview.Visibility = Visibility.Collapsed;
-				}
-			}
-			catch {
-			}
-		}
-	}
-
 	public class CustomBuyProperty : CustomPreviewProperty {
 		public override void OnUpdate() {
 			try {

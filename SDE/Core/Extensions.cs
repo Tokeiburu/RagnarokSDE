@@ -13,6 +13,18 @@ using TokeiLibrary.WPF.Styles.ListView;
 using TokeiLibrary.WpfBugFix;
 
 namespace SDE.Core {
+	public class FileParserException : Exception {
+		public string File { get; set; }
+		public int Line { get; set; }
+		public string Reason { get; set; }
+
+		public FileParserException(string file, int line, string reason) {
+			File = file;
+			Line = line;
+			Reason = reason;
+		}
+	}
+
 	public static class Extensions {
 		private static readonly Dictionary<RangeListView, object> _defaultSearches = new Dictionary<RangeListView, object>();
 		private static UTF8Encoding _utf8NoBom;
@@ -52,9 +64,9 @@ namespace SDE.Core {
 			return line;
 		}
 
-		public static DefaultComparer<T> BindDefaultSearch<T>(RangeListView lv, string id) {
+		public static DefaultComparer<T> BindDefaultSearch<T>(RangeListView lv, string id, bool enableAlphaNum = false) {
 			if (!_defaultSearches.ContainsKey(lv)) {
-				_defaultSearches[lv] = new DefaultComparer<T>();
+				_defaultSearches[lv] = new DefaultComparer<T>(enableAlphaNum);
 			}
 
 			DefaultComparer<T> comparer = (DefaultComparer<T>)_defaultSearches[lv];

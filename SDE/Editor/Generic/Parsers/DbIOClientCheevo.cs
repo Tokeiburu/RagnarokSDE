@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using Database;
+using ErrorManager;
 using GRF.FileFormats.LubFormat;
 using GRF.IO;
 using Lua;
@@ -11,6 +13,7 @@ using Lua.Structure;
 using SDE.ApplicationConfiguration;
 using SDE.Core;
 using SDE.Editor.Engines.BackupsEngine;
+using SDE.Editor.Engines.Parsers;
 using SDE.Editor.Generic.Core;
 using SDE.Editor.Generic.Lists;
 using SDE.Editor.Generic.Parsers.Generic;
@@ -114,24 +117,29 @@ namespace SDE.Editor.Generic.Parsers {
 							if (contentProperties == null)
 								continue;
 
-							foreach (LuaKeyValue contentProperty in contentProperties.Variables) {
-								switch(contentProperty.Key) {
-									case "summary":
-										table.SetRaw(itemIndex, ClientCheevoAttributes.Summary, DbIOMethods.RemoveQuotes(((LuaValue)contentProperty.Value).Value));
-										break;
-									case "details":
-										table.SetRaw(itemIndex, ClientCheevoAttributes.Details, DbIOMethods.RemoveQuotes(((LuaValue)contentProperty.Value).Value));
-										break;
-									case "title":
-										table.SetRaw(itemIndex, ClientCheevoAttributes.RewardTitleId, ((LuaValue)contentProperty.Value).Value);
-										break;
-									case "buff":
-										table.SetRaw(itemIndex, ClientCheevoAttributes.RewardBuff, ((LuaValue)contentProperty.Value).Value);
-										break;
-									case "item":
-										table.SetRaw(itemIndex, ClientCheevoAttributes.RewardId, ((LuaValue)contentProperty.Value).Value);
-										break;
+							try {
+								foreach (LuaKeyValue contentProperty in contentProperties.Variables) {
+									switch(contentProperty.Key) {
+										case "summary":
+											table.SetRaw(itemIndex, ClientCheevoAttributes.Summary, DbIOMethods.RemoveQuotes(((LuaValue)contentProperty.Value).Value));
+											break;
+										case "details":
+											table.SetRaw(itemIndex, ClientCheevoAttributes.Details, DbIOMethods.RemoveQuotes(((LuaValue)contentProperty.Value).Value));
+											break;
+										case "title":
+											table.SetRaw(itemIndex, ClientCheevoAttributes.RewardTitleId, ((LuaValue)contentProperty.Value).Value);
+											break;
+										case "buff":
+											table.SetRaw(itemIndex, ClientCheevoAttributes.RewardBuff, ((LuaValue)contentProperty.Value).Value);
+											break;
+										case "item":
+											table.SetRaw(itemIndex, ClientCheevoAttributes.RewardId, ((LuaValue)contentProperty.Value).Value);
+											break;
+									}
 								}
+							}
+							catch (Exception err) {
+								ErrorHandler.HandleException(err);
 							}
 
 							break;
@@ -144,27 +152,42 @@ namespace SDE.Editor.Generic.Parsers {
 								continue;
 
 							foreach (LuaKeyValue contentProperty in contentProperties.Variables) {
-								int resId = Int32.Parse(contentProperty.Key.Substring(1, contentProperty.Key.Length - 2));
-								LuaList resourceProperties = contentProperty.Value as LuaList;
+								try {
+									int resId;
 
-								if (resourceProperties == null)
-									continue;
+									if (!Int32.TryParse(contentProperty.Key.Substring(1, contentProperty.Key.Length - 2), out resId)) {
+										DbIOErrorHandler.Handle(StackTraceException.GetStrackTraceException(),
+											String.Format("ID: {0}, file: '{1}', exception: '{2}'", 
+											itemIndex.ToString(CultureInfo.InvariantCulture), 
+											TextFileHelper.LatestFile, 
+											"Invalid resource ID, found \"" + contentProperty.Key + "\", expected an integer."), ErrorLevel.Warning);
+										continue;
+									}
 
-								resources.Append(resId);
+									LuaList resourceProperties = contentProperty.Value as LuaList;
 
-								foreach (LuaKeyValue resourceProperty in resourceProperties.Variables) {
-									string value = ((LuaValue)resourceProperty.Value).Value;
-									resources.Append("__%");
-									resources.Append(resourceProperty.Key);
-									resources.Append("__%");
+									if (resourceProperties == null)
+										continue;
 
-									if (value.StartsWith("\""))
-										resources.Append(DbIOMethods.RemoveQuotes(value));
-									else
-										resources.Append(value);
+									resources.Append(resId);
+
+									foreach (LuaKeyValue resourceProperty in resourceProperties.Variables) {
+										string value = ((LuaValue)resourceProperty.Value).Value;
+										resources.Append("__%");
+										resources.Append(resourceProperty.Key);
+										resources.Append("__%");
+
+										if (value.StartsWith("\""))
+											resources.Append(DbIOMethods.RemoveQuotes(value));
+										else
+											resources.Append(value);
+									}
+
+									resources.Append("__&");
 								}
-
-								resources.Append("__&");
+								catch (Exception err) {
+									throw new Exception("Failed to read resource for ID " + itemIndex, err);
+								}
 							}
 
 							table.SetRaw(itemIndex, ClientCheevoAttributes.Resources, resources.ToString());

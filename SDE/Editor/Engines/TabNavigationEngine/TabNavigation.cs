@@ -10,6 +10,7 @@ using SDE.Editor.Generic.Lists;
 using SDE.Editor.Generic.TabsMakerCore;
 using TokeiLibrary;
 using Utilities.Commands;
+using Tuple = Database.Tuple;
 
 namespace SDE.Editor.Engines.TabNavigationEngine {
 	/// <summary>
@@ -55,7 +56,7 @@ namespace SDE.Editor.Engines.TabNavigationEngine {
 			_storeAndExecute(command, false);
 		}
 
-		public static void Select(ServerDbs db, Tuple tuple) {
+		public static void Select(ServerDbs db, Database.Tuple tuple) {
 			Instance.Select2(db, tuple);
 		}
 
@@ -90,7 +91,7 @@ namespace SDE.Editor.Engines.TabNavigationEngine {
 			Instance.SelectInternal(db, id);
 		}
 
-		public void Select2(ServerDbs tabName, Tuple tuple) {
+		public void Select2(ServerDbs tabName, Database.Tuple tuple) {
 			if (tuple.Attributes.PrimaryAttribute.DataType == typeof(int)) {
 				SelectInternal(tabName, new List<int> { tuple.GetKey<int>() });
 			}
@@ -216,7 +217,7 @@ namespace SDE.Editor.Engines.TabNavigationEngine {
 			}
 		}
 
-		private bool _containsAny(GDbTab tab, List<Tuple> tuples) {
+		private bool _containsAny(GDbTab tab, List<Database.Tuple> tuples) {
 			return tab.Dispatch(new Func<bool>(delegate {
 				for (int i = 0; i < tuples.Count; i++) {
 					if (tab._listView.Items.Contains(tuples[i]))

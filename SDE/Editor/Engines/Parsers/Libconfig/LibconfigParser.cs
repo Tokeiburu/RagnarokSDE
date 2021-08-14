@@ -6,9 +6,10 @@ using System.Text;
 using Database.Commands;
 using SDE.Editor.Generic;
 using SDE.Editor.Generic.Core;
+using Utilities.Extension;
 
 namespace SDE.Editor.Engines.Parsers.Libconfig {
-	public enum LibconfigMode {
+	public enum ParserMode {
 		Read,
 		Write
 	}
@@ -17,12 +18,12 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 		private int _bufferIndex;
 		private byte[] _buffer;
 		private string _word = "";
-		public LibconfigObject Output { get; set; }
-		private LibconfigObject _latest;
+		public ParserObject Output { get; set; }
+		private ParserObject _latest;
 		private readonly string _file;
 		private readonly List<string> _allLines;
-		private readonly List<LibconfigKeyValue> _writeKeyValues;
-		private List<LibconfigArray> _writeArrays;
+		private readonly List<ParserKeyValue> _writeKeyValues;
+		private List<ParserArray> _writeArrays;
 		private readonly bool _list;
 		private readonly string _idKey;
 
@@ -40,31 +41,42 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 			}
 		}
 
-		public LibconfigParser(string file, LibconfigMode mode = LibconfigMode.Read) {
-			if (mode == LibconfigMode.Write) {
-				_allLines = File.ReadAllLines(file).ToList();
+		public LibconfigParser(string file, ParserMode mode = ParserMode.Read) {
+			if (mode == ParserMode.Write) {
+				if (file.IsExtension(".dat")) {
+					_allLines = File.ReadAllLines(file).ToList();
+				}
+				else {
+					_allLines = IOHelper.ReadAllLines(file, null).ToList();
+				}
 			}
 
 			_file = file;
 			Line = 1;
 			Output = null;
-			_parse(File.ReadAllBytes(file));
 
-			if (mode == LibconfigMode.Write) {
-				var list = ((LibconfigKeyValue)Output).Value as LibconfigArrayBase;
+			if (file.IsExtension(".dat")) {
+				_parse(File.ReadAllBytes(file));
+			}
+			else {
+				_parse(IOHelper.ReadAllBytes(file));
+			}
+
+			if (mode == ParserMode.Write) {
+				var list = ((ParserKeyValue)Output).Value as ParserArrayBase;
 
 				if (list != null) {
-					_writeKeyValues = list.OfType<LibconfigKeyValue>().ToList();
-					_writeArrays = list.OfType<LibconfigArray>().ToList();
+					_writeKeyValues = list.OfType<ParserKeyValue>().ToList();
+					_writeArrays = list.OfType<ParserArray>().ToList();
 
 					if (_writeArrays.Count > 0) {
-						_idKey = ((LibconfigKeyValue)_writeArrays[0].Objects[0]).Key;
+						_idKey = ((ParserKeyValue)_writeArrays[0].Objects[0]).Key;
 						_list = true;
 					}
 
 					if (_writeArrays.Count == 0 && _writeKeyValues.Count == 0) {
-						if (list is LibconfigList) {
-							switch(((LibconfigKeyValue)Output).Key) {
+						if (list is ParserList) {
+							switch(((ParserKeyValue)Output).Key) {
 								case "item_db":
 									_idKey = "Id";
 									break;
@@ -107,11 +119,11 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 							}
 							break;
 						case ':':
-							LibconfigKeyValue keyValue = new LibconfigKeyValue(_word, Line);
+							ParserKeyValue keyValue = new ParserKeyValue(_word, Line);
 
 							if (_latest == null && Output != null) {
 								// The file contains multiple arrays
-								LibconfigArray tempList = new LibconfigArray(Line);
+								ParserArray tempList = new ParserArray(Line);
 								tempList.AddElement(Output);
 								Output.Parent = tempList;
 								Output = tempList;
@@ -125,9 +137,9 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 							else {
 								keyValue.Parent = _latest;
 
-								switch(_latest.ConfType) {
-									case LibconfigTypes.Array:
-										((LibconfigArray)_latest).AddElement(keyValue);
+								switch(_latest.ParserType) {
+									case ParserTypes.Array:
+										((ParserArray)_latest).AddElement(keyValue);
 										_latest = keyValue;
 										break;
 									default:
@@ -140,9 +152,9 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 							_readMultilineQuote();
 
 							if (_latest != null) {
-								switch(_latest.ConfType) {
-									case LibconfigTypes.KeyValue:
-										((LibconfigKeyValue)_latest).Value = new LibconfigString(_word, Line);
+								switch(_latest.ParserType) {
+									case ParserTypes.KeyValue:
+										((ParserKeyValue)_latest).Value = new ParserString(_word, Line);
 										_latest.Length = Line - _latest.Line + 1;
 										_latest = _latest.Parent;
 										break;
@@ -152,19 +164,19 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 							}
 							break;
 						case '(':
-							LibconfigList list = new LibconfigList(Line);
+							ParserList list = new ParserList(Line);
 
 							if (_latest == null)
 								throw new Exception("Trying to open a List type without a parent.");
 
-							switch(_latest.ConfType) {
-								case LibconfigTypes.List:
-									((LibconfigList)_latest).AddElement(list);
+							switch(_latest.ParserType) {
+								case ParserTypes.List:
+									((ParserList)_latest).AddElement(list);
 									list.Parent = _latest;
 									_latest = list;
 									break;
-								case LibconfigTypes.KeyValue:
-									((LibconfigKeyValue)_latest).Value = list;
+								case ParserTypes.KeyValue:
+									((ParserKeyValue)_latest).Value = list;
 									list.Parent = _latest;
 									_latest = list;
 									break;
@@ -174,25 +186,25 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 
 							break;
 						case '{':
-							LibconfigArray array = new LibconfigArray(Line);
+							ParserArray array = new ParserArray(Line);
 
 							if (_latest == null) {
 								// Used for copy pasting inputs, create a temporary list
-								Output = new LibconfigKeyValue("copy_paste", Line) {
-									Value = new LibconfigList(Line)
+								Output = new ParserKeyValue("copy_paste", Line) {
+									Value = new ParserList(Line)
 								};
 
 								_latest = Output["copy_paste"];
 							}
 
-							switch(_latest.ConfType) {
-								case LibconfigTypes.List:
-									((LibconfigList)_latest).AddElement(array);
+							switch(_latest.ParserType) {
+								case ParserTypes.List:
+									((ParserList)_latest).AddElement(array);
 									array.Parent = _latest;
 									_latest = array;
 									break;
-								case LibconfigTypes.KeyValue:
-									((LibconfigKeyValue)_latest).Value = array;
+								case ParserTypes.KeyValue:
+									((ParserKeyValue)_latest).Value = array;
 									array.Parent = _latest;
 									_latest = array;
 									break;
@@ -202,14 +214,14 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 
 							break;
 						case '[':
-							LibconfigAggregate aggregate = new LibconfigAggregate(Line);
+							ParserAggregate aggregate = new ParserAggregate(Line);
 
 							if (_latest == null)
 								throw new Exception("Trying to open an Aggregate type without a parent.");
 
-							switch(_latest.ConfType) {
-								case LibconfigTypes.KeyValue:
-									((LibconfigKeyValue)_latest).Value = aggregate;
+							switch(_latest.ParserType) {
+								case ParserTypes.KeyValue:
+									((ParserKeyValue)_latest).Value = aggregate;
 									_latest.Length = Line - _latest.Line + 1;
 									aggregate.Parent = _latest;
 									_latest = aggregate;
@@ -225,18 +237,18 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 							if (_latest == null)
 								throw new Exception("Trying to close a statement without knowing its beginning.");
 
-							switch(_latest.ConfType) {
-								case LibconfigTypes.Aggregate:
-								case LibconfigTypes.Array:
-								case LibconfigTypes.List:
+							switch(_latest.ParserType) {
+								case ParserTypes.Aggregate:
+								case ParserTypes.Array:
+								case ParserTypes.List:
 									_latest.Length = Line - _latest.Line + 1;
 									_latest = _latest.Parent;
 
-									if (_latest is LibconfigKeyValue) {
+									if (_latest is ParserKeyValue) {
 										_latest = _latest.Parent;
 									}
 									break;
-								case LibconfigTypes.KeyValue:
+								case ParserTypes.KeyValue:
 									_latest = _latest.Parent;
 									_latest.Length = Line - _latest.Line + 1;
 									break;
@@ -251,14 +263,14 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 							if (_latest == null)
 								throw new Exception("Trying to read a quote without a parent.");
 
-							switch(_latest.ConfType) {
-								case LibconfigTypes.KeyValue:
-									((LibconfigKeyValue)_latest).Value = new LibconfigString(_word, Line);
+							switch(_latest.ParserType) {
+								case ParserTypes.KeyValue:
+									((ParserKeyValue)_latest).Value = new ParserString(_word, Line);
 									_latest.Length = Line - _latest.Line + 1;
 									_latest = _latest.Parent;
 									break;
-								case LibconfigTypes.List:
-									((LibconfigList)_latest).AddElement(new LibconfigString(_word, Line));
+								case ParserTypes.List:
+									((ParserList)_latest).AddElement(new ParserString(_word, Line));
 									break;
 								default:
 									throw new Exception("Expected a KeyValue.");
@@ -284,15 +296,15 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 								continue;
 
 							if (_latest != null) {
-								switch(_latest.ConfType) {
-									case LibconfigTypes.KeyValue:
-										((LibconfigKeyValue)_latest).Value = new LibconfigString(_word, Line);
+								switch(_latest.ParserType) {
+									case ParserTypes.KeyValue:
+										((ParserKeyValue)_latest).Value = new ParserString(_word, Line);
 										_latest.Length = Line - _latest.Line + 1;
 										_latest = _latest.Parent;
 										break;
-									case LibconfigTypes.List:
-									case LibconfigTypes.Aggregate:
-										((LibconfigArrayBase)_latest).AddElement(new LibconfigString(_word, Line));
+									case ParserTypes.List:
+									case ParserTypes.Aggregate:
+										((ParserArrayBase)_latest).AddElement(new ParserString(_word, Line));
 										break;
 									default:
 										// It will be handled by the ':' parsing.
@@ -408,14 +420,14 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 			}
 		}
 
-		public void Write(string key, string line) {
+		public void Write2(string key, string line) {
 			if (!_list) {
-				LibconfigKeyValue conf = _writeKeyValues.FirstOrDefault(p => p.Key == key);
+				ParserKeyValue conf = _writeKeyValues.FirstOrDefault(p => p.Key == key);
 
 				if (conf == null) {
 					// Add a new one!
-					_writeKeyValues.Add(new LibconfigKeyValue(key, Int32.MaxValue) {
-						Value = new LibconfigString(line, Int32.MaxValue),
+					_writeKeyValues.Add(new ParserKeyValue(key, Int32.MaxValue) {
+						Value = new ParserString(line, Int32.MaxValue),
 						Added = true,
 						Length = 1
 					});
@@ -423,20 +435,29 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 					return;
 				}
 
+				// Erase what's there first
+				ParserArray array = (ParserArray)conf.Value;
+
+				if (array != null) {
+					for (int i = 0; i < array.Length; i++) {
+						_allLines[i + array.Line - 1] = null;
+					}
+				}
+
 				conf.Modified = true;
-				conf.Value = new LibconfigString(line, conf.Value.Line);
+				conf.Value = new ParserString(line, conf.Value.Line);
 			}
 			else {
-				LibconfigArray conf = _writeArrays.FirstOrDefault(p => p[_idKey] == key);
+				ParserArray conf = _writeArrays.FirstOrDefault(p => p[_idKey] == key);
 
 				if (conf == null) {
-					_writeArrays.Add(new LibconfigArray(Int32.MaxValue) {
-						Objects = new List<LibconfigObject> {
-							new LibconfigKeyValue(_idKey, Int32.MaxValue) {
-								Value = new LibconfigString(key, Int32.MaxValue),
+					_writeArrays.Add(new ParserArray(Int32.MaxValue) {
+						Objects = new List<ParserObject> {
+							new ParserKeyValue(_idKey, Int32.MaxValue) {
+								Value = new ParserString(key, Int32.MaxValue),
 							},
-							new LibconfigKeyValue("Content__", Int32.MaxValue) {
-								Value = new LibconfigString(line, Int32.MaxValue),
+							new ParserKeyValue("Content__", Int32.MaxValue) {
+								Value = new ParserString(line, Int32.MaxValue),
 							}
 						},
 						Added = true,
@@ -447,12 +468,62 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 				}
 
 				conf.Modified = true;
-				conf.Objects = new List<LibconfigObject> {
-					new LibconfigKeyValue(_idKey, Int32.MaxValue) {
-						Value = new LibconfigString(key, Int32.MaxValue),
+				conf.Objects = new List<ParserObject> {
+					new ParserKeyValue(_idKey, Int32.MaxValue) {
+						Value = new ParserString(key, Int32.MaxValue),
 					},
-					new LibconfigKeyValue("Content__", Int32.MaxValue) {
-						Value = new LibconfigString(line, Int32.MaxValue),
+					new ParserKeyValue("Content__", Int32.MaxValue) {
+						Value = new ParserString(line, Int32.MaxValue),
+					}
+				};
+			}
+		}
+
+		public void Write(string key, string line) {
+			if (!_list) {
+				ParserKeyValue conf = _writeKeyValues.FirstOrDefault(p => p.Key == key);
+
+				if (conf == null) {
+					// Add a new one!
+					_writeKeyValues.Add(new ParserKeyValue(key, Int32.MaxValue) {
+						Value = new ParserString(line, Int32.MaxValue),
+						Added = true,
+						Length = 1
+					});
+
+					return;
+				}
+
+				conf.Modified = true;
+				conf.Value = new ParserString(line, conf.Value.Line);
+			}
+			else {
+				ParserArray conf = _writeArrays.FirstOrDefault(p => p[_idKey] == key);
+
+				if (conf == null) {
+					_writeArrays.Add(new ParserArray(Int32.MaxValue) {
+						Objects = new List<ParserObject> {
+							new ParserKeyValue(_idKey, Int32.MaxValue) {
+								Value = new ParserString(key, Int32.MaxValue),
+							},
+							new ParserKeyValue("Content__", Int32.MaxValue) {
+								Value = new ParserString(line, Int32.MaxValue),
+							}
+						},
+						Added = true,
+						Length = 1
+					});
+
+					return;
+				}
+
+				conf.Modified = true;
+				conf.Objects = new List<ParserObject> {
+					new ParserKeyValue(_idKey, Int32.MaxValue) {
+						Value = new ParserString(key, Int32.MaxValue),
+					},
+					new ParserKeyValue("Content__", Int32.MaxValue) {
+						Value = new ParserString(line, Int32.MaxValue),
 					}
 				};
 			}
@@ -483,7 +554,7 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 			var sKey = key.ToString();
 
 			if (!_list) {
-				LibconfigKeyValue conf = _writeKeyValues.FirstOrDefault(p => p.Key == sKey);
+				ParserKeyValue conf = _writeKeyValues.FirstOrDefault(p => p.Key == sKey);
 
 				if (conf != null) {
 					for (int i = 0; i < conf.Length; i++) {
@@ -492,7 +563,7 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 				}
 			}
 			else {
-				LibconfigArray conf = _writeArrays.FirstOrDefault(p => p[_idKey] == sKey);
+				ParserArray conf = _writeArrays.FirstOrDefault(p => p[_idKey] == sKey);
 
 				if (conf != null) {
 					for (int i = 0; i < conf.Length; i++) {
@@ -521,9 +592,21 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 					}
 
 					if (confElement.Modified) {
-						for (int i = 0; i < confElement.Length; i++) {
-							_allLines[i + confElement.Line - 1] = null;
-						}
+						//var keyValue = confElement as LibconfigKeyValue;
+						//
+						//if (keyValue != null && keyValue.Value is LibconfigArray && confElement.Length == 0) {
+						//	// Clear the array instead
+						//	var array = (LibconfigArray)keyValue.Value;
+						//
+						//	for (int i = 0; i < array.Length; i++) {
+						//		_allLines[i + array.Line - 1] = null;
+						//	}
+						//}
+						//else {
+							for (int i = 0; i < confElement.Length; i++) {
+								_allLines[i + confElement.Line - 1] = null;
+							}
+						//}
 
 						_allLines[confElement.Line - 1] = string.Concat("\t", confElement.Key, ": ", confElement.Value);
 					}
@@ -553,18 +636,18 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 					builder.AppendLine(line);
 			}
 
-			FtpHelper.WriteAllText(path, builder.ToString());
+			IOHelper.WriteAllText(path, builder.ToString());
 		}
 
-		private int _getInsertIndex(LibconfigArray confElement) {
+		private int _getInsertIndex(ParserArray confElement) {
 			if (_writeArrays.Count == 0) {
-				return ((LibconfigKeyValue)Output).Value.Line + ((LibconfigKeyValue)Output).Value.Length - 1;
+				return ((ParserKeyValue)Output).Value.Line + ((ParserKeyValue)Output).Value.Length - 1;
 			}
 
 			var last = _writeArrays.LastOrDefault(p => !p.Added);
 
 			if (last == null) {
-				return ((LibconfigKeyValue)Output).Value.Line + ((LibconfigKeyValue)Output).Value.Length - 1;
+				return ((ParserKeyValue)Output).Value.Line + ((ParserKeyValue)Output).Value.Length - 1;
 			}
 
 			int lineIndex = last.Line + last.Length;

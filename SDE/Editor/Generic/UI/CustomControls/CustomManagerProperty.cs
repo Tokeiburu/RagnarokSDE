@@ -20,7 +20,7 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 	/// </summary>
 	/// <typeparam name="TKey">The type of the key.</typeparam>
 	/// <typeparam name="TValue">The type of the value.</typeparam>
-	public class CustomManagerProperty<TKey, TValue> : ICustomControl<TKey, TValue> where TValue : Tuple {
+	public class CustomManagerProperty<TKey, TValue> : ICustomControl<TKey, TValue> where TValue : Database.Tuple {
 		private readonly DbAttribute _attribute;
 		private readonly string _ext;
 		private readonly string _grfPath;

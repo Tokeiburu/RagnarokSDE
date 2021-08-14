@@ -19,9 +19,10 @@ namespace SDE.View.Dialogs {
 	/// </summary>
 	public partial class TradeEditDialog : TkWindow, IInputWindow {
 		private readonly List<CheckBox> _boxes = new List<CheckBox>();
-		private int _override;
+		private readonly List<RadioButton> _radios = new List<RadioButton>();
 		private int _flag;
 		private int _eventId;
+		private bool _rbEvents;
 
 		public TradeEditDialog(ReadableTuple<int> tuple) : base("Trade edit", "cde.ico", SizeToContent.Height, ResizeMode.CanResize) {
 			InitializeComponent();
@@ -38,7 +39,6 @@ namespace SDE.View.Dialogs {
 				"Item can't be auctioned"
 			}, this);
 
-			_override = tuple.GetIntNoThrow(ServerItemAttributes.TradeOverride);
 			_flag = tuple.GetIntNoThrow(ServerItemAttributes.TradeFlag);
 
 			_cbUpper1.Tag = 1 << 0;
@@ -51,6 +51,12 @@ namespace SDE.View.Dialogs {
 			_cbUpper8.Tag = 1 << 7;
 			_cbUpper9.Tag = 1 << 8;
 
+			_rbMet1.Tag = 467;
+			_rbMet2.Tag = 475;
+			_rbMet3.Tag = 483;
+			_rbMet4.Tag = 491;
+			_rbMet5.Tag = 507;
+
 			_boxes.Add(_cbUpper1);
 			_boxes.Add(_cbUpper2);
 			_boxes.Add(_cbUpper3);
@@ -61,19 +67,23 @@ namespace SDE.View.Dialogs {
 			_boxes.Add(_cbUpper8);
 			_boxes.Add(_cbUpper9);
 
-			_tbOverride.Text = tuple.GetIntNoThrow(ServerItemAttributes.TradeOverride).ToString(CultureInfo.InvariantCulture);
+			_radios.Add(_rbMet1);
+			_radios.Add(_rbMet2);
+			_radios.Add(_rbMet3);
+			_radios.Add(_rbMet4);
+			_radios.Add(_rbMet5);
+
 			_eventId = 0;
+			
 			_boxes.ForEach(_addEvents);
+			_radios.ForEach(_addEvents);
 
-			_tbOverride.TextChanged += delegate {
-				_update();
-			};
-
+			_rbEvents = true;
 			WindowStartupLocation = WindowStartupLocation.CenterOwner;
 		}
 
 		public string Text {
-			get { return _override + ":" + _flag; }
+			get { return _flag.ToString(CultureInfo.InvariantCulture); }
 		}
 
 		public Grid Footer { get { return _footerGrid; } }
@@ -95,6 +105,34 @@ namespace SDE.View.Dialogs {
 			_eventId++;
 		}
 
+		private void _addEvents(RadioButton rb) {
+			rb.Checked += delegate {
+				if (!_rbEvents)
+					return;
+
+				_rbEvents = false;
+				
+				_radios.ForEach(delegate(RadioButton p) {
+					if (p != rb)
+						p.IsChecked = false;
+				});
+
+				foreach (var cb in _boxes) {
+					if (((int)cb.Tag & (int)rb.Tag) == (int)cb.Tag) {
+						cb.IsChecked = true;
+					}
+					else {
+						cb.IsChecked = false;
+					}
+				}
+
+				_rbEvents = true;
+			};
+
+			if ((int)rb.Tag == _flag)
+				rb.IsChecked = true;
+		}
+
 		private void _update() {
 			try {
 				int flag = 0;
@@ -104,9 +142,14 @@ namespace SDE.View.Dialogs {
 						flag += (int) box.Tag;
 					}
 				}
-
-				_override = FormatConverters.IntOrHexConverter(_tbOverride.Text);
+				
 				_flag = flag;
+
+				foreach (var rb in _radios) {
+					if ((int)rb.Tag == _flag)
+						rb.IsChecked = true;
+				}
+
 				OnValueChanged();
 			}
 			catch (Exception err) {

@@ -23,11 +23,11 @@ namespace SDE.View.Dialogs {
 	/// Interaction logic for ScriptEditDialog.xaml
 	/// </summary>
 	public partial class CopyToDialog : TkWindow {
-		private List<Tuple> _tuples;
+		private List<Database.Tuple> _tuples;
 		private readonly BaseDb _sourceDb;
 		private readonly BaseDb _destDb;
 
-		public CopyToDialog(GDbTab tab, List<Tuple> tuples, BaseDb currentDb, BaseDb destDb)
+		public CopyToDialog(GDbTab tab, List<Database.Tuple> tuples, BaseDb currentDb, BaseDb destDb)
 			: base("Copy to advanced...", "imconvert.png", SizeToContent.WidthAndHeight, ResizeMode.NoResize) {
 			_tab = tab;
 			_tuples = tuples;
@@ -170,7 +170,7 @@ namespace SDE.View.Dialogs {
 
 		private void _autoField<TKey>(
 			ref Regex regex, Func<bool> cond, Func<string> input, Func<string> output,
-			Tuple item, AbstractDb<TKey> db, TKey newKey, int i, DbAttribute attribute) {
+			Database.Tuple item, AbstractDb<TKey> db, TKey newKey, int i, DbAttribute attribute) {
 			if (cond()) {
 				if (regex == null) {
 					regex = new Regex(input(), RegexOptions.RightToLeft);

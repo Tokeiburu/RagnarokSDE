@@ -5,11 +5,13 @@ using Database;
 using ErrorManager;
 using GRF.IO;
 using SDE.ApplicationConfiguration;
+using SDE.Core;
 using SDE.Editor.Engines;
 using SDE.Editor.Engines.BackupsEngine;
 using SDE.Editor.Engines.Parsers;
 using SDE.Editor.Generic.Lists;
 using SDE.Editor.Generic.Parsers.Generic;
+using SDE.View;
 using Utilities.Extension;
 
 namespace SDE.Editor.Generic.Core {
@@ -151,6 +153,12 @@ namespace SDE.Editor.Generic.Core {
 			return true;
 		}
 
+		public bool ReportIdException(FileParserException fpe, object item) {
+			DbIOErrorHandler.Handle(fpe, fpe.Reason, (item ?? "#").ToString(), fpe.Line);
+			DbDebugHelper.OnExceptionThrown(DbSource, fpe.File, _bdb);
+			return true;
+		}
+
 		public bool ReportException(string item) {
 			DbIOErrorHandler.Handle(StackTraceException.GetStrackTraceException(), item);
 			DbDebugHelper.OnExceptionThrown(DbSource, FilePath, _bdb);
@@ -242,6 +250,10 @@ namespace SDE.Editor.Generic.Core {
 					FileType = FileType.Txt;
 				}
 
+				if ((DbSource.SupportedFileType & FileType.Yaml) == FileType.Yaml && logicalPath.IsExtension(".yml")) {
+					FileType = FileType.Yaml;
+				}
+
 				if ((DbSource.SupportedFileType & FileType.Conf) == FileType.Conf) {
 					if (serverType == ServerType.Hercules) {
 						FileType = FileType.Conf;
@@ -250,6 +262,9 @@ namespace SDE.Editor.Generic.Core {
 						if (DbSource.AlternativeName != null && !DbSource.AlternativeName.StartsWith("import\\")) {
 							filename = DbSource.AlternativeName ?? filename;
 						}
+					}
+					else if (serverType == ServerType.RAthena && SdeEditor.Instance.ProjectDatabase.IsNova && logicalPath.IsExtension(".conf")) {
+						FileType = FileType.Conf;
 					}
 					else if (FileType == FileType.Detect && serverType == ServerType.RAthena) {
 						FileType = FileType.Conf;
@@ -272,12 +287,28 @@ namespace SDE.Editor.Generic.Core {
 				}
 			}
 
+			if (DbSource == ServerDbs.Cheevo || DbSource == ServerDbs.Cheevo2) {
+				if (DbPathLocator.GetServerType() == ServerType.RAthena && serverType == ServerType.RAthena) {
+					FileType = logicalPath.IsExtension(".conf") ? FileType.Conf : logicalPath.IsExtension(".yml") ? FileType.Yaml : FileType;
+				}
+			}
+
+			if (DbSource == ServerDbs.Pet || DbSource == ServerDbs.Pet2) {
+				if (DbPathLocator.GetServerType() == ServerType.RAthena && serverType == ServerType.RAthena) {
+					FileType = logicalPath.IsExtension(".yml") ? FileType.Yaml : FileType.Txt;
+				}
+			}
+
 			if ((DbSource.SupportedFileType & FileType) != FileType) {
 				DbDebugHelper.OnWriteStatusUpdate(DbSource, FilePath, _db, "FileType not supported.");
 				return false;
 			}
 
 			string ext = "." + FileType.ToString().ToLower();
+
+			if (FileType == Core.FileType.Yaml) {
+				ext = ".yml";
+			}
 
 			IsRenewal = false;
 
@@ -327,7 +358,7 @@ namespace SDE.Editor.Generic.Core {
 				return false;
 			}
 
-			if (FtpHelper.IsSystemFile(FilePath))
+			if (IOHelper.IsSystemFile(FilePath))
 				GrfPath.CreateDirectoryFromFile(FilePath);
 
 			BackupEngine.Instance.Backup(logicalPath);

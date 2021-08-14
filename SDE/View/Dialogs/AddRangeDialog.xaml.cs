@@ -12,13 +12,14 @@ using TokeiLibrary;
 using TokeiLibrary.WPF.Styles;
 using TokeiLibrary.WPF.Styles.ListView;
 using Utilities;
+using Tuple = Database.Tuple;
 
 namespace SDE.View.Dialogs {
 	/// <summary>
 	/// Interaction logic for ScriptEditDialog.xaml
 	/// </summary>
 	public partial class AddRangeDialog : TkWindow {
-		private Tuple _based;
+		private Database.Tuple _based;
 		private readonly GDbTab _tab;
 
 		public AddRangeDialog(SdeEditor editor)

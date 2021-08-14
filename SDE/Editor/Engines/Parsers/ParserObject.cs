@@ -3,25 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SDE.Editor.Engines.Parsers.Libconfig {
-	public class LibconfigObject : IEnumerable<LibconfigObject> {
-		public LibconfigTypes ConfType { get; private set; }
-		public LibconfigObject Parent { get; set; }
+namespace SDE.Editor.Engines.Parsers {
+	public class ParserObject : IEnumerable<ParserObject> {
+		public ParserTypes ParserType { get; private set; }
+		public ParserObject Parent { get; set; }
 		public List<string> Lines;
 		public int Line { get; private set; }
 		public int Length { get; set; }
+		public int Indent { get; set; }
+		public int ChildrenIndent { get; set; }
 
 		public bool Added { get; set; }
 		public bool Modified { get; set; }
 
 		public string ObjectValue {
 			get {
-				var confString = this as LibconfigString;
+				var confString = this as ParserString;
 
 				if (confString != null)
 					return confString.Value;
 
-				var confAggregate = this as LibconfigAggregate;
+				var confAggregate = this as ParserAggregate;
 
 				if (confAggregate != null) {
 					StringBuilder builder = new StringBuilder();
@@ -38,7 +40,7 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 					return builder.ToString();
 				}
 
-				var confKeyValue = this as LibconfigKeyValue;
+				var confKeyValue = this as ParserKeyValue;
 
 				if (confKeyValue != null)
 					return confKeyValue.Value;
@@ -47,13 +49,13 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 			}
 		}
 
-		protected LibconfigObject(LibconfigTypes confType, int line) {
-			ConfType = confType;
+		protected ParserObject(ParserTypes confType, int line) {
+			ParserType = confType;
 			Line = line;
 			//Length = 1;
 		}
 
-		public LibconfigObject this[string key] {
+		public ParserObject this[string key] {
 			get {
 				if (key.Contains(".")) {
 					string[] keys = key.Split(new char[] { '.' }, 2);
@@ -66,14 +68,14 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 					return obj[keys[1]];
 				}
 
-				var keyValue = this as LibconfigKeyValue;
+				var keyValue = this as ParserKeyValue;
 
 				if (keyValue != null && keyValue.Key == key)
 					return keyValue.Value;
 
-				var arrayBase = this as LibconfigArrayBase;
+				var arrayBase = this as ParserArrayBase;
 
-				if (arrayBase != null && (keyValue = arrayBase.Objects.OfType<LibconfigKeyValue>().FirstOrDefault(p => p.Key == key)) != null) {
+				if (arrayBase != null && (keyValue = arrayBase.Objects.OfType<ParserKeyValue>().FirstOrDefault(p => p.Key == key)) != null) {
 					return keyValue.Value;
 				}
 
@@ -85,29 +87,29 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 			return this as T;
 		}
 
-		public IEnumerator<LibconfigObject> GetEnumerator() {
-			var arrayBase = this as LibconfigArrayBase;
+		public IEnumerator<ParserObject> GetEnumerator() {
+			var arrayBase = this as ParserArrayBase;
 
 			if (arrayBase != null)
 				return arrayBase.Objects.GetEnumerator();
 
-			return new List<LibconfigObject>().GetEnumerator();
+			return new List<ParserObject>().GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator() {
 			return GetEnumerator();
 		}
 
-		public static implicit operator string(LibconfigObject item) {
+		public static implicit operator string(ParserObject item) {
 			return item.ObjectValue;
 		}
 	}
 
-	public class LibconfigString : LibconfigObject {
+	public class ParserString : ParserObject {
 		public string Value { get; set; }
 
-		public LibconfigString(string value, int line)
-			: base(LibconfigTypes.String, line) {
+		public ParserString(string value, int line)
+			: base(ParserTypes.String, line) {
 			Value = value;
 		}
 
@@ -116,20 +118,20 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 		}
 	}
 
-	public class LibconfigArrayBase : LibconfigObject {
-		public List<LibconfigObject> Objects = new List<LibconfigObject>();
+	public class ParserArrayBase : ParserObject {
+		public List<ParserObject> Objects = new List<ParserObject>();
 
-		protected LibconfigArrayBase(LibconfigTypes confType, int line) : base(confType, line) {
+		protected ParserArrayBase(ParserTypes confType, int line) : base(confType, line) {
 		}
 
-		public void AddElement(LibconfigObject obj) {
+		public void AddElement(ParserObject obj) {
 			Objects.Add(obj);
 		}
 	}
 
-	public class LibconfigArray : LibconfigArrayBase {
-		public LibconfigArray(int line)
-			: base(LibconfigTypes.Array, line) {
+	public class ParserArray : ParserArrayBase {
+		public ParserArray(int line)
+			: base(ParserTypes.Array, line) {
 		}
 
 		public override string ToString() {
@@ -137,9 +139,9 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 		}
 	}
 
-	public class LibconfigList : LibconfigArrayBase {
-		public LibconfigList(int line)
-			: base(LibconfigTypes.List, line) {
+	public class ParserList : ParserArrayBase {
+		public ParserList(int line)
+			: base(ParserTypes.List, line) {
 		}
 
 		public override string ToString() {
@@ -147,9 +149,9 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 		}
 	}
 
-	public class LibconfigAggregate : LibconfigArrayBase {
-		public LibconfigAggregate(int line)
-			: base(LibconfigTypes.Aggregate, line) {
+	public class ParserAggregate : ParserArrayBase {
+		public ParserAggregate(int line)
+			: base(ParserTypes.Aggregate, line) {
 		}
 
 		public override string ToString() {
@@ -157,12 +159,12 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 		}
 	}
 
-	public class LibconfigKeyValue : LibconfigObject {
+	public class ParserKeyValue : ParserObject {
 		public string Key { get; private set; }
-		public LibconfigObject Value { get; set; }
+		public ParserObject Value { get; set; }
 
-		public LibconfigKeyValue(string key, int line)
-			: base(LibconfigTypes.KeyValue, line) {
+		public ParserKeyValue(string key, int line)
+			: base(ParserTypes.KeyValue, line) {
 			Key = key;
 		}
 
@@ -171,7 +173,7 @@ namespace SDE.Editor.Engines.Parsers.Libconfig {
 		}
 	}
 
-	public enum LibconfigTypes {
+	public enum ParserTypes {
 		List,
 		KeyValue,
 		String,

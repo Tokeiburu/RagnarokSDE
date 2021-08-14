@@ -24,7 +24,7 @@ using Utilities.Services;
 
 namespace SDE.Editor.Generic.Parsers {
 	public sealed class DbIOClientItems {
-		private delegate bool RequiredCondition<T>(T item) where T : Tuple;
+		private delegate bool RequiredCondition<T>(T item) where T : Database.Tuple;
 
 		public static void Loader(DbDebugItem<int> debug, AbstractDb<int> db) {
 			if (ProjectConfiguration.UseLuaFiles) {
@@ -178,7 +178,19 @@ namespace SDE.Editor.Generic.Parsers {
 
 			if (SdeAppConfiguration.DbWriterItemInfoClassNum) {
 				builder.Append("\t\tClassNum = ");
-				builder.AppendLine(_toAnsiEscaped((String.IsNullOrEmpty(tuple.GetValue<string>(ClientItemAttributes.ClassNumber.Index)) ? "0" : tuple.GetValue<string>(ClientItemAttributes.ClassNumber.Index))));
+
+				if (SdeAppConfiguration.DbWriterItemInfoIsCostume) {
+					builder.Append(_toAnsiEscaped((String.IsNullOrEmpty(tuple.GetValue<string>(ClientItemAttributes.ClassNumber.Index)) ? "0" : tuple.GetValue<string>(ClientItemAttributes.ClassNumber.Index))));
+					builder.AppendLine(",");
+				}
+				else {
+					builder.AppendLine(_toAnsiEscaped((String.IsNullOrEmpty(tuple.GetValue<string>(ClientItemAttributes.ClassNumber.Index)) ? "0" : tuple.GetValue<string>(ClientItemAttributes.ClassNumber.Index))));
+				}
+			}
+
+			if (SdeAppConfiguration.DbWriterItemInfoIsCostume) {
+				builder.Append("\t\tcostume = ");
+				builder.AppendLine(tuple.GetValue<bool>(ClientItemAttributes.IsCostume.Index).ToString().ToLowerInvariant());
 			}
 
 			builder.AppendLine(end ? "\t}" : "\t},");
@@ -276,6 +288,7 @@ namespace SDE.Editor.Generic.Parsers {
 
 			Debug.Ignore(() => DbDebugHelper.OnWriteStatusUpdate(ServerDbs.CItems, gdb.MetaGrf.FindTkPath(filename), null, "Saving client table (" + (attribute == null ? "" : attribute.GetQueryName()) + ")."));
 		}
+
 
 		private static void _saveItemDataToLua(SdeDatabase gdb, string filename, string output) {
 			if (output == null && gdb.MetaGrf.GetData(filename) == null) {
@@ -519,6 +532,9 @@ namespace SDE.Editor.Generic.Parsers {
 							break;
 						case "ClassNum":
 							table.SetRaw(itemIndex, ClientItemAttributes.ClassNumber, ((LuaValue)itemProperty.Value).Value);
+							break;
+						case "costume":
+							table.SetRaw(itemIndex, ClientItemAttributes.IsCostume, Boolean.Parse(((LuaValue)itemProperty.Value).Value));
 							break;
 						case "unidentifiedDescriptionName":
 							itemList = itemProperty.Value as LuaList;

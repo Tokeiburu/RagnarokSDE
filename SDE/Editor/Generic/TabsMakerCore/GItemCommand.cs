@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Input;
 using Database;
 using Database.Commands;
+using TokeiLibrary.Shortcuts;
 
 namespace SDE.Editor.Generic.TabsMakerCore {
 	/// <summary>
@@ -11,7 +12,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 	/// </summary>
 	/// <typeparam name="TKey">The type of the key.</typeparam>
 	/// <typeparam name="TValue">The type of the value.</typeparam>
-	public class GItemCommand<TKey, TValue> where TValue : Tuple {
+	public class GItemCommand<TKey, TValue> where TValue : Database.Tuple {
 		#region Delegates
 		public delegate void GenericCommandDelegate(List<TValue> toList);
 		#endregion
@@ -32,7 +33,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 			set { _addToCommandsStack = value; }
 		}
 
-		public KeyGesture Shortcut { get; set; }
+		public Shortcut Shortcut { get; set; }
 
 		public Visibility Visibility {
 			get { return _visibility; }

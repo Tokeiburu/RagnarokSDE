@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -40,9 +41,11 @@ namespace SDE.Core.Avalon {
 			foldingUpdateTimer.Interval = TimeSpan.FromSeconds(2);
 			foldingUpdateTimer.Start();
 
+			_textEditor.Foreground = Application.Current.Resources["TextForeground"] as Brush;
+			_textEditor.Background = Application.Current.Resources["AvalonEditorBackground"] as Brush;
 			_textEditor.Dispatch(p => p.TextArea.SelectionCornerRadius = 0);
 			_textEditor.Dispatch(p => p.TextArea.SelectionBorder = new Pen(_textEditor.TextArea.SelectionBrush, 0));
-			_textEditor.TextArea.SelectionBrush = new SolidColorBrush(Color.FromArgb(160, 172, 213, 254));
+			_textEditor.TextArea.SelectionBrush = Application.Current.Resources["AvalonEditorSelectionBrush"] as Brush;
 			_textEditor.TextArea.SelectionBorder = new Pen(_textEditor.TextArea.SelectionBrush, 1);
 			_textEditor.TextArea.SelectionForeground = new SolidColorBrush(Colors.Black);
 			_textEditor.KeyDown += new KeyEventHandler(_textEditor_KeyDown);
@@ -52,7 +55,7 @@ namespace SDE.Core.Avalon {
 			FontFamily oldFamily = _textEditor.FontFamily;
 			double oldSize = _textEditor.FontSize;
 
-			_renderer = new SearchPanel.SearchResultBackgroundRenderer { MarkerBrush = new SolidColorBrush(Color.FromArgb(255, 143, 255, 143)) };
+			_renderer = new SearchPanel.SearchResultBackgroundRenderer { MarkerBrush = Application.Current.Resources["AvalonScriptRenderer"] as Brush };
 			_textEditor.TextArea.Caret.PositionChanged += _caret_PositionChanged;
 
 			try {

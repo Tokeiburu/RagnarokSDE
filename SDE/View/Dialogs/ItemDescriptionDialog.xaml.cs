@@ -384,7 +384,7 @@ namespace SDE.View.Dialogs {
 			_showPreview();
 		}
 		private void _showPreview() {
-			WpfUtilities.UpdateRtb(_rtbItemDescription, _generateDescription());
+			WpfUtilities.UpdateRtb(_rtbItemDescription, _generateDescription(), true);
 		}
 		private void _loadComboBoxes() {
 			_cbType.ItemsSource = ItemTypeStructure.AllTypes;

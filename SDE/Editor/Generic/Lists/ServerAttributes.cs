@@ -2,6 +2,7 @@
 using Database;
 using SDE.Editor.Generic.Core;
 using SDE.Editor.Generic.UI.FormatConverters;
+using SDE.View.ObjectView;
 
 namespace SDE.Editor.Generic.Lists {
 	public sealed class ServerItemAttributes : DbAttribute {
@@ -19,9 +20,9 @@ namespace SDE.Editor.Generic.Lists {
 		public static readonly DbAttribute Range = new ServerItemAttributes(new DbAttribute("Range", typeof(string), "")) { Description = "Sets the range (number of cells) of the weapon." };
 		public static readonly DbAttribute NumberOfSlots = new ServerItemAttributes(new DbAttribute("Slots", typeof(string), "", "Number of slots")) { Description = "Amount of slots the item possesses." };
 		public static readonly DbAttribute ApplicableJob = new ServerItemAttributes(new DbAttribute("Job", typeof(CustomJobProperty), "0xFFFFFFFF", "Applicable job")) { DataConverter = ValueConverters.GetNoHexJobSetHexJob, IsSearchable = false, Description = "Only the specified jobs will be able to use or wear this item." };
-		public static readonly DbAttribute Upper = new ServerItemAttributes(new DbAttribute("Upper", typeof(CustomUpperProperty), "63")) { DataConverter = ValueConverters.GetHexToIntSetInt, Description = "Restricts the usage of the item based for a specific class group." };
+		public static readonly DbAttribute Upper = new ServerItemAttributes(new DbAttribute("Upper", typeof(PreviewUpperFlagProperty<int>), "63")) { DataConverter = ValueConverters.GetHexToIntSetInt, Description = "Restricts the usage of the item based for a specific class group." };
 		public static readonly DbAttribute Gender = new ServerItemAttributes(new DbAttribute("Gender", typeof(GenderType), "2")) { DataConverter = ValueConverters.GetSetGenderString, IsSearchable = false, Description = "Restricts the usage of the item for a specific gender." };
-		public static readonly DbAttribute Location = new ServerItemAttributes(new DbAttribute("Loc", typeof(CustomLocationProperty), "", "Location")) { DataConverter = ValueConverters.GetHexToIntSetInt, Description = "Restricts the location of the item." };
+		public static readonly DbAttribute Location = new ServerItemAttributes(new DbAttribute("Loc", typeof(PreviewLocationDefinedFlagProperty<int, LocationType>), "", "Location")) { DataConverter = ValueConverters.GetHexToIntSetInt, Description = "Restricts the location of the item." };
 		public static readonly DbAttribute WeaponLevel = new ServerItemAttributes(new DbAttribute("WeaponLv", typeof(string), "", "Weapon level")) { Description = "Sets the weapon level." };
 		public static readonly DbAttribute EquipLevel = new ServerItemAttributes(new DbAttribute("EquipLv", typeof(string), "", "Equip level")) { Description = "Sets the minimum level required to equip this item." };
 		public static readonly DbAttribute Refineable = new ServerItemAttributes(new DbAttribute("Refine", typeof(bool), "", "Refineable")) { DataConverter = ValueConverters.GetBooleanSetRefinableString, Description = "Defines wheter or not the equipment can be refined (the value is ignored for other item types)." };
@@ -35,14 +36,39 @@ namespace SDE.Editor.Generic.Lists {
 		public static readonly DbAttribute ForceSerial = new ServerItemAttributes(new DbAttribute("ForceSerial", typeof(bool), "false", "Force unique ID")) { DataConverter = ValueConverters.GetBooleanSetTrueFalseString };
 		public static readonly DbAttribute Matk = new ServerItemAttributes(new DbAttribute("Matk", typeof(string), "", "Matk"));
 		public static readonly DbAttribute Delay = new ServerItemAttributes(new DbAttribute("Delay", typeof(string), "", "Delay")) { Description = "Delay after using the item (in milliseconds)." };
+		public static readonly DbAttribute DelayStatus = new ServerItemAttributes(new DbAttribute("Status", typeof(string), "", "Status")) { Description = "Status Change used to track delay. (Default: None)" };
 		public static readonly DbAttribute Stack = new ServerItemAttributes(new DbAttribute("Stack", typeof(string), "[]", "Stack")) { DataConverter = ValueConverters.GetScriptNoBracketsSetScriptWithBracketsSqure, Description = "[amount, type]\r\namount: The maximum amount of items that can be stacked.\r\ntype (mask): \r\n1 = Character inventory\r\n2 = Character cart\r\n4 = Account storage\r\n8 = Guild storage" };
 		public static readonly DbAttribute Sprite = new ServerItemAttributes(new DbAttribute("Sprite", typeof(SpriteRedirect), "", "Sprite ID")) { Description = "Redirects the item's sprite (client side) for this one instead.", Visibility = VisibleState.Hidden | VisibleState.ForceShow };
 
-		public static readonly DbAttribute TradeFlag = new ServerItemAttributes(new DbAttribute("TradeFlag", typeof(TradeProperty), "0", "Trade")) { Description = "Trading restrictions (can't be dropped, traded, etc)." };
-		public static readonly DbAttribute TradeOverride = new ServerItemAttributes(new DbAttribute("TradeOverride", typeof(int), "100", "Trade override"));
-		public static readonly DbAttribute NoUseFlag = new ServerItemAttributes(new DbAttribute("NoUseFlag", typeof(NouseProperty), "0", "No use")) { Description = "Conditions to make the item not usable." };
-		public static readonly DbAttribute NoUseOverride = new ServerItemAttributes(new DbAttribute("NoUseOverride", typeof(int), "100", "No use override"));
+		public static readonly DbAttribute TradeFlag = new ServerItemAttributes(new DbAttribute("TradeFlag", typeof(PreviewTradeDefinedFlagProperty<int, TradeFlag>), "0", "Trade")) { Description = "Trading restrictions (can't be dropped, traded, etc)." };
+		public static readonly DbAttribute TradeOverride = new ServerItemAttributes(new DbAttribute("TradeOverride", typeof(int), "100", "Override")) { Description = "Group level to override these trade conditions." };
+		public static readonly DbAttribute NoUseFlag = new ServerItemAttributes(new DbAttribute("NoUseFlag", typeof(PreviewNoUseDefinedFlagProperty<int>), "0", "No use")) { Description = "Conditions to make the item not usable." };
+		public static readonly DbAttribute NoUseOverride = new ServerItemAttributes(new DbAttribute("NoUseOverride", typeof(int), "100", "Override")) { Description = "Group level to override these trade conditions." };
 
+		public static readonly DbAttribute SubType = new ServerItemAttributes(new DbAttribute("SubType", typeof(SubTypeProperty<int>), "0", "Sub type")) { DataConverter = ValueConverters.GetHexToIntSetInt };
+		public static readonly DbAttribute EquipLevelMin = new ServerItemAttributes(new DbAttribute("EquipLevelMin", typeof(CustomItemMaxEquipProperty), "", "Min equip level")) { Description = "Sets the minimum level required to equip this item." };
+		public static readonly DbAttribute EquipLevelMax = new ServerItemAttributes(new DbAttribute("EquipLevelMax", typeof(string), "", "Max equip level")) { Description = "Sets the maximum level to equip this item." };
+		public static readonly DbAttribute AliasName = new ServerItemAttributes(new DbAttribute("AliasName", typeof(SelectTupleProperty<int>), "", "Alias name")) { AttachedObject = ServerDbs.Items };
+		public static readonly DbAttribute Flags = new ServerItemAttributes(new DbAttribute("Flags", typeof(PreviewGenericDefinedFlagProperty<int, ItemFlagType>), "0", "Flags")) { DataConverter = ValueConverters.GetHexToIntSetInt, Description = "The behavior of the skill's attack.\r\n(No damage, spash area, etc)." };
+		public static readonly DbAttribute StackAmount = new ServerItemAttributes(new DbAttribute("StackAmount", typeof(string), "", "Stack"));
+		public static readonly DbAttribute StackFlags = new ServerItemAttributes(new DbAttribute("StackFlags", typeof(PreviewGenericFlagProperty<int, ItemStackFlagType>), "", "S. flags")) { Description = "Stack restriction flags." };
+		public static readonly DbAttribute TempFlags = new ServerItemAttributes(new DbAttribute("StackFlags", typeof(string), "", "S. flags")) { };
+		public static readonly DbAttribute TempHideII = new ServerItemAttributes(new DbAttribute("StackFlags", typeof(string), "", "S. flags")) { };
+		public static readonly DbAttribute TempClientName = new ServerItemAttributes(new DbAttribute("StackFlags", typeof(AutoDisplayItemInfoNameProperty<int>), "", "ItemInfo name")) { };
+		public static readonly DbAttribute TempNoDrop = new ServerItemAttributes(new DbAttribute("StackFlags", typeof(string), "", "S. flags")) { };
+		public static readonly DbAttribute TempForceLog = new ServerItemAttributes(new DbAttribute("StackFlags", typeof(string), "", "S. flags")) { };
+		public static readonly DbAttribute TempMvpCategory = new ServerItemAttributes(new DbAttribute("StackFlags", typeof(string), "", "MVP tier")) { };
+		public static readonly DbAttribute TempExpectedWeight = new ServerItemAttributes(new DbAttribute("StackFlags", typeof(string), "", "Open weight")) { };
+		public static readonly DbAttribute TempShadowGear = new ServerItemAttributes(new DbAttribute("StackFlags", typeof(string), "", "S. flags")) { DataConverter = ValueConverters.GetBooleanSetTrueFalseString };
+		public static readonly DbAttribute MHItem = new ServerItemAttributes(new DbAttribute("StackFlags", typeof(string), "", "S. flags")) { DataConverter = ValueConverters.GetBooleanSetTrueFalseString };
+		public static readonly DbAttribute MHHuntItem = new ServerItemAttributes(new DbAttribute("StackFlags", typeof(string), "", "S. flags")) { DataConverter = ValueConverters.GetBooleanSetTrueFalseString };
+		public static readonly DbAttribute MHMaxUses = new ServerItemAttributes(new DbAttribute("StackFlags", typeof(string), "", "MH max uses")) { };
+		public static readonly DbAttribute MHResetUsesOnDeath = new ServerItemAttributes(new DbAttribute("StackFlags", typeof(string), "", "S. flags")) { DataConverter = ValueConverters.GetBooleanSetTrueFalseString };
+		public static readonly DbAttribute MHUseIncOnSuccess = new ServerItemAttributes(new DbAttribute("StackFlags", typeof(string), "", "S. flags")) { DataConverter = ValueConverters.GetBooleanSetTrueFalseString };
+		public static readonly DbAttribute CustomFlags = new ServerItemAttributes(new DbAttribute("CustomFlags", typeof(PreviewGenericDefinedFlagProperty<int, ItemCustomFlagType>), "0", "Custom flags")) { DataConverter = ValueConverters.GetHexToIntSetInt };
+		public static readonly DbAttribute MHFlags = new ServerItemAttributes(new DbAttribute("MHFlags", typeof(PreviewGenericDefinedFlagProperty<int, ItemMHFlagType>), "0", "MH flags")) { DataConverter = ValueConverters.GetHexToIntSetInt };
+		public static readonly DbAttribute DropEffect = new ServerItemAttributes(new DbAttribute("DropEffect", typeof(DropEffectType), "0", "Drop effect")) { DataConverter = ValueConverters.GetIntSetZeroStringType };
+		public static readonly DbAttribute TempWoEDelay = new ServerItemAttributes(new DbAttribute("TempWoEDelay", typeof(string), "", "WoE delay")) { };
 		//public static readonly DbAttribute NoUse = new ServerItemAttributes(new DbAttribute("NoUse", typeof(NouseProperty), "{\n}", "No use")) { DataConverter = ValueConverters.GetSetTypeNouse, Description = "Conditions to make the item not usable." };
 
 		static ServerItemAttributes() {
@@ -142,18 +168,18 @@ namespace SDE.Editor.Generic.Lists {
 		public static readonly DbAttribute Id = new ServerSkillAttributes(new PrimaryAttribute("Id", typeof(int), 0, "Skill ID"));
 		public static readonly DbAttribute Range = new ServerSkillAttributes(new DbAttribute("Range", typeof(LevelIntEditProperty<int>), "0")) { DataConverter = ValueConverters.GetIntSetZeroString, Description = "The skill range (number of cells)­­.\r\nCombo skills do not check for range when used, if range is < 5, the skill is considered melee-range." };
 		public static readonly DbAttribute HitMode = new ServerSkillAttributes(new DbAttribute("HitMode", typeof(HitType), "0", "Hit mode")) { DataConverter = ValueConverters.GetIntSetZeroString };
-		public static readonly DbAttribute Inf = new ServerSkillAttributes(new DbAttribute("Inf", typeof(CustomSkillTypeProperty), "0", "Type (inf)")) { DataConverter = ValueConverters.GetIntSetZeroString, Description = "The general behavior of the skill\r\n(passive, enemy, place, self, friend, trap)." };
+		public static readonly DbAttribute TargetType = new ServerSkillAttributes(new DbAttribute("TargetType", typeof(CustomSkillTypeProperty), "0", "Target type")) { DataConverter = ValueConverters.GetIntSetZeroString, Description = "The general behavior of the skill\r\n(passive, enemy, place, self, friend, trap)." };
 		public static readonly DbAttribute Element = new ServerSkillAttributes(new DbAttribute("Element", typeof(SkillElementType), "0", "Element")) { DataConverter = ValueConverters.GetIntSetZeroString, Description = "The skill's elemental property." };
-		public static readonly DbAttribute SkillDamage = new ServerSkillAttributes(new DbAttribute("SkillDamage", typeof(CustomSkillDamageProperty), "0", "Damage behavior")) { DataConverter = ValueConverters.GetHexToIntSetInt, Description = "The behavior of the skill's attack.\r\n(No damage, spash area, etc)." };
-		public static readonly DbAttribute SplashEffect = new ServerSkillAttributes(new DbAttribute("SplashEffect", typeof(LevelIntEditProperty<int>), "0", "Splash/effect range")) { DataConverter = ValueConverters.GetIntSetZeroString, Description = "The skill's splash or effect range (-1 for screen-wide)." };
+		public static readonly DbAttribute DamageFlags = new ServerSkillAttributes(new DbAttribute("SkillDamage", typeof(PreviewGenericDefinedFlagProperty<int, SkillDamageType>), "0", "Damage flags")) { DataConverter = ValueConverters.GetHexToIntSetInt, Description = "The behavior of the skill's attack.\r\n(No damage, spash area, etc)." };
+		public static readonly DbAttribute SplashArea = new ServerSkillAttributes(new DbAttribute("SplashEffect", typeof(LevelIntEditProperty<int>), "0", "Splash/effect range")) { DataConverter = ValueConverters.GetIntSetZeroString, Description = "The skill's splash or effect range (-1 for screen-wide)." };
 		public static readonly DbAttribute MaxLevel = new ServerSkillAttributes(new DbAttribute("MaxLevel", typeof(string), "0", "Max level")) { DataConverter = ValueConverters.GetIntSetZeroString, Description = "The skill's max level." };
-		public static readonly DbAttribute NumberOfHits = new ServerSkillAttributes(new DbAttribute("NumberOfHits", typeof(LevelIntEditProperty<int>), "0", "Number of hits")) { DataConverter = ValueConverters.GetIntSetZeroString, Description = "Number of hits (when positive, damage is increased by hits, negative values just show number of hits without increasing total damage)." };
+		public static readonly DbAttribute HitCount = new ServerSkillAttributes(new DbAttribute("NumberOfHits", typeof(LevelIntEditProperty<int>), "0", "Number of hits")) { DataConverter = ValueConverters.GetIntSetZeroString, Description = "Number of hits (when positive, damage is increased by hits, negative values just show number of hits without increasing total damage)." };
 		public static readonly DbAttribute CastInterrupt = new ServerSkillAttributes(new DbAttribute("CastInterrupt", typeof(bool), "yes", "Cast interruptable")) { DataConverter = ValueConverters.GetBooleanSetYesNoString, Description = "Defines wheter or not the skill can be interrupted." };
 		public static readonly DbAttribute DefReduc = new ServerSkillAttributes(new DbAttribute("DefReduc", typeof(LevelIntEditProperty<int>), "0", "Defense reduction")) { DataConverter = ValueConverters.GetIntSetZeroString, Description = "Defense reduction rate while casting." };
-		public static readonly DbAttribute Inf2 = new ServerSkillAttributes(new DbAttribute("Inf2", typeof(CustomSkillType2Property), "0", "Category (inf2)")) { DataConverter = ValueConverters.GetHexToIntSetInt, Description = "Sets special attributes to the skill (ex: quest skill, npc skill, trap, ignores land protected, etc)." };
-		public static readonly DbAttribute Maxcount = new ServerSkillAttributes(new DbAttribute("Maxcount", typeof(string), "0", "Max count")) { DataConverter = ValueConverters.GetIntSetZeroString, Description = "Max amount of skill instances to place on the ground when player_land_skill_limit/monster_land_skill_limit is enabled. For skills that attack using a path, this is the path length to be used." };
+		public static readonly DbAttribute Inf2 = new ServerSkillAttributes(new DbAttribute("Inf2", typeof(CustomSkillType2Property), "0", "Flags (inf2)")) { DataConverter = ValueConverters.GetHexToIntSetInt, Description = "Sets special attributes to the skill (ex: quest skill, npc skill, trap, ignores land protected, etc)." };
+		public static readonly DbAttribute ActiveInstance = new ServerSkillAttributes(new DbAttribute("Maxcount", typeof(LevelIntEditProperty<int>), "0", "Max active")) { DataConverter = ValueConverters.GetIntSetZeroString, Description = "Max amount of skill instances to place on the ground when player_land_skill_limit/monster_land_skill_limit is enabled. For skills that attack using a path, this is the path length to be used." };
 		public static readonly DbAttribute AttackType = new ServerSkillAttributes(new DbAttribute("AttackType", typeof(AttackTypeType), "none", "Attack type")) { DataConverter = ValueConverters.GetIntSetSkillAttackString };
-		public static readonly DbAttribute Blowcount = new ServerSkillAttributes(new DbAttribute("Blowcount", typeof(LevelIntEditProperty<int>), "0", "Blowcount")) { DataConverter = ValueConverters.GetIntSetZeroString, Description = "The amount of cells the skill's knockback will apply." };
+		public static readonly DbAttribute Knockback = new ServerSkillAttributes(new DbAttribute("Blowcount", typeof(LevelIntEditProperty<int>), "0", "Knockback")) { DataConverter = ValueConverters.GetIntSetZeroString, Description = "The amount of cells the skill's knockback will apply." };
 		public static readonly DbAttribute Inf3 = new ServerSkillAttributes(new DbAttribute("Inf3", typeof(CustomSkillType3Property), "0", "Renewal behavior")) { DataConverter = ValueConverters.GetHexToIntSetInt, IsSkippable = true };
 		public static readonly DbAttribute Name = new ServerSkillAttributes(new DbAttribute("Name", typeof(string), "", "Name")) { DataConverter = ValueConverters.StringTrimEmptyDefault };
 		public static readonly DbAttribute Desc = new ServerSkillAttributes(new DbAttribute("Description", typeof(string), "", "Description")) { IsDisplayAttribute = true };
@@ -165,8 +191,48 @@ namespace SDE.Editor.Generic.Lists {
 		public static readonly DbAttribute AfterCastWalkDelay = new ServerSkillAttributes(new DbAttribute("AfterCastWalkDelay", typeof(LevelEditProperty<int>), "0", "After cast\r\nwalk delay")) { DataConverter = ValueConverters.GetSetZeroString, Description = "The amount of time before the character can move again (in milliseconds)." };
 		public static readonly DbAttribute Duration1 = new ServerSkillAttributes(new DbAttribute("Duration1", typeof(LevelEditProperty<int>), "0")) { DataConverter = ValueConverters.GetSetZeroString, Description = "(usually) The duration of the skill on the player." };
 		public static readonly DbAttribute Duration2 = new ServerSkillAttributes(new DbAttribute("Duration2", typeof(LevelEditProperty<int>), "0")) { DataConverter = ValueConverters.GetSetZeroString, Description = "(usually) The duration of the skill on the target." };
-		public static readonly DbAttribute CoolDown = new ServerSkillAttributes(new DbAttribute("CoolDown", typeof(LevelEditProperty<int>), "0", "Cool down")) { DataConverter = ValueConverters.GetSetZeroString, Description = "The amount of time until the character can use this skill again (in milliseconds)." };
+		public static readonly DbAttribute Cooldown = new ServerSkillAttributes(new DbAttribute("Cooldown", typeof(LevelEditProperty<int>), "0", "Cooldown")) { DataConverter = ValueConverters.GetSetZeroString, Description = "The amount of time until the character can use this skill again (in milliseconds)." };
 		public static readonly DbAttribute FixedCastTime = new ServerSkillAttributes(new DbAttribute("FixedCastTime", typeof(LevelEditProperty<int>), "0", "Fixed casttime")) { DataConverter = ValueConverters.GetSetZeroString, Description = "Sets the fixed casttime (renewal only, in milliseconds).", Requirements = new DbRequirement { Renewal = RenewalType.Renewal } };
+
+		public static readonly DbAttribute CopyFlags = new ServerSkillAttributes(new DbAttribute("CopyFlags", typeof(PreviewGenericDefinedFlagProperty<int, SkillCopyType>), "0", "Copy flags")) { DataConverter = ValueConverters.GetHexToIntSetInt };
+		public static readonly DbAttribute CopyFlagsRemovedRequirement = new ServerSkillAttributes(new DbAttribute("CopyFlags", typeof(PreviewGenericDefinedFlagProperty<int, SkillCopyRemoveRequirementType>), "0", "Copy remove\r\nrequirement flags")) { DataConverter = ValueConverters.GetHexToIntSetInt };
+		public static readonly DbAttribute NoNearNPCRange = new ServerSkillAttributes(new DbAttribute("NoNearNPCRange", typeof(string), "", "No near NPC range")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute NoNearNPCType = new ServerSkillAttributes(new DbAttribute("NoNearNPCType", typeof(PreviewGenericFlagProperty<int, NoNearNpcType>), "", "No near NPC type")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute CastDefenseReduction = new ServerSkillAttributes(new DbAttribute("CastDefenseReduction", typeof(string), "", "No near NPC ")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute CastTimeFlags = new ServerSkillAttributes(new DbAttribute("CastTimeFlags", typeof(PreviewGenericDefinedFlagProperty<int, CastingFlags>), "0", "Cast time flags")) { DataConverter = ValueConverters.GetHexToIntSetInt };
+		public static readonly DbAttribute CastDelayFlags = new ServerSkillAttributes(new DbAttribute("CastDelayFlags", typeof(PreviewGenericDefinedFlagProperty<int, CastingFlags>), "0", "Cast delay flags")) { DataConverter = ValueConverters.GetHexToIntSetInt };
+
+		public static readonly DbAttribute RequireHpCost = new ServerSkillAttributes(new DbAttribute("HpCost", typeof(LevelIntEditProperty<int>), "0", "HP Cost")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute RequireMaxHpTrigger = new ServerSkillAttributes(new DbAttribute("MaxHpTrigger", typeof(string), "0", "Max HP Trigger")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute RequireSpCost = new ServerSkillAttributes(new DbAttribute("SpCost", typeof(LevelIntEditProperty<int>), "0", "SP Cost")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute RequireHpRateCost = new ServerSkillAttributes(new DbAttribute("HpRateCost", typeof(LevelIntEditProperty<int>), "0", "HP Rate Cost")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute RequireSpRateCost = new ServerSkillAttributes(new DbAttribute("SpRateCost", typeof(LevelIntEditProperty<int>), "0", "SP Rate Cost")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute RequireZenyCost = new ServerSkillAttributes(new DbAttribute("ZenyCost", typeof(LevelIntEditProperty<int>), "0", "Zeny Cost")) { DataConverter = ValueConverters.GetSetZeroString };
+
+		public static readonly DbAttribute RequireWeapons = new ServerSkillAttributes(new DbAttribute("RequireWeapons", typeof(PreviewWeaponFlagProperty<int, WeaponType>), "0xFFFFFF", "Required weapons")) { DataConverter = ValueConverters.GetHexToIntSetInt };
+		public static readonly DbAttribute RequireAmmoTypes = new ServerSkillAttributes(new DbAttribute("RequireAmmoTypes", typeof(PreviewGenericDefinedFlagProperty<int, AmmoType>), "0", "Required ammo\r\ntypes")) { DataConverter = ValueConverters.GetHexToIntSetInt };
+		public static readonly DbAttribute RequireAmmoAmount = new ServerSkillAttributes(new DbAttribute("RequireAmmoAmount", typeof(LevelIntEditProperty<int>), "0", "Required ammo\r\namount")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute RequireState = new ServerSkillAttributes(new DbAttribute("RequireState", typeof(RequiredStateTypeNew), "0", "Required state")) { DataConverter = ValueConverters.GetIntSetZeroString };
+		public static readonly DbAttribute RequireStatuses = new ServerSkillAttributes(new DbAttribute("RequireStatuses", typeof(LevelEditProperty10<int>), "", "Required statuses")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute RequireSpiritSphereCost = new ServerSkillAttributes(new DbAttribute("RequireSpiritSphereCost", typeof(LevelIntEditProperty<int>), "", "Spirit sphere cost")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute RequireItemCost = new ServerSkillAttributes(new DbAttribute("RequireItemCost", typeof(PreviewSelectItemLevelIntEditProperty<int>), "", "Required items"));
+		public static readonly DbAttribute RequiredEquipment = new ServerSkillAttributes(new DbAttribute("RequiredEquipment", typeof(PreviewSelectLevelIntEditProperty<int>), "", "Required equipment")) { Description = "Specified equipment to be equipped." };
+
+		public static readonly DbAttribute UnitId = new ServerSkillAttributes(new DbAttribute("UnitId", typeof(string), "", "Id"));
+		public static readonly DbAttribute UnitAlternateId = new ServerSkillAttributes(new DbAttribute("UnitAlternateId", typeof(string), "", "Alternate id"));
+		public static readonly DbAttribute UnitLayout = new ServerSkillAttributes(new DbAttribute("UnitLayout", typeof(LevelIntEditProperty<int>), "", "Layout")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute UnitRange = new ServerSkillAttributes(new DbAttribute("UnitRange", typeof(LevelIntEditProperty<int>), "", "Range")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute UnitInterval = new ServerSkillAttributes(new DbAttribute("UnitInterval", typeof(string), "", "Interval")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute UnitTarget = new ServerSkillAttributes(new DbAttribute("UnitTarget", typeof(UnitTargetType), "0x3F0000", "Target")) { DataConverter = ValueConverters.GetHexToIntSetInt };
+		public static readonly DbAttribute UnitFlag = new ServerSkillAttributes(new DbAttribute("UnitFlag", typeof(PreviewGenericDefinedFlagProperty<int, UnitFlagType>), "", "Flag")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute SkillTargetType = new ServerSkillAttributes(new DbAttribute("TargetType", typeof(SkillTargetType), "0", "Target type")) { DataConverter = ValueConverters.GetIntSetZeroString, Description = "The general behavior of the skill\r\n(passive, enemy, place, self, friend, trap)." };
+		public static readonly DbAttribute SkillElement = new ServerSkillAttributes(new DbAttribute("SkillElement", typeof(LevelElementEditProperty<int, SkillElementType>), "Neutral", "Element")) { DataConverter = ValueConverters.GetIntSetZeroString, Description = "The skill's elemental property." };
+		public static readonly DbAttribute Inf2New = new ServerSkillAttributes(new DbAttribute("Inf2", typeof(PreviewGenericDefinedFlagProperty<int, SkillType2TypeNew>), "0", "Flags (inf2)")) { DataConverter = ValueConverters.GetHexToIntSetInt, Description = "Sets special attributes to the skill (ex: quest skill, npc skill, trap, ignores land protected, etc)." };
+
+		public static readonly DbAttribute DISPLAY_Requirement = new ServerSkillAttributes(new DbAttribute("DISPLAY", typeof(InvisibleProperty<int>), "", "Skill Requirements")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute DISPLAY_Casttime = new ServerSkillAttributes(new DbAttribute("DISPLAY", typeof(InvisibleProperty<int>), "", "Skill Duration")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute DISPLAY_Unit = new ServerSkillAttributes(new DbAttribute("DISPLAY", typeof(InvisibleProperty<int>), "", "Unit")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute DISPLAY_Others = new ServerSkillAttributes(new DbAttribute("DISPLAY", typeof(InvisibleProperty<int>), "", "Others")) { DataConverter = ValueConverters.GetSetZeroString };
 
 		private ServerSkillAttributes(DbAttribute attribute)
 			: base(attribute) {
@@ -224,7 +290,7 @@ namespace SDE.Editor.Generic.Lists {
 		public static readonly AttributeList AttributeList = new AttributeList();
 
 		public static readonly DbAttribute Id = new ServerMobAttributes(new PrimaryAttribute("Id", typeof(int), 0, "Mob ID"));
-		public static readonly DbAttribute SpriteName = new ServerMobAttributes(new DbAttribute("SpriteName", typeof(AutoSpriteNameProperty<int>), "", "Sprite name")) { IsSearchable = false, Description = "This is the resource's name id (must be unique) that will be used by the client." };
+		public static readonly DbAttribute AegisName = new ServerMobAttributes(new DbAttribute("SpriteName", typeof(AutoSpriteNameProperty<int>), "", "Aegis name")) { IsSearchable = false, Description = "This is the resource's name id (must be unique) that will be used by the client." };
 		public static readonly DbAttribute KRoName = new ServerMobAttributes(new DbAttribute("KRoName", typeof(AutokRONameProperty<int>), "", "kRO name")) { IsDisplayAttribute = true, IsSearchable = true, Description = "This name is what will be displayed under the mob ingame." };
 		public static readonly DbAttribute IRoName = new ServerMobAttributes(new DbAttribute("IRoName", typeof(AutoiRONameProperty<int>), "", "iRO name")) { IsSearchable = true };
 		public static readonly DbAttribute Lv = new ServerMobAttributes(new DbAttribute("Lv", typeof(string), "1", "Level")) { DataConverter = ValueConverters.GetSetZeroString, Description = "The mob's level." };
@@ -282,7 +348,34 @@ namespace SDE.Editor.Generic.Lists {
 		public static readonly DbAttribute DropCardid = new ServerMobAttributes(new DbAttribute("DropCardid", typeof(string), "0")) { DataConverter = ValueConverters.GetSetZeroString };
 		public static readonly DbAttribute DropCardper = new ServerMobAttributes(new DbAttribute("DropCardper", typeof(string), "0")) { DataConverter = ValueConverters.GetSetZeroString };
 		public static readonly DbAttribute ClientSprite = new ServerMobAttributes(new DbAttribute("ClientSprite", typeof(CustomMobSpriteProperty), "", "Client sprite")) { Description = "This is the resource name that will be used by the client.", Visibility = VisibleState.Hidden | VisibleState.ForceShow };
-		public static readonly DbAttribute Sprite = new ServerMobAttributes(new DbAttribute("Sprite", typeof(SpriteRedirect2), "", "Sprite ID")) { Description = "Redirects the mob's sprite (client side) for this one instead.", Visibility = VisibleState.Hidden | VisibleState.ForceShow };
+		public static readonly DbAttribute Drop1Flags = new ServerMobAttributes(new DbAttribute("Drop1Flags", typeof(bool), "false")) { DataConverter = ValueConverters.GetBooleanSetTrueFalseString };
+		public static readonly DbAttribute Drop2Flags = new ServerMobAttributes(new DbAttribute("Drop2Flags", typeof(bool), "false")) { DataConverter = ValueConverters.GetBooleanSetTrueFalseString };
+		public static readonly DbAttribute Drop3Flags = new ServerMobAttributes(new DbAttribute("Drop3Flags", typeof(bool), "false")) { DataConverter = ValueConverters.GetBooleanSetTrueFalseString };
+		public static readonly DbAttribute Drop4Flags = new ServerMobAttributes(new DbAttribute("Drop4Flags", typeof(bool), "false")) { DataConverter = ValueConverters.GetBooleanSetTrueFalseString };
+		public static readonly DbAttribute Drop5Flags = new ServerMobAttributes(new DbAttribute("Drop5Flags", typeof(bool), "false")) { DataConverter = ValueConverters.GetBooleanSetTrueFalseString };
+		public static readonly DbAttribute Drop6Flags = new ServerMobAttributes(new DbAttribute("Drop6Flags", typeof(bool), "false")) { DataConverter = ValueConverters.GetBooleanSetTrueFalseString };
+		public static readonly DbAttribute Drop7Flags = new ServerMobAttributes(new DbAttribute("Drop7Flags", typeof(bool), "false")) { DataConverter = ValueConverters.GetBooleanSetTrueFalseString };
+		public static readonly DbAttribute Drop8Flags = new ServerMobAttributes(new DbAttribute("Drop8Flags", typeof(bool), "false")) { DataConverter = ValueConverters.GetBooleanSetTrueFalseString };
+		public static readonly DbAttribute Drop9Flags = new ServerMobAttributes(new DbAttribute("Drop9Flags", typeof(bool), "false")) { DataConverter = ValueConverters.GetBooleanSetTrueFalseString };
+		public static readonly DbAttribute Drop10Flags = new ServerMobAttributes(new DbAttribute("Drop10Flags", typeof(bool), "false")) { DataConverter = ValueConverters.GetBooleanSetTrueFalseString };
+		public static readonly DbAttribute Drop1RandomOptionGroup = new ServerMobAttributes(new DbAttribute("Drop1RandomOptionGroup", typeof(string), ""));
+		public static readonly DbAttribute Drop2RandomOptionGroup = new ServerMobAttributes(new DbAttribute("Drop2RandomOptionGroup", typeof(string), ""));
+		public static readonly DbAttribute Drop3RandomOptionGroup = new ServerMobAttributes(new DbAttribute("Drop3RandomOptionGroup", typeof(string), ""));
+		public static readonly DbAttribute Drop4RandomOptionGroup = new ServerMobAttributes(new DbAttribute("Drop4RandomOptionGroup", typeof(string), ""));
+		public static readonly DbAttribute Drop5RandomOptionGroup = new ServerMobAttributes(new DbAttribute("Drop5RandomOptionGroup", typeof(string), ""));
+		public static readonly DbAttribute Drop6RandomOptionGroup = new ServerMobAttributes(new DbAttribute("Drop6RandomOptionGroup", typeof(string), ""));
+		public static readonly DbAttribute Drop7RandomOptionGroup = new ServerMobAttributes(new DbAttribute("Drop7RandomOptionGroup", typeof(string), ""));
+		public static readonly DbAttribute Drop8RandomOptionGroup = new ServerMobAttributes(new DbAttribute("Drop8RandomOptionGroup", typeof(string), ""));
+		public static readonly DbAttribute Drop9RandomOptionGroup = new ServerMobAttributes(new DbAttribute("Drop9RandomOptionGroup", typeof(string), ""));
+		public static readonly DbAttribute Drop10RandomOptionGroup = new ServerMobAttributes(new DbAttribute("Drop10RandomOptionGroup", typeof(string), ""));
+		public static readonly DbAttribute Mvp1RandomOptionGroup = new ServerMobAttributes(new DbAttribute("Mvp1RandomOptionGroup", typeof(string), ""));
+		public static readonly DbAttribute Mvp2RandomOptionGroup = new ServerMobAttributes(new DbAttribute("Mvp2RandomOptionGroup", typeof(string), ""));
+		public static readonly DbAttribute Mvp3RandomOptionGroup = new ServerMobAttributes(new DbAttribute("Mvp3RandomOptionGroup", typeof(string), ""));
+		public static readonly DbAttribute Class = new ServerMobAttributes(new DbAttribute("Class", typeof(ClassType), "0", "Class")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute NewMode = new ServerMobAttributes(new DbAttribute("Mode", typeof(PreviewGenericDefinedFlagProperty<int, NewMobModeType>), "")) { DataConverter = ValueConverters.GetHexToIntSetInt, Description = "Mode of the mob (can move, looter, aggressive, etc)." };
+		public static readonly DbAttribute RaceGroups = new ServerMobAttributes(new DbAttribute("RaceGroups", typeof(PreviewGenericDefinedFlagProperty<int, MobGroup2Type>), "Race groups")) { DataConverter = ValueConverters.GetHexToIntSetInt, Description = "Special group that the mob belongs to." };
+		public static readonly DbAttribute DamageTaken = new ServerMobAttributes(new DbAttribute("DamageTaken", typeof(string), "0", "DT")) { DataConverter = ValueConverters.GetSetZeroString, Description = "Damage taken in percentage. For Green Aura MVPs, this value is set to 10." };
+		public static readonly DbAttribute Sprite = new ServerMobAttributes(new DbAttribute("Sprite", typeof(SpriteRedirect2), "", "Sprite ID")) { Description = "Redirects the mob's sprite (client side) for this one instead." };
 
 		private ServerMobAttributes(DbAttribute attribute)
 			: base(attribute) {
@@ -380,22 +473,52 @@ namespace SDE.Editor.Generic.Lists {
 
 		public static readonly DbAttribute Id = new ServerQuestsAttributes(new PrimaryAttribute("Id", typeof(int), 0, "Quest ID"));
 		public static readonly DbAttribute TimeLimit = new ServerQuestsAttributes(new DbAttribute("TimeLimit", typeof(TimeHourPreviewProperty<int>), "0", "Time limit")) { Description = "The amount of time allowed to finish the quest." };
-		public static readonly DbAttribute TargetId1 = new ServerQuestsAttributes(new DbAttribute("TargetId1", typeof(SelectTupleProperty<int>), "0", "Target ID1")) { Description = "Mob ID to kill.", AttachedObject = ServerDbs.Mobs };
-		public static readonly DbAttribute Val1 = new ServerQuestsAttributes(new DbAttribute("Val1", typeof(string), "0", "Amount 1")) { Description = "The amount of mobs to kill." };
-		public static readonly DbAttribute TargetId2 = new ServerQuestsAttributes(new DbAttribute("TargetId2", typeof(SelectTupleProperty<int>), "0", "Target ID2")) { Description = "Mob ID to kill.", AttachedObject = ServerDbs.Mobs };
-		public static readonly DbAttribute Val2 = new ServerQuestsAttributes(new DbAttribute("Val2", typeof(string), "0", "Amount 2")) { Description = "The amount of mobs to kill." };
-		public static readonly DbAttribute TargetId3 = new ServerQuestsAttributes(new DbAttribute("TargetId3", typeof(SelectTupleProperty<int>), "0", "Target ID3")) { Description = "Mob ID to kill.", AttachedObject = ServerDbs.Mobs };
-		public static readonly DbAttribute Val3 = new ServerQuestsAttributes(new DbAttribute("Val3", typeof(string), "0", "Amount 3")) { Description = "The amount of mobs to kill." };
-		public static readonly DbAttribute MobId1 = new ServerQuestsAttributes(new DbAttribute("MobId1", typeof(SelectTupleProperty<int>), "0", "Mob ID1")) { Description = "Mob ID.", AttachedObject = ServerDbs.Mobs };
-		public static readonly DbAttribute NameId1 = new ServerQuestsAttributes(new DbAttribute("NameId1", typeof(SelectTupleProperty<int>), "0", "Name ID1")) { Description = "The item ID.", AttachedObject = ServerDbs.Items };
-		public static readonly DbAttribute Rate1 = new ServerQuestsAttributes(new DbAttribute("Rate1", typeof(string), "0", "Rate1")) { Description = "The rate of the item drop." };
-		public static readonly DbAttribute MobId2 = new ServerQuestsAttributes(new DbAttribute("MobId2", typeof(SelectTupleProperty<int>), "0", "Mob ID2")) { Description = "Mob ID.", AttachedObject = ServerDbs.Mobs };
-		public static readonly DbAttribute NameId2 = new ServerQuestsAttributes(new DbAttribute("NameId2", typeof(SelectTupleProperty<int>), "0", "Name ID2")) { Description = "The item ID.", AttachedObject = ServerDbs.Items };
-		public static readonly DbAttribute Rate2 = new ServerQuestsAttributes(new DbAttribute("Rate2", typeof(string), "0", "Rate2")) { Description = "The rate of the item drop." };
-		public static readonly DbAttribute MobId3 = new ServerQuestsAttributes(new DbAttribute("MobId3", typeof(SelectTupleProperty<int>), "0", "Mob ID3")) { Description = "Mob ID.", AttachedObject = ServerDbs.Mobs };
-		public static readonly DbAttribute NameId3 = new ServerQuestsAttributes(new DbAttribute("NameId3", typeof(SelectTupleProperty<int>), "0", "Name ID3")) { Description = "The item ID.", AttachedObject = ServerDbs.Items };
-		public static readonly DbAttribute Rate3 = new ServerQuestsAttributes(new DbAttribute("Rate3", typeof(string), "0", "Rate3")) { Description = "The rate of the item drop." };
+		public static readonly DbAttribute TargetId1 = new ServerQuestsAttributes(new DbAttribute("TargetId1", typeof(SelectTupleProperty<int>), "0", "1 - Target ID")) { Description = "Mob ID to kill.", AttachedObject = ServerDbs.Mobs };
+		public static readonly DbAttribute Val1 = new ServerQuestsAttributes(new DbAttribute("Val1", typeof(string), "0", "1 - Amount")) { Description = "The amount of mobs to kill." };
+		public static readonly DbAttribute TargetId2 = new ServerQuestsAttributes(new DbAttribute("TargetId2", typeof(SelectTupleProperty<int>), "0", "2 - Target ID")) { Description = "Mob ID to kill.", AttachedObject = ServerDbs.Mobs };
+		public static readonly DbAttribute Val2 = new ServerQuestsAttributes(new DbAttribute("Val2", typeof(string), "0", "2 - Amount")) { Description = "The amount of mobs to kill." };
+		public static readonly DbAttribute TargetId3 = new ServerQuestsAttributes(new DbAttribute("TargetId3", typeof(SelectTupleProperty<int>), "0", "3 - Target ID")) { Description = "Mob ID to kill.", AttachedObject = ServerDbs.Mobs };
+		public static readonly DbAttribute Val3 = new ServerQuestsAttributes(new DbAttribute("Val3", typeof(string), "0", "3 - Amount")) { Description = "The amount of mobs to kill." };
+		public static readonly DbAttribute MobId1 = new ServerQuestsAttributes(new DbAttribute("MobId1", typeof(SelectTupleProperty<int>), "0", "1 - Mob ID")) { Description = "Mob ID.", AttachedObject = ServerDbs.Mobs };
+		public static readonly DbAttribute NameId1 = new ServerQuestsAttributes(new DbAttribute("NameId1", typeof(SelectTupleProperty<int>), "0", "1 - Drop ID")) { Description = "The item ID.", AttachedObject = ServerDbs.Items };
+		public static readonly DbAttribute Rate1 = new ServerQuestsAttributes(new DbAttribute("Rate1", typeof(RatePreviewProperty<int>), "0", "1 - Rate")) { Description = "The rate of the item drop." };
+		public static readonly DbAttribute MobId2 = new ServerQuestsAttributes(new DbAttribute("MobId2", typeof(SelectTupleProperty<int>), "0", "2 - Drop ID")) { Description = "Mob ID.", AttachedObject = ServerDbs.Mobs };
+		public static readonly DbAttribute NameId2 = new ServerQuestsAttributes(new DbAttribute("NameId2", typeof(SelectTupleProperty<int>), "0", "2 - Name ID")) { Description = "The item ID.", AttachedObject = ServerDbs.Items };
+		public static readonly DbAttribute Rate2 = new ServerQuestsAttributes(new DbAttribute("Rate2", typeof(RatePreviewProperty<int>), "0", "2 - Rate")) { Description = "The rate of the item drop." };
+		public static readonly DbAttribute MobId3 = new ServerQuestsAttributes(new DbAttribute("MobId3", typeof(SelectTupleProperty<int>), "0", "3 - Drop ID")) { Description = "Mob ID.", AttachedObject = ServerDbs.Mobs };
+		public static readonly DbAttribute NameId3 = new ServerQuestsAttributes(new DbAttribute("NameId3", typeof(SelectTupleProperty<int>), "0", "3 - Name ID")) { Description = "The item ID.", AttachedObject = ServerDbs.Items };
+		public static readonly DbAttribute Rate3 = new ServerQuestsAttributes(new DbAttribute("Rate3", typeof(RatePreviewProperty<int>), "0", "3 - Rate")) { Description = "The rate of the item drop." };
 		public static readonly DbAttribute QuestTitle = new ServerQuestsAttributes(new DbAttribute("QuestTitle", typeof(string), "", "Name")) { Description = "The name of the quest (not read by the client).", DataConverter = ValueConverters.StringRemoveQuotes, IsDisplayAttribute = true };
+
+		public static readonly DbAttribute Race1 = new ServerQuestsAttributes(new DbAttribute("Race1", typeof(QuestRaceType), "0", "1 - Race")) { IsSearchable = false, DataConverter = ValueConverters.GetIntSetRaceTypeString };
+		public static readonly DbAttribute Race2 = new ServerQuestsAttributes(new DbAttribute("Race2", typeof(QuestRaceType), "0", "2 - Race")) { IsSearchable = false, DataConverter = ValueConverters.GetIntSetRaceTypeString };
+		public static readonly DbAttribute Race3 = new ServerQuestsAttributes(new DbAttribute("Race3", typeof(QuestRaceType), "0", "3 - Race")) { IsSearchable = false, DataConverter = ValueConverters.GetIntSetRaceTypeString };
+
+		public static readonly DbAttribute Size1 = new ServerQuestsAttributes(new DbAttribute("Size1", typeof(QuestSizeType), "0", "1 - Size")) { IsSearchable = false, DataConverter = ValueConverters.GetIntSetSizeTypeString };
+		public static readonly DbAttribute Size2 = new ServerQuestsAttributes(new DbAttribute("Size2", typeof(QuestSizeType), "0", "2 - Size")) { IsSearchable = false, DataConverter = ValueConverters.GetIntSetSizeTypeString };
+		public static readonly DbAttribute Size3 = new ServerQuestsAttributes(new DbAttribute("Size3", typeof(QuestSizeType), "0", "3 - Size")) { IsSearchable = false, DataConverter = ValueConverters.GetIntSetSizeTypeString };
+
+		public static readonly DbAttribute Element1 = new ServerQuestsAttributes(new DbAttribute("Element1", typeof(QuestElementType), "0", "1 - Element")) { IsSearchable = false, DataConverter = ValueConverters.GetIntSetElementTypeString };
+		public static readonly DbAttribute Element2 = new ServerQuestsAttributes(new DbAttribute("Element2", typeof(QuestElementType), "0", "2 - Element")) { IsSearchable = false, DataConverter = ValueConverters.GetIntSetElementTypeString };
+		public static readonly DbAttribute Element3 = new ServerQuestsAttributes(new DbAttribute("Element3", typeof(QuestElementType), "0", "3 - Element")) { IsSearchable = false, DataConverter = ValueConverters.GetIntSetElementTypeString };
+
+		public static readonly DbAttribute MinLevel1 = new ServerQuestsAttributes(new DbAttribute("MinLevel1", typeof(string), "0", "1 - MinLevel")) { Description = "Minimum monster level target. If not supplied but MaxLevel defined, MinLevel is 1. Set to 0 to ignore MinLevel on import. (Default: 0)" };
+		public static readonly DbAttribute MinLevel2 = new ServerQuestsAttributes(new DbAttribute("MinLevel2", typeof(string), "0", "2 - MinLevel")) { Description = "Minimum monster level target. If not supplied but MaxLevel defined, MinLevel is 1. Set to 0 to ignore MinLevel on import. (Default: 0)" };
+		public static readonly DbAttribute MinLevel3 = new ServerQuestsAttributes(new DbAttribute("MinLevel3", typeof(string), "0", "3 - MinLevel")) { Description = "Minimum monster level target. If not supplied but MaxLevel defined, MinLevel is 1. Set to 0 to ignore MinLevel on import. (Default: 0)" };
+
+		public static readonly DbAttribute MaxLevel1 = new ServerQuestsAttributes(new DbAttribute("MaxLevel1", typeof(string), "0", "1 - MaxLevel")) { Description = "Maximum monster level target. Set to 0 to ignore MaxLevel on import. (Default: 0)" };
+		public static readonly DbAttribute MaxLevel2 = new ServerQuestsAttributes(new DbAttribute("MaxLevel2", typeof(string), "0", "2 - MaxLevel")) { Description = "Maximum monster level target. Set to 0 to ignore MaxLevel on import. (Default: 0)" };
+		public static readonly DbAttribute MaxLevel3 = new ServerQuestsAttributes(new DbAttribute("MaxLevel3", typeof(string), "0", "3 - MaxLevel")) { Description = "Maximum monster level target. Set to 0 to ignore MaxLevel on import. (Default: 0)" };
+
+		public static readonly DbAttribute Id1 = new ServerQuestsAttributes(new DbAttribute("Id1", typeof(string), "0", "1 - Id")) { Description = "Unique target index for the quest Id. Requires a positive number." };
+		public static readonly DbAttribute Id2 = new ServerQuestsAttributes(new DbAttribute("Id2", typeof(string), "0", "2 - Id")) { Description = "Unique target index for the quest Id. Requires a positive number." };
+		public static readonly DbAttribute Id3 = new ServerQuestsAttributes(new DbAttribute("Id3", typeof(string), "0", "3 - Id")) { Description = "Unique target index for the quest Id. Requires a positive number." };
+
+		public static readonly DbAttribute Count1 = new ServerQuestsAttributes(new DbAttribute("Count1", typeof(string), "1", "1 - Count")) { Description = "Amount of items that will drop. Non-stackable items default to 1. (Default: 1)" };
+		public static readonly DbAttribute Count2 = new ServerQuestsAttributes(new DbAttribute("Count2", typeof(string), "1", "2 - Count")) { Description = "Amount of items that will drop. Non-stackable items default to 1. (Default: 1)" };
+		public static readonly DbAttribute Count3 = new ServerQuestsAttributes(new DbAttribute("Count3", typeof(string), "1", "3 - Count")) { Description = "Amount of items that will drop. Non-stackable items default to 1. (Default: 1)" };
+
+		public static readonly DbAttribute TimeLimitNew = new ServerQuestsAttributes(new DbAttribute("TimeLimit", typeof(TimePreviewProperty2<int>), "", "Time limit")) { Description = "The amount of time allowed to finish the quest." };
 
 		private ServerQuestsAttributes(DbAttribute attribute)
 			: base(attribute) {
@@ -410,7 +533,7 @@ namespace SDE.Editor.Generic.Lists {
 		public static readonly DbAttribute EvoClass = new ServerHomunAttributes(new DbAttribute("EvoClass", typeof(string), "0", "Evolution ID")) { Description = "Homunculus's evolved ID." };
 		public static readonly DbAttribute Name = new ServerHomunAttributes(new DbAttribute("Name", typeof(string), "", "Name")) { IsDisplayAttribute = true, Description = "Name of the homunculus." };
 		public static readonly DbAttribute FoodID = new ServerHomunAttributes(new DbAttribute("FoodID", typeof(SelectTupleProperty<int>), "0", "Food ID")) { AttachedObject = ServerDbs.Items, Description = "Item ID of the food the homunculus needs." };
-		public static readonly DbAttribute HungryDelay = new ServerHomunAttributes(new DbAttribute("HungryDelay", typeof(string), "0", "Hungry delay")) { Description = "Time interval in milliseconds after which the homunculus' hunger value is altered." };
+		public static readonly DbAttribute HungryDelay = new ServerHomunAttributes(new DbAttribute("HungryDelay", typeof(string), "60", "Hungry delay")) { Description = "Time interval in milliseconds after which the homunculus' hunger value is altered." };
 		public static readonly DbAttribute BaseSize = new ServerHomunAttributes(new DbAttribute("BaseSize", typeof(ScaleType), "0", "Base size")) { IsSearchable = false, Description = "Size of the base homunculus class." };
 		public static readonly DbAttribute EvoSize = new ServerHomunAttributes(new DbAttribute("EvoSize", typeof(ScaleType), "0", "Evolution size")) { IsSearchable = false, Description = "Size of the evolved homunculus class." };
 		public static readonly DbAttribute Race = new ServerHomunAttributes(new DbAttribute("Race", typeof(HomunRaceType), "0")) { IsSearchable = false, Description = "Race of the homunculus." };
@@ -468,26 +591,47 @@ namespace SDE.Editor.Generic.Lists {
 
 		public static readonly DbAttribute MobId = new ServerPetAttributes(new PrimaryAttribute("Id", typeof(int), 0, "Mob ID")); // { AttachedObject = ServerDBs.Mobs };
 		public static readonly DbAttribute Name = new ServerPetAttributes(new DbAttribute("Name", typeof(AutoSpritePetProperty<int>), "", "Sprite name"));
-		public static readonly DbAttribute JName = new ServerPetAttributes(new DbAttribute("JName", typeof(AutoNamePetProperty<int>), "", "Display name")) { IsDisplayAttribute = true };
+		public static readonly DbAttribute JName = new ServerPetAttributes(new DbAttribute("JName", typeof(AutoNamePetProperty<int>), "", "Display name")) { IsDisplayAttribute = true, DataConverter = ValueConverters.GetSetZeroString, Accessor = ValueAccessors.GetDisplayString };
 		public static readonly DbAttribute LureId = new ServerPetAttributes(new DbAttribute("LureId", typeof(SelectTupleProperty<int>), "0", "Lure item ID")) { DataConverter = ValueConverters.GetSetZeroString, AttachedObject = ServerDbs.Items };
 		public static readonly DbAttribute EggId = new ServerPetAttributes(new DbAttribute("EggId", typeof(SelectTupleProperty<int>), "0", "Egg ID")) { DataConverter = ValueConverters.GetSetZeroString, AttachedObject = ServerDbs.Items };
 		public static readonly DbAttribute EquipId = new ServerPetAttributes(new DbAttribute("EquipId", typeof(SelectTupleProperty<int>), "0", "Equip ID")) { DataConverter = ValueConverters.GetSetZeroString, AttachedObject = ServerDbs.Items };
 		public static readonly DbAttribute FoodId = new ServerPetAttributes(new DbAttribute("FoodId", typeof(SelectTupleProperty<int>), "0", "Food ID")) { DataConverter = ValueConverters.GetSetZeroString, AttachedObject = ServerDbs.Items };
 		public static readonly DbAttribute Fullness = new ServerPetAttributes(new DbAttribute("Fullness", typeof(string), "0", "Hunger decrease amount")) { DataConverter = ValueConverters.GetSetZeroString };
 		public static readonly DbAttribute HungryDelay = new ServerPetAttributes(new DbAttribute("HungryDelay", typeof(string), "60", "Hunger decrease delay")) { DataConverter = ValueConverters.GetSetZeroString };
-		public static readonly DbAttribute RHungry = new ServerPetAttributes(new DbAttribute("RHungry", typeof(string), "0", "Intimacy increased\r\nwhen fed")) { DataConverter = ValueConverters.GetSetZeroString };
-		public static readonly DbAttribute RFull = new ServerPetAttributes(new DbAttribute("RHungry", typeof(string), "0", "Intimacy decreased\r\nwhen over-fed")) { DataConverter = ValueConverters.GetSetZeroString };
-		public static readonly DbAttribute Intimate = new ServerPetAttributes(new DbAttribute("Intimate", typeof(string), "0", "Initial intimacy")) { DataConverter = ValueConverters.GetSetZeroString };
-		public static readonly DbAttribute Die = new ServerPetAttributes(new DbAttribute("Die", typeof(string), "0", "Initial lost after dying")) { DataConverter = ValueConverters.GetSetZeroString };
-		public static readonly DbAttribute Capture = new ServerPetAttributes(new DbAttribute("Capture", typeof(PourcentagePreviewProperty<int>), "0", "Capture success rate")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute IntimacyFed = new ServerPetAttributes(new DbAttribute("RHungry", typeof(string), "50", "Intimacy increased\r\nwhen fed")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute IntimacyOverfed = new ServerPetAttributes(new DbAttribute("RFull", typeof(string), "-100", "Intimacy decreased\r\nwhen over-fed")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute IntimacyStart = new ServerPetAttributes(new DbAttribute("Intimate", typeof(string), "250", "Initial intimacy")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute IntimacyOwnerDie = new ServerPetAttributes(new DbAttribute("Die", typeof(string), "-20", "Initial lost after dying")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute CaptureRate = new ServerPetAttributes(new DbAttribute("Capture", typeof(RatePreviewProperty<int>), "0", "Capture success rate")) { DataConverter = ValueConverters.GetSetZeroString };
 		public static readonly DbAttribute Speed = new ServerPetAttributes(new DbAttribute("Speed", typeof(string), "0", "Speed")) { DataConverter = ValueConverters.GetSetZeroString };
-		public static readonly DbAttribute SPerformance = new ServerPetAttributes(new DbAttribute("SPerformance", typeof(bool), "1", "Special performance")) { DataConverter = ValueConverters.GetBooleanSetIntString };
+		public static readonly DbAttribute SpecialPerformance = new ServerPetAttributes(new DbAttribute("SPerformance", typeof(bool), "1", "Special performance")) { DataConverter = ValueConverters.GetBooleanSetIntString };
 		public static readonly DbAttribute DisablePetTalk = new ServerPetAttributes(new DbAttribute("DisablePetTalk", typeof(bool), "0", "Disable pet talk")) { DataConverter = ValueConverters.GetBooleanSetIntString };
-		public static readonly DbAttribute AttackRate = new ServerPetAttributes(new DbAttribute("AttackRate", typeof(string), "0", "Attack rate")) { DataConverter = ValueConverters.GetSetZeroString };
-		public static readonly DbAttribute DefAttackRate = new ServerPetAttributes(new DbAttribute("DefAttackRate", typeof(string), "0", "Defense attack rate")) { DataConverter = ValueConverters.GetSetZeroString };
-		public static readonly DbAttribute ChangeTargetRate = new ServerPetAttributes(new DbAttribute("ChangeTargetRate", typeof(string), "0", "Change target rate")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute AttackRate = new ServerPetAttributes(new DbAttribute("AttackRate", typeof(RatePreviewProperty<int>), "0", "Attack rate")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute RetaliateRate = new ServerPetAttributes(new DbAttribute("DefAttackRate", typeof(RatePreviewProperty<int>), "0", "Defense attack rate")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute ChangeTargetRate = new ServerPetAttributes(new DbAttribute("ChangeTargetRate", typeof(RatePreviewProperty<int>), "0", "Change target rate")) { DataConverter = ValueConverters.GetSetZeroString };
 		public static readonly DbAttribute PetScript = new ServerPetAttributes(new DbAttribute("PetScript", typeof(CustomScriptProperty<int>), "{}", "Pet script")) { DataConverter = ValueConverters.GetScriptNoBracketsSetScriptWithBrackets };
 		public static readonly DbAttribute LoyalScript = new ServerPetAttributes(new DbAttribute("LoyalScript", typeof(CustomScriptProperty<int>), "{}", "Loyal script")) { DataConverter = ValueConverters.GetScriptNoBracketsSetScriptWithBrackets };
+
+		public static readonly DbAttribute CordialScript = new ServerPetAttributes(new DbAttribute("CordialScript", typeof(CustomScriptProperty<int>), "{}", "Cordial script")) { DataConverter = ValueConverters.GetScriptNoBracketsSetScriptWithBrackets, IsSkippable = true };
+		public static readonly DbAttribute NeutralScript = new ServerPetAttributes(new DbAttribute("NeutralScript", typeof(CustomScriptProperty<int>), "{}", "Neutral script")) { DataConverter = ValueConverters.GetScriptNoBracketsSetScriptWithBrackets, IsSkippable = true };
+		public static readonly DbAttribute AwkwardScript = new ServerPetAttributes(new DbAttribute("AwkwardScript", typeof(CustomScriptProperty<int>), "{}", "Awkard script")) { DataConverter = ValueConverters.GetScriptNoBracketsSetScriptWithBrackets, IsSkippable = true };
+
+		public static readonly DbAttribute IntimacyHungry = new ServerPetAttributes(new DbAttribute("IntimacyHungry", typeof(string), "-5", "Intimacy increased\r\nwhen pet hungry")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute AllowAutoFeed = new ServerPetAttributes(new DbAttribute("AllowAutoFeed", typeof(bool), "0", "Allow autofeeding")) { DataConverter = ValueConverters.GetBooleanSetIntString };
+		public static readonly DbAttribute HungerIncrease = new ServerPetAttributes(new DbAttribute("HungerIncrease", typeof(string), "20", "Hunger increase")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute Evolution = new ServerPetAttributes(new DbAttribute("Evolution", typeof(string), "", "Evolution")) { DataConverter = ValueConverters.GetSetZeroString };
+
+		public static readonly DbAttribute TargetId = new ServerPetAttributes(new DbAttribute("TargetId", typeof(SelectTupleProperty<int>), "0", "Evolution target pet ID")) { DataConverter = ValueConverters.GetSetZeroString, AttachedObject = ServerDbs.Pet };
+		public static readonly DbAttribute ItemId1 = new ServerPetAttributes(new DbAttribute("ItemId1", typeof(SelectTupleProperty<int>), "0", "Required item ID 1")) { DataConverter = ValueConverters.GetSetZeroString, AttachedObject = ServerDbs.Items };
+		public static readonly DbAttribute Amount1 = new ServerPetAttributes(new DbAttribute("Amount1", typeof(string), "0", "Required amount for item ID 1")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute ItemId2 = new ServerPetAttributes(new DbAttribute("ItemId2", typeof(SelectTupleProperty<int>), "0", "Required item ID 2")) { DataConverter = ValueConverters.GetSetZeroString, AttachedObject = ServerDbs.Items };
+		public static readonly DbAttribute Amount2 = new ServerPetAttributes(new DbAttribute("Amount2", typeof(string), "0", "Required amount for item ID 2")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute ItemId3 = new ServerPetAttributes(new DbAttribute("ItemId3", typeof(SelectTupleProperty<int>), "0", "Required item ID 3")) { DataConverter = ValueConverters.GetSetZeroString, AttachedObject = ServerDbs.Items };
+		public static readonly DbAttribute Amount3 = new ServerPetAttributes(new DbAttribute("Amount3", typeof(string), "0", "Required amount for item ID 3")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute ItemId4 = new ServerPetAttributes(new DbAttribute("ItemId4", typeof(SelectTupleProperty<int>), "0", "Required item ID 4")) { DataConverter = ValueConverters.GetSetZeroString, AttachedObject = ServerDbs.Items };
+		public static readonly DbAttribute Amount4 = new ServerPetAttributes(new DbAttribute("Amount4", typeof(string), "0", "Required amount for item ID 4")) { DataConverter = ValueConverters.GetSetZeroString };
+		public static readonly DbAttribute ItemId5 = new ServerPetAttributes(new DbAttribute("ItemId5", typeof(SelectTupleProperty<int>), "0", "Required item ID 5")) { DataConverter = ValueConverters.GetSetZeroString, AttachedObject = ServerDbs.Items };
+		public static readonly DbAttribute Amount5 = new ServerPetAttributes(new DbAttribute("Amount5", typeof(string), "0", "Required amount for item ID 5")) { DataConverter = ValueConverters.GetSetZeroString };
 
 		private ServerPetAttributes(DbAttribute attribute)
 			: base(attribute) {
@@ -501,8 +645,7 @@ namespace SDE.Editor.Generic.Lists {
 		public static readonly DbAttribute Id = new ServerCastleAttributes(new PrimaryAttribute("Id", typeof(int), 0, "Castle ID"));
 		public static readonly DbAttribute MapName = new ServerCastleAttributes(new DbAttribute("MapName", typeof(string), "", "Map name")) { Description = "The name of the map used by the castle." };
 		public static readonly DbAttribute CastleName = new ServerCastleAttributes(new DbAttribute("CastleName", typeof(string), "", "Castle name")) { IsDisplayAttribute = true, Description = "The name of the castle (used by scripts and guardian name tags)." };
-		public static readonly DbAttribute OnBreakGuildEventName = new ServerCastleAttributes(new DbAttribute("OnBreakGuildEventName", typeof(string), "", "On guild break\r\nevent name")) { Description = "NPC unique name to invoke ::OnGuildBreak on, when a occupied castle is abandoned during guild break." };
-		public static readonly DbAttribute Flag = new ServerCastleAttributes(new DbAttribute("Flag", typeof(string), "1", "Flag")) { Description = "Switch flag (not used by server)." };
+		public static readonly DbAttribute NpcName = new ServerCastleAttributes(new DbAttribute("NPC", typeof(string), "", "NPC")) { Description = "NPC unique name to invoke ::OnGuildBreak on, when a occupied castle is abandoned during guild break." };
 
 		private ServerCastleAttributes(DbAttribute attribute)
 			: base(attribute) {
@@ -543,27 +686,23 @@ namespace SDE.Editor.Generic.Lists {
 		public static readonly DbAttribute Name = new ServerCheevoAttributes(new DbAttribute("Name", typeof(string), "", "Name")) { IsDisplayAttribute = true };
 		public static readonly DbAttribute GroupId = new ServerCheevoAttributes(new DbAttribute("GroupId", typeof(string), "0", "Group ID"));
 		public static readonly DbAttribute RewardId = new ServerCheevoAttributes(new DbAttribute("RewardId", typeof(SelectTupleProperty<int>), "", "Reward ID")) { AttachedObject = ServerDbs.Items };
-		public static readonly DbAttribute RewardAmount = new ServerCheevoAttributes(new DbAttribute("RewardAmount", typeof(string), "1", "Amount"));
+		public static readonly DbAttribute RewardAmount = new ServerCheevoAttributes(new DbAttribute("RewardAmount", typeof(string), "", "Amount"));
 		public static readonly DbAttribute RewardScript = new ServerCheevoAttributes(new DbAttribute("RewardScript", typeof(CustomScriptProperty<int>), "", "Script"));
-		public static readonly DbAttribute RewardTitleId = new ServerCheevoAttributes(new DbAttribute("RewardTitleId", typeof(string), "0", "Title ID"));
-		public static readonly DbAttribute Parameter1 = new ServerCheevoAttributes(new DbAttribute("Parameter1", typeof(string), "", "Condition 1"));
-		public static readonly DbAttribute Parameter2 = new ServerCheevoAttributes(new DbAttribute("Parameter2", typeof(string), "", "Condition 2"));
-		public static readonly DbAttribute Parameter3 = new ServerCheevoAttributes(new DbAttribute("Parameter3", typeof(string), "", "Condition 3"));
-		public static readonly DbAttribute Parameter4 = new ServerCheevoAttributes(new DbAttribute("Parameter4", typeof(string), "", "Condition 4"));
-		public static readonly DbAttribute Parameter5 = new ServerCheevoAttributes(new DbAttribute("Parameter5", typeof(string), "", "Condition 5"));
-		public static readonly DbAttribute ParamsRequired = new ServerCheevoAttributes(new DbAttribute("ParamsRequired", typeof(CustomParamsRequiredProperty), "", "Params Required")) { AttachedObject = new DbAttribute[] { Parameter1, Parameter2, Parameter3, Parameter4, Parameter5 } };
+		public static readonly DbAttribute RewardTitleId = new ServerCheevoAttributes(new DbAttribute("RewardTitleId", typeof(string), "", "Title ID"));
+		public static readonly DbAttribute Condition = new ServerCheevoAttributes(new DbAttribute("Condition", typeof(CustomScriptProperty<int>), "", "Condition"));
 		public static readonly DbAttribute Score = new ServerCheevoAttributes(new DbAttribute("Score", typeof(string), "", "Score"));
 		public static readonly DbAttribute Dependent = new ServerCheevoAttributes(new DbAttribute("Dependent", typeof(LevelIntEditAnyProperty<int>), "", "Dependencies"));
-		public static readonly DbAttribute TargetId1 = new ServerCheevoAttributes(new DbAttribute("TargetId1", typeof(SelectTupleProperty<int>), "", "Target ID1")) { AttachedObject = ServerDbs.Mobs };
-		public static readonly DbAttribute TargetCount1 = new ServerCheevoAttributes(new DbAttribute("TargetCount1", typeof(string), "", "Count1"));
-		public static readonly DbAttribute TargetId2 = new ServerCheevoAttributes(new DbAttribute("TargetId2", typeof(SelectTupleProperty<int>), "", "Target ID2")) { AttachedObject = ServerDbs.Mobs };
-		public static readonly DbAttribute TargetCount2 = new ServerCheevoAttributes(new DbAttribute("TargetCount2", typeof(string), "", "Count2"));
-		public static readonly DbAttribute TargetId3 = new ServerCheevoAttributes(new DbAttribute("TargetId3", typeof(SelectTupleProperty<int>), "", "Target ID3")) { AttachedObject = ServerDbs.Mobs };
-		public static readonly DbAttribute TargetCount3 = new ServerCheevoAttributes(new DbAttribute("TargetCount3", typeof(string), "", "Count3"));
-		public static readonly DbAttribute TargetId4 = new ServerCheevoAttributes(new DbAttribute("TargetId4", typeof(SelectTupleProperty<int>), "", "Target ID4")) { AttachedObject = ServerDbs.Mobs };
-		public static readonly DbAttribute TargetCount4 = new ServerCheevoAttributes(new DbAttribute("TargetCount4", typeof(string), "", "Count4"));
-		public static readonly DbAttribute TargetId5 = new ServerCheevoAttributes(new DbAttribute("TargetId5", typeof(SelectTupleProperty<int>), "", "Target ID5")) { AttachedObject = ServerDbs.Mobs };
-		public static readonly DbAttribute TargetCount5 = new ServerCheevoAttributes(new DbAttribute("TargetCount5", typeof(string), "", "Count5"));
+		public static readonly DbAttribute TargetId1 = new ServerCheevoAttributes(new DbAttribute("TargetId1", typeof(SelectTupleProperty<int>), "", "0 - Target ID")) { AttachedObject = ServerDbs.Mobs };
+		public static readonly DbAttribute TargetCount1 = new ServerCheevoAttributes(new DbAttribute("TargetCount1", typeof(string), "", "0 - Amount"));
+		public static readonly DbAttribute TargetId2 = new ServerCheevoAttributes(new DbAttribute("TargetId2", typeof(SelectTupleProperty<int>), "", "1 - Target ID")) { AttachedObject = ServerDbs.Mobs };
+		public static readonly DbAttribute TargetCount2 = new ServerCheevoAttributes(new DbAttribute("TargetCount2", typeof(string), "", "1 - Amount"));
+		public static readonly DbAttribute TargetId3 = new ServerCheevoAttributes(new DbAttribute("TargetId3", typeof(SelectTupleProperty<int>), "", "2 - Target ID")) { AttachedObject = ServerDbs.Mobs };
+		public static readonly DbAttribute TargetCount3 = new ServerCheevoAttributes(new DbAttribute("TargetCount3", typeof(string), "", "2 - Amount"));
+		public static readonly DbAttribute TargetId4 = new ServerCheevoAttributes(new DbAttribute("TargetId4", typeof(SelectTupleProperty<int>), "", "3 - Target ID")) { AttachedObject = ServerDbs.Mobs };
+		public static readonly DbAttribute TargetCount4 = new ServerCheevoAttributes(new DbAttribute("TargetCount4", typeof(string), "", "3 - Amount"));
+		public static readonly DbAttribute TargetId5 = new ServerCheevoAttributes(new DbAttribute("TargetId5", typeof(SelectTupleProperty<int>), "", "4 - Target ID")) { AttachedObject = ServerDbs.Mobs };
+		public static readonly DbAttribute TargetCount5 = new ServerCheevoAttributes(new DbAttribute("TargetCount5", typeof(string), "", "4 - Amount"));
+		public static readonly DbAttribute Map = new ServerCheevoAttributes(new DbAttribute("Map", typeof(string), "", "Map"));
 
 		private ServerCheevoAttributes(DbAttribute attribute)
 			: base(attribute) {

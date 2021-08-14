@@ -19,6 +19,14 @@ namespace SDE.ApplicationConfiguration {
 			return TkPathRequest.OpenFile(new Setting(null, typeof (SdeAppConfiguration).GetProperty("AppLastPath")), extra);
 		}
 
+		public static string SaveFileMapcache(params string[] extra) {
+			return TkPathRequest.SaveFile(new Setting(null, typeof(SdeAppConfiguration).GetProperty("MapCachePath")), extra);
+		}
+
+		public static string OpenFileMapcache(params string[] extra) {
+			return TkPathRequest.OpenFile(new Setting(null, typeof(SdeAppConfiguration).GetProperty("MapCachePath")), extra);
+		}
+
 		public static string[] OpenFilesCde(params string[] extra) {
 			return TkPathRequest.OpenFiles(new Setting(null, typeof (SdeAppConfiguration).GetProperty("AppLastPath")), extra);
 		}

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Windows;
 using System.Windows.Media;
 using Database;
 using GRF.Threading;
@@ -12,7 +13,7 @@ using TokeiLibrary.WPF.Styles.ListView;
 using Utilities.Extension;
 
 namespace SDE.Editor.Generic.TabsMakerCore {
-	public partial class GSearchEngine<TKey, TValue> where TValue : Tuple {
+	public partial class GSearchEngine<TKey, TValue> where TValue : Database.Tuple {
 		private bool _filterEnabled = true;
 		private bool _ignoreFilter;
 
@@ -85,7 +86,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 
 					if (allItems.Count == 0) {
 						_items.Dispatch(r => r.ItemsSource = new RangeObservableCollection<TValue>(new List<TValue>()));
-						WpfUtilities.TextBoxOk(_tbSearchItems);
+						_textBoxOk();
 						OnFilterFinished(new List<TValue>());
 						return;
 					}
@@ -118,13 +119,14 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 					    !_itemsSearchSettings[GSearchSettings.TupleRange]) {
 						allItems = allItems.OrderBy(p => p, _entryComparer).ToList();
 						_items.Dispatch(r => r.ItemsSource = new RangeObservableCollection<TValue>(allItems));
+						_textBoxOk();
 						OnFilterFinished(allItems);
 						return;
 					}
 
 					if (currentSearch != _searchItemsFilter) return;
 
-					WpfUtilities.TextBoxProcessing(_tbSearchItems);
+					_textBoxProcessing();
 
 					string predicateSearch = _tbItemsRange.Dispatch(() => _tbItemsRange.Text);
 					bool isWiden = _itemsSearchSettings.Get(GSearchSettings.Mode) == "0";
@@ -140,7 +142,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 					bool isAttributeRestricted = false;
 
 					if (search == null) {
-						_tbSearchItems.Dispatch(p => p.Background = new SolidColorBrush(Color.FromArgb(50, 255, 212, 0)));
+						_textBoxPrediate();
 						generalPredicates.Clear();
 						var predicate = condition.ToPredicate(_settings);
 						generalPredicates = new List<Func<TValue, string, bool>> { predicate };
@@ -187,19 +189,19 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 					List<TValue> result = _getResults(search, isAttributeRestricted, generalPredicates, allItems, tuplePredicate, isWiden);
 
 					if (currentSearch != _searchItemsFilter) {
-						WpfUtilities.TextBoxOk(_tbSearchItems);
+						_textBoxOk();
 						return;
 					}
 
 					_items.Dispatch(r => r.ItemsSource = new RangeObservableCollection<TValue>(result));
 
 					if (!isCondition)
-						WpfUtilities.TextBoxOk(_tbSearchItems);
+						_textBoxOk();
 
 					OnFilterFinished(result);
 				}
 				catch {
-					WpfUtilities.TextBoxOk(_tbSearchItems);
+					_textBoxOk();
 				}
 				finally {
 					try {
@@ -211,6 +213,24 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 					IsFiltering = false;
 				}
 			}
+		}
+
+		private void _textBoxOk() {
+			_tbSearchItems.Dispatch(delegate {
+				_tbSearchItems.Background = Application.Current.Resources["GSearchEngineOk"] as Brush;
+			});
+		}
+
+		private void _textBoxProcessing() {
+			_tbSearchItems.Dispatch(delegate {
+				_tbSearchItems.Background = Application.Current.Resources["GSearchEngineProcessing"] as Brush;
+			});
+		}
+
+		private void _textBoxPrediate() {
+			_tbSearchItems.Dispatch(delegate {
+				_tbSearchItems.Background = Application.Current.Resources["GSearchEnginePredicate"] as Brush;
+			});
 		}
 
 		private List<TValue> _getResults(ICollection<string> search, bool isAttributeRestricted, ICollection<Func<TValue, string, bool>> generalPredicates, IEnumerable<TValue> allItems, Func<TValue, bool> tuplePredicate, bool isWiden) {
@@ -289,7 +309,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 			return tuplePredicate;
 		}
 
-		private readonly string[] _symbols = { " <= ", " < ", " > ", " >= ", " = ", " == ", " != ", " ~= ", "!( ", " not(", " & ", " | ", " << ", " >> ", " % ", " * ", " / ", " ^ ", " - " };
+		private readonly string[] _symbols = { " <= ", " < ", " > ", " >= ", " = ", " == ", " != ", " ~= ", "!( ", " not(", " & ", " | ", " << ", " >> ", " % ", " * ", " / ", " ^ ", " - ", " contains ", " exclude ", " ⊃ ", " ⊅ " };
 
 		private List<string> _getSearch(string currentSearch, out Condition condition) {
 			condition = null;
@@ -302,6 +322,8 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 						.Replace(" or ", " || ")
 						.Replace(" != ", " ~= ")
 						.Replace(" = ", " == ")
+						.Replace(" contains ", " ⊃ ")
+						.Replace(" exclude ", " ⊅ ")
 						.Replace("!(", "not(");
 
 					condition = ConditionLogic.GetCondition(currentSearch2);

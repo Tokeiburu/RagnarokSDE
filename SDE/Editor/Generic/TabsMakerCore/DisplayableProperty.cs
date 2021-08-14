@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using Database;
 using ErrorManager;
 using ICSharpCode.AvalonEdit;
@@ -12,6 +13,7 @@ using SDE.ApplicationConfiguration;
 using SDE.Editor.Engines;
 using SDE.Editor.Generic.UI.CustomControls;
 using SDE.Editor.Generic.UI.FormatConverters;
+using SDE.View;
 using TokeiLibrary;
 using TokeiLibrary.Shortcuts;
 using Utilities;
@@ -23,7 +25,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 	/// </summary>
 	/// <typeparam name="TKey">The type of the key.</typeparam>
 	/// <typeparam name="TValue">The type of the value.</typeparam>
-	public class DisplayableProperty<TKey, TValue> where TValue : Tuple {
+	public class DisplayableProperty<TKey, TValue> where TValue : Database.Tuple {
 		#region Delegates
 		public delegate void DisplayableDelegate(object sender);
 		#endregion
@@ -34,7 +36,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 		private readonly List<Action<Grid>> _deployCommands = new List<Action<Grid>>();
 
 		// These are elements that will be drawn on the primary grid automatically
-		private readonly List<Tuple<FrameworkElement, FrameworkElement>> _deployControls = new List<Tuple<FrameworkElement, FrameworkElement>>();
+		private readonly List<Utilities.Extension.Tuple<FrameworkElement, FrameworkElement>> _deployControls = new List<Utilities.Extension.Tuple<FrameworkElement, FrameworkElement>>();
 		private readonly List<FormatConverter<TKey, TValue>> _formattedProperties = new List<FormatConverter<TKey, TValue>>();
 
 		// These are actions that will be exeuted when resetting the fields
@@ -42,7 +44,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 		private readonly List<FrameworkElement> _resetFields = new List<FrameworkElement>();
 
 		// These are used when creating the instance; they contain information to automatically generate the update action and deployable control
-		private readonly List<Tuple<DbAttribute, FrameworkElement>> _update = new List<Tuple<DbAttribute, FrameworkElement>>();
+		private readonly List<Utilities.Extension.Tuple<DbAttribute, FrameworkElement>> _update = new List<Utilities.Extension.Tuple<DbAttribute, FrameworkElement>>();
 
 		// These are actions to take when a new item is being selected
 		private readonly List<Action<TValue>> _updateActions = new List<Action<TValue>>();
@@ -52,7 +54,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 		public int Spacing = 5;
 		public int ZIndex = 0;
 
-		public List<Tuple<DbAttribute, FrameworkElement>> Updates {
+		public List<Utilities.Extension.Tuple<DbAttribute, FrameworkElement>> Updates {
 			get { return _update; }
 		}
 
@@ -70,21 +72,110 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 			if (handler != null) handler(this);
 		}
 
-		public void AddLabel(object content, int gridRow, int gridColumn, bool isItalic = false, Grid parent = null) {
+		public void Clear() {
+			_formattedProperties.Clear();
+			_deployControls.Clear();
+			_deployCommands.Clear();
+			_customProperties.Clear();
+			_resetActions.Clear();
+			_resetFields.Clear();
+			_update.Clear();
+			_updateActions.Clear();
+		}
+
+		public void AddLabelContextMenu(Label element, DbAttribute att) {
+			var menu = new ContextMenu();
+			element.ContextMenu = menu;
+
+			MenuItem item = new MenuItem();
+			item.Header = "Search for this field [" + att.GetQueryName().Replace("_", "__") + "]";
+			menu.Items.Add(item);
+
+			item.Click += delegate {
+				var selected = SdeEditor.Instance.Tabs.FirstOrDefault(p => p.IsSelected);
+
+				if (selected != null) {
+					selected._dbSearchPanel._searchTextBox.Text = _getTextSearch(att);
+				}
+			};
+
+			item = new MenuItem();
+			item.Header = "Append search for this field [" + att.GetQueryName().Replace("_", "__") + "]";
+			menu.Items.Add(item);
+
+			item.Click += delegate {
+				var selected = SdeEditor.Instance.Tabs.FirstOrDefault(p => p.IsSelected);
+
+				if (selected != null) {
+					if (selected._dbSearchPanel._searchTextBox.Text == "") {
+						selected._dbSearchPanel._searchTextBox.Text = _getTextSearch(att);
+					}
+					else {
+						selected._dbSearchPanel._searchTextBox.Text = "(" + selected._dbSearchPanel._searchTextBox.Text + ") && " + _getTextSearch(att);
+					}
+				}
+			};
+		}
+
+		public void AddLabel(object content, DbAttribute att, int gridRow, int gridColumn, bool isItalic = false, Grid parent = null) {
 			Label element = new Label { Content = content, VerticalAlignment = VerticalAlignment.Center };
 
 			if (isItalic) {
 				element.FontStyle = FontStyles.Italic;
 			}
 
+			if (att != null) {
+				AddLabelContextMenu(element, att);
+			}
+
 			element.SetValue(Grid.RowProperty, gridRow);
 			element.SetValue(Grid.ColumnProperty, gridColumn);
-			_deployControls.Add(new Tuple<FrameworkElement, FrameworkElement>(element, parent));
+			element.SetValue(TextBlock.ForegroundProperty, Application.Current.Resources["TextForeground"] as Brush);
+			_deployControls.Add(new Utilities.Extension.Tuple<FrameworkElement, FrameworkElement>(element, parent));
+		}
+
+		private string _getTextSearch(DbAttribute att) {
+			var selected = SdeEditor.Instance.Tabs.FirstOrDefault(p => p.IsSelected);
+
+			if (selected != null) {
+				var tuple = selected._listView.SelectedItem as Database.Tuple;
+
+				if (tuple != null) {
+					if (att.DataType == typeof(bool)) {
+						return "[" + att.GetQueryName() + "] == " + tuple.GetValue<string>(att);
+					}
+					else if (att.DataType.BaseType == typeof(Enum) || att.DataType == typeof(int)) {
+						return "[" + att.GetQueryName() + "] == " + tuple.GetValue<int>(att);
+					}
+					else {
+						string value = tuple.GetRawValue<string>(att.Index);
+
+						if (FormatConverters.LongOrHexConverter(value) > 0 || value == "0x0" || value == "0") {
+							return "[" + att.GetQueryName() + "] == " + value;
+						}
+						else {
+							return "[" + att.GetQueryName() + "] contains \"" + value + "\"";
+						}
+					}
+				}
+				else {
+					if (att.DataType == typeof(bool)) {
+						return "[" + att.GetQueryName() + "] == true";
+					}
+					else {
+						return "[" + att.GetQueryName() + "] == 0";
+					}
+				}
+			}
+
+			return "";
 		}
 
 		public void AddLabel(DbAttribute att, int gridRow, int gridColumn, bool isItalic = false, Grid parent = null) {
 			Label element = new Label { Content = att.DisplayName, VerticalAlignment = VerticalAlignment.Center };
 			ToolTipsBuilder.SetToolTip(att, element);
+
+			AddLabelContextMenu(element, att);
 
 			if (isItalic) {
 				element.FontStyle = FontStyles.Italic;
@@ -92,7 +183,23 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 
 			element.SetValue(Grid.RowProperty, gridRow);
 			element.SetValue(Grid.ColumnProperty, gridColumn);
-			_deployControls.Add(new Tuple<FrameworkElement, FrameworkElement>(element, parent));
+			element.SetValue(TextBlock.ForegroundProperty, Application.Current.Resources["TextForeground"] as Brush);
+			_deployControls.Add(new Utilities.Extension.Tuple<FrameworkElement, FrameworkElement>(element, parent));
+		}
+
+		public void AddSpacer(int gridRow, int gridColumn, bool isItalic = false, Grid parent = null) {
+			Label element = new Label { Content = "", VerticalAlignment = VerticalAlignment.Center };
+
+			if (isItalic) {
+				element.FontStyle = FontStyles.Italic;
+			}
+
+			element.Margin = new Thickness(0);
+			element.Padding = new Thickness(0);
+
+			element.SetValue(Grid.RowProperty, gridRow);
+			element.SetValue(Grid.ColumnProperty, gridColumn);
+			_deployControls.Add(new Utilities.Extension.Tuple<FrameworkElement, FrameworkElement>(element, parent));
 		}
 
 		public static void RemoveUndoAndRedoEvents(FrameworkElement box, GDbTabWrapper<TKey, TValue> tab) {
@@ -184,7 +291,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 			element.SetValue(Grid.RowProperty, gridRow);
 			element.SetValue(Grid.ColumnProperty, gridColumn);
 			element.TabIndex = ZIndex++;
-			_deployControls.Add(new Tuple<FrameworkElement, FrameworkElement>(element, parent));
+			_deployControls.Add(new Utilities.Extension.Tuple<FrameworkElement, FrameworkElement>(element, parent));
 			return element;
 		}
 
@@ -194,7 +301,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 			element.VerticalAlignment = VerticalAlignment.Center;
 			element.SetValue(Grid.RowProperty, gridRow);
 			element.SetValue(Grid.ColumnProperty, gridColumn);
-			_deployControls.Add(new Tuple<FrameworkElement, FrameworkElement>(element, parent));
+			_deployControls.Add(new Utilities.Extension.Tuple<FrameworkElement, FrameworkElement>(element, parent));
 			return element;
 		}
 
@@ -204,7 +311,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 			element.VerticalAlignment = VerticalAlignment.Center;
 			element.SetValue(Grid.RowProperty, gridRow);
 			element.SetValue(Grid.ColumnProperty, gridColumn);
-			_deployControls.Add(new Tuple<FrameworkElement, FrameworkElement>(element, parent));
+			_deployControls.Add(new Utilities.Extension.Tuple<FrameworkElement, FrameworkElement>(element, parent));
 			return element;
 		}
 
@@ -217,7 +324,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 		}
 
 		public void Deploy(GDbTabWrapper<TKey, TValue> tab, GTabSettings<TKey, TValue> settings, bool noUpdate = false) {
-			foreach (Tuple<FrameworkElement, FrameworkElement> element in _deployControls) {
+			foreach (Utilities.Extension.Tuple<FrameworkElement, FrameworkElement> element in _deployControls) {
 				Grid grid = element.Item2 as Grid;
 				FrameworkElement fElement = element.Item1;
 
@@ -246,8 +353,8 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 			if (noUpdate)
 				return;
 
-			foreach (Tuple<DbAttribute, FrameworkElement> v in _update) {
-				Tuple<DbAttribute, FrameworkElement> x = v;
+			foreach (Utilities.Extension.Tuple<DbAttribute, FrameworkElement> v in _update) {
+				Utilities.Extension.Tuple<DbAttribute, FrameworkElement> x = v;
 
 				if (x.Item1.DataType == typeof(int)) {
 					TextBox element = (TextBox)x.Item2;
@@ -277,11 +384,12 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 								if (val == element.Text)
 									return;
 
-								element.Text = item.GetValue<string>(x.Item1);
+								element.Text = val;
 								element.UndoLimit = 0;
 								element.UndoLimit = int.MaxValue;
 							}
 							catch {
+								Z.F();
 							}
 						})));
 
@@ -380,11 +488,11 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 		}
 
 		public void AddElement(FrameworkElement element) {
-			_deployControls.Add(new Tuple<FrameworkElement, FrameworkElement>(element, null));
+			_deployControls.Add(new Utilities.Extension.Tuple<FrameworkElement, FrameworkElement>(element, null));
 		}
 
 		public T AddElement<T>(T element) where T : FrameworkElement {
-			_deployControls.Add(new Tuple<FrameworkElement, FrameworkElement>(element, null));
+			_deployControls.Add(new Utilities.Extension.Tuple<FrameworkElement, FrameworkElement>(element, null));
 			return element;
 		}
 
@@ -434,13 +542,13 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 				FrameworkElement element = AddTextBox(row, column, parent);
 
 				_resetFields.Add(element);
-				_update.Add(new Tuple<DbAttribute, FrameworkElement>(attribute, element));
+				_update.Add(new Utilities.Extension.Tuple<DbAttribute, FrameworkElement>(attribute, element));
 			}
 			else if (attribute.DataType == typeof(bool)) {
 				FrameworkElement element = AddCheckBox(row, column, parent);
 
 				_resetFields.Add(element);
-				_update.Add(new Tuple<DbAttribute, FrameworkElement>(attribute, element));
+				_update.Add(new Utilities.Extension.Tuple<DbAttribute, FrameworkElement>(attribute, element));
 			}
 			else if (attribute.DataType.BaseType == typeof(Enum)) {
 				ComboBox element = AddComboBox(row, column, parent);
@@ -448,7 +556,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 				element.ItemsSource = Enum.GetValues(attribute.DataType).Cast<Enum>().Select(p => _getDescription(Description.GetDescription(p)));
 
 				_resetFields.Add(element);
-				_update.Add(new Tuple<DbAttribute, FrameworkElement>(attribute, element));
+				_update.Add(new Utilities.Extension.Tuple<DbAttribute, FrameworkElement>(attribute, element));
 			}
 			else if (_isType<FormatConverter<TKey, TValue>>(attribute.DataType)) {
 				FormatConverter<TKey, TValue> obj = (FormatConverter<TKey, TValue>)Activator.CreateInstance(attribute.DataType, new object[] { });
@@ -578,7 +686,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 		public Grid AddGrid(int row, int col, int rowSpan, int colSpan) {
 			Grid element = new Grid();
 			WpfUtilities.SetGridPosition(element, row, rowSpan, col, colSpan);
-			_deployControls.Add(new Tuple<FrameworkElement, FrameworkElement>(element, null));
+			_deployControls.Add(new Utilities.Extension.Tuple<FrameworkElement, FrameworkElement>(element, null));
 			return element;
 		}
 	}

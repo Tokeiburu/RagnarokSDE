@@ -7,10 +7,10 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <Border BorderBrush="#FF7D7DFF" Height="124" CornerRadius="3" BorderThickness="2" Width="284" >
         <Grid Height="120" HorizontalAlignment="Left" VerticalAlignment="Top">
-            <Image HorizontalAlignment="Left" Source="../../../../../Resources/collection_bg.png" RenderOptions.BitmapScalingMode="NearestNeighbor" VerticalAlignment="Top" SnapsToDevicePixels="True" Stretch="None" />
+            <Image Name="_resImage" HorizontalAlignment="Left" Source="../../../../../Resources/collection_bg.png" RenderOptions.BitmapScalingMode="NearestNeighbor" VerticalAlignment="Top" SnapsToDevicePixels="True" Stretch="None" />
             <Image Name="_itemImage" HorizontalAlignment="Left" RenderOptions.BitmapScalingMode="NearestNeighbor" VerticalAlignment="Top" SnapsToDevicePixels="True" Stretch="None" Margin="10 11 0 0" />
-            <ScrollViewer Width="180" Height="76" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="90 34 0 0">
-                <RichTextBox IsReadOnly="True" Name="_rtbItemDescription" BorderThickness="0" HorizontalAlignment="Left" VerticalAlignment="Top" >
+            <ScrollViewer Width="180" Height="76" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="90 34 0 0" Background="Transparent">
+                <RichTextBox IsReadOnly="True" Name="_rtbItemDescription" BorderThickness="0" HorizontalAlignment="Left" VerticalAlignment="Top" Background="Transparent" >
                     <RichTextBox.Resources>
                         <Style TargetType="{x:Type Paragraph}">
                             <Setter Property="Margin" Value="0"/>
@@ -18,8 +18,8 @@
                     </RichTextBox.Resources>
                 </RichTextBox>
             </ScrollViewer>
-            <Label Content="{Binding Path=Box.Text, RelativeSource={RelativeSource  AncestorType={x:Type UserControl}}}" HorizontalAlignment="Left" Foreground="White" VerticalAlignment="Top" Margin="91 1 0 0" FontSize="12" />
-            <Label Name="_cardName" Content="{Binding Path=Box.Text, RelativeSource={RelativeSource  AncestorType={x:Type UserControl}}}"  HorizontalAlignment="Left" Foreground="Black" VerticalAlignment="Top" Margin="90 2 0 0" FontSize="12" />
+            <Label Content="{Binding Path=Box.Text, RelativeSource={RelativeSource  AncestorType={x:Type UserControl}}}" HorizontalAlignment="Left" Foreground="{StaticResource PreviewItemTextBackground}" VerticalAlignment="Top" Margin="91 1 0 0" FontSize="12" />
+            <Label Name="_cardName" Content="{Binding Path=Box.Text, RelativeSource={RelativeSource  AncestorType={x:Type UserControl}}}"  HorizontalAlignment="Left" Foreground="{StaticResource PreviewItemTextForeground}" VerticalAlignment="Top" Margin="90 2 0 0" FontSize="12" />
         </Grid>
     </Border>
 </UserControl>

@@ -133,7 +133,7 @@ namespace SDE.Editor.Writers {
 			if (path == null || encoding == null)
 				throw new ArgumentNullException((path == null ? "path" : "encoding"));
 
-			Stream stream = FtpHelper.IsSystemFile(path) ? new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultFileStreamBufferSize, FileOptions.SequentialScan) : FtpHelper.OpenRead(path);
+			Stream stream = IOHelper.IsSystemFile(path) ? new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultFileStreamBufferSize, FileOptions.SequentialScan) : IOHelper.OpenRead(path);
 			Init(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize);
 		}
 

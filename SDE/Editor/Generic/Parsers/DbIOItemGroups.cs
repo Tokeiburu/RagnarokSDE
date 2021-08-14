@@ -43,7 +43,7 @@ namespace SDE.Editor.Generic.Parsers {
 				var ele = new LibconfigParser(debug.FilePath);
 				var table = debug.AbsractDb.Table;
 
-				foreach (LibconfigKeyValue group in ele.Output.OfType<LibconfigKeyValue>()) {
+				foreach (ParserKeyValue group in ele.Output.OfType<ParserKeyValue>()) {
 					string groupAegisName = group.Key;
 					int groupId = _aegisNameToId(groupAegisName);
 
@@ -64,12 +64,12 @@ namespace SDE.Editor.Generic.Parsers {
 						string itemName;
 						int quantity;
 
-						if (itemEntry is LibconfigList) {
-							LibconfigList list = (LibconfigList)itemEntry;
+						if (itemEntry is ParserList) {
+							ParserList list = (ParserList)itemEntry;
 							itemName = list.Objects[0].ObjectValue;
 							quantity = Int32.Parse(list.Objects[1].ObjectValue);
 						}
-						else if (itemEntry is LibconfigString) {
+						else if (itemEntry is ParserString) {
 							itemName = itemEntry.ObjectValue;
 							quantity = 1;
 						}
@@ -140,12 +140,12 @@ namespace SDE.Editor.Generic.Parsers {
 			var table = db.Table;
 
 			if (db.Attached[serverDb] == null) {
-				db.Attached[serverDb] = new Tuple<ServerDbs, HashSet<int>>(serverDb, new HashSet<int>());
+				db.Attached[serverDb] = new Utilities.Extension.Tuple<ServerDbs, HashSet<int>>(serverDb, new HashSet<int>());
 			}
 
-			HashSet<int> loadedIds = ((Tuple<ServerDbs, HashSet<int>>)db.Attached[serverDb]).Item2;
+			HashSet<int> loadedIds = ((Utilities.Extension.Tuple<ServerDbs, HashSet<int>>)db.Attached[serverDb]).Item2;
 
-			foreach (string[] elements in TextFileHelper.GetElementsByCommas(FtpHelper.ReadAllBytes(file))) {
+			foreach (string[] elements in TextFileHelper.GetElementsByCommas(IOHelper.ReadAllBytes(file))) {
 				try {
 					int itemId;
 					int iItemId;
@@ -284,7 +284,7 @@ namespace SDE.Editor.Generic.Parsers {
 							if (isModified) break;
 
 							// Check if the file has more groups than what it's supposed to
-							HashSet<int> loadedIds = ((Tuple<ServerDbs, HashSet<int>>)db.Attached[debug.DbSource]).Item2;
+							HashSet<int> loadedIds = ((Utilities.Extension.Tuple<ServerDbs, HashSet<int>>)db.Attached[debug.DbSource]).Item2;
 
 							foreach (var id in loadedIds) {
 								if (!affectedGroups.Contains(id)) {
@@ -374,7 +374,7 @@ namespace SDE.Editor.Generic.Parsers {
 						builder.AppendLine();
 					}
 			
-					FtpHelper.WriteAllText(debug.FilePath, builder.ToString());
+					IOHelper.WriteAllText(debug.FilePath, builder.ToString());
 				}
 			}
 			catch (Exception err) {

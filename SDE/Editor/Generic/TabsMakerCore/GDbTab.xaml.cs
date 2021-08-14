@@ -14,7 +14,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 	/// Interaction logic for GDbTab.xaml
 	/// </summary>
 	public partial class GDbTab : TabItem {
-		public static Tuple LastSelectedTuple;
+		public static Database.Tuple LastSelectedTuple;
 
 		public GDbTab() {
 			InitializeComponent();
@@ -59,7 +59,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 		public virtual void SetRange(List<int> selectedIds) {
 		}
 
-		public virtual void SelectItems(List<Tuple> selectedIds) {
+		public virtual void SelectItems(List<Database.Tuple> selectedIds) {
 		}
 
 		public virtual void CopyItemTo() {
@@ -132,11 +132,11 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 					return;
 				}
 
-				var last = _listView.SelectedItems.OfType<Tuple>().Last();
+				var last = _listView.SelectedItems.OfType<Database.Tuple>().Last();
 				_listView.SelectedItems.Remove(last);
 				_listView.SelectedItems.Insert(0, last);
 
-				var items = new List<Tuple>(_listView.SelectedItems.OfType<Tuple>());
+				var items = new List<Database.Tuple>(_listView.SelectedItems.OfType<Database.Tuple>());
 
 				_listView.SelectedItem = null;
 

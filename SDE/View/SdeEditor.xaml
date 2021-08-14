@@ -8,7 +8,7 @@
                  xmlns:Application="clr-namespace:GrfToWpfBridge.Application;assembly=GrfToWpfBridge"
                  xmlns:view="clr-namespace:SDE.View"
                  xmlns:controls="clr-namespace:SDE.View.Controls"
-                 Height="600" Width="941">
+                 Height="600" Width="941" Background="{StaticResource TabItemBackground}" Foreground="{StaticResource TextForeground}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
@@ -87,6 +87,7 @@
                 <Separator />
                 <MenuItem Header="Export">
                     <MenuItem Name="_menuItemExportTradeRestrictions" Header="Generate trade restrictions..." ListView:WpfUtils.ImagePath="export.png" Click="_menuItemExportTradeRestrictions_Click" />
+                    <MenuItem Name="_menuItemQuestExport" Header="Generate quest lub..." Click="_menuItemQuestExport_Click" />
                 </MenuItem>
                 <MenuItem Header="Client Tables">
                     <MenuItem Name="_menuItemUpdateClientQuests" Header="Update Client Quests" ListView:WpfUtils.ImagePath="notepad.png" Click="_menuItemUpdateClientQuests_Click" />
@@ -105,8 +106,15 @@
                 <Separator />
                 <MenuItem Name="_menuItemBackups" ListView:WpfUtils.ImagePath="archive.png" Header="Backups manager" Click="_menuItemBackups_Click" />
                 <Separator />
+                <MenuItem Name="_menuItemMapCache" ListView:WpfUtils.ImagePath="cache.png" Header="Mapcache editor" Click="_menuItemMapCache_Click" />
+                <MenuItem Name="_menuItemMobStats" ListView:WpfUtils.ImagePath="properties.png" Header="Mob stats adjust" Click="_menuItemMobStats_Click" />
                 <MenuItem Name="_menuItemShopSimulator" ListView:WpfUtils.ImagePath="editor.png" Header="Shop simulator" Click="_menuItemShopSimulator_Click" />
+                <MenuItem Name="_menuItemConvertItemIds" ListView:WpfUtils.ImagePath="convert.png" Header="Convert item IDs from text" Click="_menuItemConvertItemIds_Click" />
                 <MenuItem Name="_menuItemDebugTables" ListView:WpfUtils.ImagePath="warning16.png" Header="Debug tables" Click="_menuItemDebugTables_Click" />
+                <MenuItem Header="Client item image export...">
+                    <MenuItem Name="_menuItemInventoryExport" Header="Export inventory images..." Click="_menuItemInventoryExport_Click" />
+                    <MenuItem Name="_menuItemIllustrationExport" Header="Export illustration images..." Click="_menuItemIllustrationExport_Click" />
+                </MenuItem>
                 <Separator />
                 <MenuItem Name="_menuItemSettings" ListView:WpfUtils.ImagePath="settings.png" Header="Settings" Click="_menuItemSettings_Click" />
             </MenuItem>
@@ -118,14 +126,14 @@
             <controls:ToggleMemoryButton x:Name="_tnbRedo" PrimaryButtonImagePath="forward.png" DisplayFormat="Go forward {0} element" />
         </DockPanel>
         <Styles:TkProgressBar Name="_progressBar" Width="300" HorizontalAlignment="Right" Margin="0 0 3 0"  />
-        <Border Background="#F7F9FD" Grid.Row="1">
+        <Border Background="{StaticResource TabControlBackground}" Grid.Row="1" SnapsToDevicePixels="True">
             <Grid>
-                <TabControl Name="_mainTabControl" Background="White" SelectionChanged="_mainTabControl_SelectionChanged" Style="{DynamicResource TabControlStyled}">
+                <TabControl SnapsToDevicePixels="True" Name="_mainTabControl" SelectionChanged="_mainTabControl_SelectionChanged" Style="{DynamicResource TabControlStyled}">
                     <TabItem Style="{DynamicResource TabItemStyledLess}">
                         <TabItem.Header>
-                            <controls:DisplayLabel FontWeight="Bold" DisplayText="Settings" />
+                            <controls:DisplayLabel FontWeight="Bold" DisplayText="Settings" Foreground="{StaticResource TextForeground}"/>
                         </TabItem.Header>
-                        <Grid>
+                        <Grid SnapsToDevicePixels="True">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="auto" />
                                 <RowDefinition Height="auto" />
@@ -144,7 +152,7 @@
                                         <RowDefinition Height="auto" />
                                         <RowDefinition Height="auto" />
                                     </Grid.RowDefinitions>
-                                    <Label Content="Client encoding" Padding="0" Margin="3" VerticalAlignment="Center">
+                                    <Label Content="Client encoding" Padding="0" Margin="3" VerticalAlignment="Center" Foreground="{StaticResource TextForeground}">
                                         <Label.ToolTip>
                                             <TextBlock>
                                         Encoding used for the client databases and lua files.
@@ -152,7 +160,7 @@
                                         </Label.ToolTip>
                                     </Label>
                                     <Application:EncodingPicker Grid.Column="1" Margin="3" Name="_comboBoxEncoding" IsReadOnly="True" Width="120" HorizontalAlignment="Left" />
-                                    <Label Content="Server encoding" Padding="0" Grid.Row="1" Margin="3" VerticalAlignment="Center">
+                                    <Label Content="Server encoding" Padding="0" Grid.Row="1" Margin="3" VerticalAlignment="Center" Foreground="{StaticResource TextForeground}">
                                         <Label.ToolTip>
                                             <TextBlock>
                                         Encoding used to read and write the server database files.
@@ -161,7 +169,7 @@
                                     </Label>
                                     <Application:EncodingPicker Grid.Column="1" Grid.Row="1" Margin="3" Name="_comboBoxEncodingServer" IsReadOnly="True" Width="120" HorizontalAlignment="Left" />
                                 </Grid>
-                            <TextBlock Margin="3" Text="Resource files or folders (drop a GRF or a data folder) : " />
+                            <TextBlock Margin="3" Text="Resource files or folders (drop a GRF or a data folder) : " Foreground="{StaticResource TextForeground}" />
                             </StackPanel>
                             <MultiGrf:MetaGrfResourcesViewer Grid.Row="1" x:Name="_metaGrfViewer" Height="100" />
                             <Grid Name="_gridTextFilesSettings" Grid.Row="2" >
@@ -170,7 +178,6 @@
                                 </Grid.ColumnDefinitions>
                             </Grid>
                             <StackPanel Name="_spPaths" Grid.Row="2">
-                                
                             </StackPanel>
                             <Grid Grid.Row="4">
                                 <Grid.RowDefinitions>
@@ -178,17 +185,17 @@
                                     <RowDefinition Height="auto" />
                                     <RowDefinition />
                                 </Grid.RowDefinitions>
-                                <CheckBox Margin="3" Name="_cbClientDbSync" Content="Synchronize with client database files" HorizontalAlignment="Left" />
+                                <CheckBox Margin="3" Name="_cbClientDbSync" Content="Synchronize with client database files" HorizontalAlignment="Left" Foreground="{StaticResource TextForeground}" />
                                 <DockPanel Grid.Row="1">
-                                    <CheckBox Margin="3 3 15 3" Name="_cbUseLuaFiles" Content="Use lua files" HorizontalAlignment="Left" />
-                                    <Button HorizontalAlignment="Left" Name="_buttonLuaSettings" Click="_menuItemEditLuaSettings_Click">
+                                    <CheckBox Margin="3 3 15 3" Name="_cbUseLuaFiles" Content="Use lua files" HorizontalAlignment="Left" Foreground="{StaticResource TextForeground}" />
+                                    <Button HorizontalAlignment="Left" Name="_buttonLuaSettings" Click="_menuItemEditLuaSettings_Click" VerticalAlignment="Top">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="auto" />
                                                 <ColumnDefinition />
                                             </Grid.ColumnDefinitions>
                                             <Image Grid.Column="0" ListView:WpfUtils.ImagePath="settings.png" />
-                                            <Label Padding="0" Margin="3 0 3 0" VerticalAlignment="Center" Content="Edit lua settings" Grid.Column="1" />
+                                            <Label Padding="0" Margin="3 0 3 0" VerticalAlignment="Center" Content="Edit lua settings" Grid.Column="1" Foreground="{StaticResource TextForeground}" />
                                         </Grid>
                                     </Button>
                                 </DockPanel>
@@ -204,33 +211,21 @@
                                         <ColumnDefinition Width="4" />
                                         <ColumnDefinition />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Row="1" Text="Text files" Margin="3" />
-                                    <TextBlock Grid.Row="1" Grid.Column="3" Text="Lua files" Margin="3" />
-                                    <ListView Name="_listItemClientTxtFiles" Grid.Row="2" ScrollViewer.HorizontalScrollBarVisibility="Hidden" Grid.Column="0" Margin="3">
+                                    <TextBlock Grid.Row="1" Text="Text files" Margin="3" Foreground="{StaticResource TextForeground}" />
+                                    <TextBlock Grid.Row="1" Grid.Column="3" Text="Lua files" Margin="3" Foreground="{StaticResource TextForeground}" />
+                                    <ListView SnapsToDevicePixels="True" Name="_listItemClientTxtFiles" Grid.Row="2" ScrollViewer.HorizontalScrollBarVisibility="Hidden" Grid.Column="0" Margin="3">
                                         <ListView.ItemContainerStyle>
                                             <Style TargetType="ListViewItem">
                                                 <Setter Property="IsSelected" Value="{Binding Content.IsSelected, Mode=TwoWay, RelativeSource={RelativeSource Self}}"/>
-                                                <Setter Property="Template">
-                                                    <Setter.Value>
-                                                        <ControlTemplate TargetType="ListBoxItem">
-                                                            <ContentPresenter/>
-                                                        </ControlTemplate>
-                                                    </Setter.Value>
-                                                </Setter>
+                                                <Setter Property="Template" Value="{DynamicResource DefaultListViewControlTemplate}" />
                                             </Style>
                                         </ListView.ItemContainerStyle>
                                     </ListView>
-                                    <ListView IsEnabled="False" Name="_listItemClientLuaFiles" ScrollViewer.HorizontalScrollBarVisibility="Hidden" Grid.Row="2" Grid.Column="2" Margin="3">
+                                    <ListView SnapsToDevicePixels="True" IsEnabled="False" Name="_listItemClientLuaFiles" ScrollViewer.HorizontalScrollBarVisibility="Hidden" Grid.Row="2" Grid.Column="2" Margin="3">
                                         <ListView.ItemContainerStyle>
                                             <Style TargetType="ListViewItem">
                                                 <Setter Property="IsSelected" Value="{Binding Content.IsSelected, Mode=TwoWay, RelativeSource={RelativeSource Self}}"/>
-                                                <Setter Property="Template">
-                                                    <Setter.Value>
-                                                        <ControlTemplate TargetType="ListBoxItem">
-                                                            <ContentPresenter/>
-                                                        </ControlTemplate>
-                                                    </Setter.Value>
-                                                </Setter>
+                                                <Setter Property="Template" Value="{DynamicResource DefaultListViewControlTemplate}" />
                                             </Style>
                                         </ListView.ItemContainerStyle>
                                     </ListView>
@@ -238,7 +233,7 @@
                             </Grid>
                         </Grid>
                     </TabItem>
-                    <TabItem Style="{DynamicResource TabItemStyledLess}" >
+                    <TabItem Style="{DynamicResource TabItemStyledLess}" Foreground="{StaticResource TextForeground}">
                         <TabItem.Header>
                             <controls:DisplayLabel FontWeight="Bold" DisplayText="Error console" />
                         </TabItem.Header>
@@ -246,7 +241,7 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition />
                             </Grid.RowDefinitions>
-                            <ListView Foreground="Black" AllowDrop="True" Grid.Row="1" Name="_debugList" SelectionMode="Extended" BorderThickness="0" FocusVisualStyle="{x:Null}"
+                            <ListView Foreground="{DynamicResource TextForeground}" AllowDrop="True" Grid.Row="1" Name="_debugList" SelectionMode="Extended" BorderThickness="0" FocusVisualStyle="{x:Null}"
                             ListView:WpfUtils.IsGridSortable="True" VirtualizingStackPanel.IsVirtualizing="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                 <ListView.ContextMenu>
                                     <ContextMenu>

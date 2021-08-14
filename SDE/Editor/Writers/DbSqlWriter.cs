@@ -113,7 +113,7 @@ namespace SDE.Editor.Writers {
 		}
 
 		public void Write() {
-			FtpHelper.WriteAllText(FileOutput, Builder.ToString());
+			IOHelper.WriteAllText(FileOutput, Builder.ToString());
 		}
 	}
 }

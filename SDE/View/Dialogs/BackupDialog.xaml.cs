@@ -6,8 +6,8 @@ using System.Windows.Input;
 using ErrorManager;
 using GRF.Threading;
 using SDE.ApplicationConfiguration;
-using SDE.Core.ViewItems;
 using SDE.Editor.Engines.BackupsEngine;
+using SDE.View.ObjectView;
 using TokeiLibrary;
 using TokeiLibrary.WPF;
 using TokeiLibrary.WPF.Styles;
@@ -28,10 +28,10 @@ namespace SDE.View.Dialogs {
 
 			WindowStartupLocation = WindowStartupLocation.CenterOwner;
 
-			Extensions.GenerateListViewTemplate(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			ListViewDataTemplateHelper.GenerateListViewTemplateNew(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 					new ListViewDataTemplateHelper.GeneralColumnInfo {Header = "Date", DisplayExpression = "Date", SearchGetAccessor = "DateInt", ToolTipBinding = "Date", TextWrapping = TextWrapping.Wrap, TextAlignment = TextAlignment.Center, FixedWidth = 140 },
 					new ListViewDataTemplateHelper.RangeColumnInfo {Header = "Database path", DisplayExpression = "DbPath", SearchGetAccessor = "DbPath", IsFill = true, ToolTipBinding = "DbPath", MinWidth = 100, TextWrapping = TextWrapping.Wrap }
-				}, null, new string[] { "Normal", "Black" });
+				}, null, new string[] { "Normal", "{DynamicResource TextForeground}" });
 
 			_items = new RangeObservableCollection<BackupView>();
 			_listView.ItemsSource = _items;

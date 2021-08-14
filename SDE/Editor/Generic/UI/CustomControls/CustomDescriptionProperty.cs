@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,7 +17,7 @@ using TokeiLibrary.WPF;
 using Utilities;
 
 namespace SDE.Editor.Generic.UI.CustomControls {
-	public class CustomDescriptionProperty<TKey, TValue> : ICustomControl<TKey, TValue> where TValue : Tuple {
+	public class CustomDescriptionProperty<TKey, TValue> : ICustomControl<TKey, TValue> where TValue : Database.Tuple {
 		private static TextEditor _lastAccessed;
 		private static TextEditorColorControl _tecc;
 		private readonly DbAttribute _attribute;
@@ -87,6 +88,7 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 			panel.SetValue(Grid.ColumnProperty, _gridColumn);
 
 			Label label = new Label { Content = "Description" };
+			label.SetValue(TextBlock.ForegroundProperty, Application.Current.Resources["TextForeground"] as Brush);
 
 			Button button = new Button();
 			button.Margin = new Thickness(3);
@@ -102,6 +104,7 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 
 				TextEditorColorControl colorControl = new TextEditorColorControl();
 				Label label2 = new Label { Content = "Color picker" };
+				label2.SetValue(TextBlock.ForegroundProperty, Application.Current.Resources["TextForeground"] as Brush);
 
 				_tecc = colorControl;
 				_lastAccessed = _textBox;
@@ -181,7 +184,7 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 			})));
 
 			_realBox.TextChanged += delegate {
-				WpfUtilities.UpdateRtb(_previewTextBox, _realBox.Text);
+				WpfUtilities.UpdateRtb(_previewTextBox, _realBox.Text, true);
 				if (_avalonUpdate) return;
 				_textBox.Text = _realBox.Text;
 			};
@@ -217,24 +220,26 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 
 			try {
 				_tab.Table.Commands.Begin();
-				var tuple = _tab.List.SelectedItem as TValue;
 
-				if (tuple != null) {
-					var table = _tab.Table;
-					tuple = table.GetTuple(tuple.GetKey<TKey>());
+				foreach (var tuple2 in _tab.List.SelectedItems.OfType<TValue>()) {
+					if (tuple2 != null) {
+						var table = _tab.Table;
+						var tuple = table.GetTuple(tuple2.GetKey<TKey>());
 
-					int index = 1;
+						int index = 1;
 
-					for (int i = index; i < 4; i++) {
-						string id = tuple.GetValue<string>(i);
-						string un = tuple.GetValue<string>(i + 3);
+						for (int i = index; i < 4; i++) {
+							string id = tuple.GetValue<string>(i);
+							string un = tuple.GetValue<string>(i + 3);
 
-						if (id != un) {
-							table.Commands.Set(tuple, i + 3, id);
-							changed = true;
+							if (id != un) {
+								table.Commands.Set(tuple, i + 3, id);
+								changed = true;
+							}
 						}
 					}
 				}
+
 			}
 			catch (Exception err) {
 				ErrorHandler.HandleException(err);

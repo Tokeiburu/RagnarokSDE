@@ -159,7 +159,7 @@ namespace SDE.Editor.Engines.DatabaseEngine {
 			OnPreviewReloaded();
 
 			try {
-				FtpHelper.SetupFileManager();
+				IOHelper.SetupFileManager();
 				Commands.ClearCommands();
 				DbPathLocator.ClearStoredFiles();
 				ResetAllSettings();
@@ -228,7 +228,7 @@ namespace SDE.Editor.Engines.DatabaseEngine {
 
 				var dbs = _dbs.Values.ToList();
 
-				FtpHelper.SetupFileManager();
+				IOHelper.SetupFileManager();
 
 				for (int i = 0; i < dbs.Count; i++) {
 					var db = dbs[i];
@@ -380,6 +380,7 @@ namespace SDE.Editor.Engines.DatabaseEngine {
 		#region Temporary settings
 		private static readonly SdeAppConfiguration.BufferedProperty<ServerType> _bufferedServerType = new SdeAppConfiguration.BufferedProperty<ServerType>(ConfigAsker, "[SdeDatabase - Server type]", ServerType.Unknown, _convertServerType);
 		private static bool? _isRenewal;
+		private static bool? _isNova;
 
 		public bool IsRenewal {
 			get {
@@ -388,6 +389,16 @@ namespace SDE.Editor.Engines.DatabaseEngine {
 				}
 
 				return _isRenewal.Value;
+			}
+		}
+
+		public bool IsNova {
+			get {
+				if (_isNova == null) {
+					_isNova = DbPathLocator.GetIsNova();
+				}
+
+				return _isNova.Value;
 			}
 		}
 

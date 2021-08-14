@@ -4,33 +4,34 @@
               xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
                  xmlns:TokeiLibrary="clr-namespace:TokeiLibrary;assembly=TokeiLibrary"
                  xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
-                 Width="600" Height="450" >
+                 Width="600" Height="450" 
+                 Background="{StaticResource TabItemBackground}" Foreground="{StaticResource TextForeground}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
         <Border Background="{DynamicResource TabControlBackground}">
-            <TabControl Name="_tabControl" Style="{DynamicResource TabControlStyled}">
-                <TabItem Header="Table errors" Style="{DynamicResource TabItemStyled}">
+            <TabControl Name="_tabControl" Style="{DynamicResource TabControlStyled}" Foreground="{StaticResource TextForeground}">
+                <TabItem Header="Table errors" Style="{DynamicResource TabItemStyled}" Foreground="{StaticResource TextForeground}">
                     <StackPanel>
                         <StackPanel>
-                            <Label Content="Table errors" FontWeight="Bold" FontSize="16" Margin="3 10 0 5" />
+                            <Label Content="Table errors" FontWeight="Bold" FontSize="16" Margin="3 10 0 5" Foreground="{StaticResource TextForeground}"/>
                             <Rectangle Margin="5 0 5 5" Stroke="{DynamicResource SeperatorBrush}" VerticalAlignment="Stretch" />
                         </StackPanel>
 
                         <Styles:FancyButton Click="_buttonTableErrors_Click" x:Name="_buttonTableErrors" TextHeader="Table errors" TextDescription="Look for errors in the server tables" Margin="3" HorizontalAlignment="Left" />
                     </StackPanel>
                 </TabItem>
-                <TabItem Header="Resource errors" Style="{DynamicResource TabItemStyled}">
+                <TabItem Header="Resource errors" Style="{DynamicResource TabItemStyled}" Foreground="{StaticResource TextForeground}">
                     <StackPanel>
                         <StackPanel>
-                            <Label Content="Resource errors" FontWeight="Bold" FontSize="16" Margin="3 10 0 5" />
+                            <Label Content="Resource errors" FontWeight="Bold" FontSize="16" Margin="3 10 0 5" Foreground="{StaticResource TextForeground}" />
                             <Rectangle Margin="5 0 5 5" Stroke="{DynamicResource SeperatorBrush}" VerticalAlignment="Stretch" />
                         </StackPanel>
 
                         <Styles:FancyButton Click="_buttonFindErrors_Click" x:Name="_buttonFindErrors" TextHeader="Resource errors" TextDescription="Look for texture or sprite errors" Margin="3" HorizontalAlignment="Left" />
-                        <CheckBox Name="_cbResSelectAll" Content="Select all" Margin="3" HorizontalAlignment="Left" />
+                        <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbResSelectAll" Content="Select all" Margin="3" HorizontalAlignment="Left" />
                         <TextBlock Text="Errors to look for :" Margin="3" />
                         <Grid Name="_findErrors">
                             <Grid.ColumnDefinitions>
@@ -38,14 +39,14 @@
                                 <ColumnDefinition Width="auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel>
-                                <CheckBox Name="_cbResExistingOnly" Content="Only look for existing item_db entries" Margin="3" />
-                                <CheckBox Name="_cbResItem" Content="Missing inventory images" Margin="3" />
-                                <CheckBox Name="_cbResIllust" Content="Missing card illustration images" Margin="3" />
-                                <CheckBox Name="_cbResCollection" Content="Missing collection images" Margin="3" />
-                                <CheckBox Name="_cbResDrag" Content="Missing drag sprites" Margin="3" />
-                                <CheckBox Name="_cbResShield" Content="Missing shield sprites" Margin="3" />
-                                <CheckBox Name="_cbResGarment" Content="Missing garment sprites" Margin="3" />
-                                <CheckBox Name="_cbResWeapon" Content="Missing weapon sprites" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbResExistingOnly" Content="Only look for existing item_db entries" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbResItem" Content="Missing inventory images" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbResIllust" Content="Missing card illustration images" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbResCollection" Content="Missing collection images" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbResDrag" Content="Missing drag sprites" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbResShield" Content="Missing shield sprites" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbResGarment" Content="Missing garment sprites" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbResWeapon" Content="Missing weapon sprites" Margin="3" />
                             </StackPanel>
                             <StackPanel Grid.Column="1">
                                 <CheckBox Name="_cbResHeadger" Content="Missing headgear sprites" Margin="3" />
@@ -59,15 +60,15 @@
                         </Grid>
                     </StackPanel>
                 </TabItem>
-                <TabItem Header="Client Items" Style="{DynamicResource TabItemStyled}">
+                <TabItem Header="Client Items" Style="{DynamicResource TabItemStyled}" Foreground="{StaticResource TextForeground}">
                     <StackPanel>
                         <StackPanel>
-                            <Label Content="Client Items" FontWeight="Bold" FontSize="16" Margin="3 10 0 5" />
+                            <Label Content="Client Items" FontWeight="Bold" FontSize="16" Margin="3 10 0 5" Foreground="{StaticResource TextForeground}" />
                             <Rectangle Margin="5 0 5 5" Stroke="{DynamicResource SeperatorBrush}" VerticalAlignment="Stretch" />
                         </StackPanel>
 
                         <Styles:FancyButton Click="_buttonScanClientItems_Click" x:Name="_buttonScanClientItems" TextHeader="Scan Client Items" TextDescription="Look for item description errors" Margin="3" HorizontalAlignment="Left" />
-                        <CheckBox Name="_cbCiSelectAll" Content="Select all" Margin="3" HorizontalAlignment="Left" />
+                        <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbCiSelectAll" Content="Select all" Margin="3" HorizontalAlignment="Left" />
                         <TextBlock Text="Errors to look for :" Margin="3" />
                         <Grid Name="_scanClientItems">
                             <Grid.ColumnDefinitions>
@@ -75,29 +76,29 @@
                                 <ColumnDefinition Width="auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel>
-                                <CheckBox Name="_cbCiClassNumber" Content="View ID (Class number)" Margin="3" />
-                                <CheckBox Name="_cbCiItemType" Content="Invalid item ID range" Margin="3" />
-                                <CheckBox Name="_cbCiDescription" Content="Item description" Margin="3" />
-                                <CheckBox Name="_cbCiClass" Content="Invalid value for Class field" Margin="3" />
-                                <CheckBox Name="_cbCiAttack" Content="Invalid value for Attack field" Margin="3" />
-                                <CheckBox Name="_cbCiDefense" Content="Invalid value for Defense field" Margin="3" />
-                                <CheckBox Name="_cbCiProperty" Content="Invalid value for Property field" Margin="3" />
-                                <CheckBox Name="_cbCiJob" Content="Invalid value for Applicable Job field" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbCiClassNumber" Content="View ID (Class number)" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbCiItemType" Content="Invalid item ID range" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbCiDescription" Content="Item description" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbCiClass" Content="Invalid value for Class field" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbCiAttack" Content="Invalid value for Attack field" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbCiDefense" Content="Invalid value for Defense field" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbCiProperty" Content="Invalid value for Property field" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbCiJob" Content="Invalid value for Applicable Job field" Margin="3" />
                             </StackPanel>
                             <StackPanel Grid.Column="1">
-                                <CheckBox Name="_cbCiRequiredLevel" Content="Invalid value for RequiredLevel field" Margin="3" />
-                                <CheckBox Name="_cbCiWeaponLevel" Content="Invalid value for WeaponLevel field" Margin="3" />
-                                <CheckBox Name="_cbCiWeight" Content="Invalid value for Weight field" Margin="3" />
-                                <CheckBox Name="_cbCiLocation" Content="Invalid value for Location field" Margin="3" />
-                                <CheckBox Name="_cbCiCompoundOn" Content="Invalid value for CompoundOn field" Margin="3" />
-                                <CheckBox Name="_cbCiName" Content="Invalid value for Name field" Margin="3" />
-                                <CheckBox Name="_cbCiIsCard" Content="Invalid value for IsCard field" Margin="3" />
-                                <CheckBox Name="_cbCiNumberOfSlots" Content="Invalid value for NumberOfSlots field" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbCiRequiredLevel" Content="Invalid value for RequiredLevel field" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbCiWeaponLevel" Content="Invalid value for WeaponLevel field" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbCiWeight" Content="Invalid value for Weight field" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbCiLocation" Content="Invalid value for Location field" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbCiCompoundOn" Content="Invalid value for CompoundOn field" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbCiName" Content="Invalid value for Name field" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbCiIsCard" Content="Invalid value for IsCard field" Margin="3" />
+                                <CheckBox Foreground="{StaticResource TextForeground}" Name="_cbCiNumberOfSlots" Content="Invalid value for NumberOfSlots field" Margin="3" />
                             </StackPanel>
                         </Grid>
                     </StackPanel>
                 </TabItem>
-                <TabItem Name="_tabItemResults" Header="Results" Style="{DynamicResource TabItemStyled}">
+                <TabItem Name="_tabItemResults" Header="Results" Style="{DynamicResource TabItemStyled}" Foreground="{StaticResource TextForeground}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="auto" />
@@ -105,7 +106,7 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0">
-                            <Label Name="_lbResults" Content="Results" FontWeight="Bold" FontSize="16" Margin="3 10 0 5" />
+                            <Label Name="_lbResults" Content="Results" FontWeight="Bold" FontSize="16" Margin="3 10 0 5" Foreground="{StaticResource TextForeground}" />
                             <Rectangle Margin="5 0 5 5" Stroke="{DynamicResource SeperatorBrush}" VerticalAlignment="Stretch" />
                         </StackPanel>
                         <WrapPanel Grid.Row="1">

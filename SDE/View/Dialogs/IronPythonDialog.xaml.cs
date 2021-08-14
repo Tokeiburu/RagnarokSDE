@@ -64,7 +64,7 @@ namespace SDE.View.Dialogs {
 			
 			Binder.Bind(_textEditor, () => SdeAppConfiguration.IronPythonScript);
 			Binder.Bind(_miAutocomplete, () => SdeAppConfiguration.IronPythonAutocomplete);
-
+			
 			AvalonLoader.Load(_textEditor);
 			AvalonLoader.SetSyntax(_textEditor, "Python");
 			_textEditor.TextArea.TextEntered += new TextCompositionEventHandler(_textArea_TextEntered);
@@ -73,12 +73,14 @@ namespace SDE.View.Dialogs {
 			this.PreviewKeyDown += new KeyEventHandler(_ironPythonDialog_PreviewKeyDown);
 
 			_completionWindow = new CompletionWindow(_textEditor.TextArea);
+			_completionWindow.Background = Application.Current.Resources["TabItemBackground"] as Brush;
 			_li = _completionWindow.CompletionList;
 			ListView lv = _li.ListBox;
 			lv.SelectionMode = SelectionMode.Single;
+			lv.Background = Application.Current.Resources["TabItemBackground"] as Brush;
 
 			//Image
-			Extensions.GenerateListViewTemplate(lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			ListViewDataTemplateHelper.GenerateListViewTemplateNew(lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 				new ListViewDataTemplateHelper.ImageColumnInfo { Header = "", DisplayExpression = "Image", TextAlignment = TextAlignment.Center, FixedWidth = 22, MaxHeight = 22, SearchGetAccessor = "Commands"},
 				new ListViewDataTemplateHelper.GeneralColumnInfo {Header = "Commands", DisplayExpression = "Text", TextAlignment = TextAlignment.Left, IsFill = true, ToolTipBinding = "Description"}
 			}, null, new string[] { }, "generateHeader", "false");
@@ -178,7 +180,7 @@ namespace SDE.View.Dialogs {
 		private void _textArea_TextEntering(object sender, TextCompositionEventArgs e) {
 			try {
 				if (e.Text.Length > 0 && _completionWindow != null) {
-					if (!char.IsLetterOrDigit(e.Text[0]) && e.Text[0] != '_' && e.Text[0] != ' ') {
+					if (!char.IsLetterOrDigit(e.Text[0]) && e.Text[0] != '_' && e.Text[0] != ' ' && e.Text[0] != '(' && e.Text[0] != ')') {
 						string word = AvalonLoader.GetWholeWordAdv(_textEditor.TextArea.Document, _textEditor);
 
 						var strategy = new RegexSearchStrategy(new Regex(word), true);
@@ -293,14 +295,16 @@ namespace SDE.View.Dialogs {
 
 			List<string> words = PythonEditorList.Tables.Where(p => p.IndexOf(word, StringComparison.OrdinalIgnoreCase) != -1).OrderBy(p => p).ToList();
 			List<string> constants = PythonEditorList.Constants.Where(p => p.IndexOf(word, StringComparison.OrdinalIgnoreCase) != -1).OrderBy(p => p).ToList();
+			List<string> flags = FlagsManager.GetFlagNames().Where(p => p.IndexOf(word, StringComparison.OrdinalIgnoreCase) != -1).OrderBy(p => p).ToList();
 
-			if (words.Count == 0 && constants.Count == 0) {
+			if (words.Count == 0 && constants.Count == 0 && flags.Count == 0) {
 				_completionWindow.Close();
 				return;
 			}
 
 			IEnumerable<ICompletionData> results = words.Select(p => (ICompletionData)new MyCompletionData(p, _textEditor, DataType.Function)).
-				Concat(constants.Select(p => (ICompletionData)new MyCompletionData(p, _textEditor, DataType.Constant)));
+				Concat(constants.Select(p => (ICompletionData)new MyCompletionData(p, _textEditor, DataType.Constant))).
+				Concat(flags.Select(p => (ICompletionData)new MyCompletionData(p, _textEditor, DataType.Constant)));
 
 			data.AddRange(results);
 

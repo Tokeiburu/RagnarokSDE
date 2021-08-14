@@ -54,7 +54,7 @@ namespace SDE.Editor.Engines.LuaEngine {
 
 				if (table != null) {
 					foreach (var tuple in db.Table.FastItems) {
-						var sprite = tuple.GetValue<string>(ServerMobAttributes.SpriteName);
+						var sprite = tuple.GetValue<string>(ServerMobAttributes.AegisName);
 
 						if (!String.IsNullOrEmpty(sprite)) {
 							table["JT_" + sprite.ToUpper()] = tuple.GetKey<int>().ToString(CultureInfo.InvariantCulture);
@@ -132,7 +132,7 @@ namespace SDE.Editor.Engines.LuaEngine {
 					}
 
 					foreach (var tuple in metaTable.FastItems.OrderBy(p => p.Key)) {
-						var ssprite = "JT_" + (tuple.GetValue<string>(ServerMobAttributes.SpriteName) ?? "");
+						var ssprite = "JT_" + (tuple.GetValue<string>(ServerMobAttributes.AegisName) ?? "");
 						var csprite = tuple.GetValue<string>(ServerMobAttributes.ClientSprite);
 
 						if (ssprite != "JT_") {
@@ -934,7 +934,7 @@ namespace SDE.Editor.Engines.LuaEngine {
 			return builder.ToString();
 		}
 
-		public static string GetAccAegisNameFromTuple(Tuple tuple) {
+		public static string GetAccAegisNameFromTuple(Database.Tuple tuple) {
 			string accessoryName = tuple.GetValue<string>(ServerItemAttributes.AegisName.Index);
 			return LatinOnly(accessoryName);
 		}

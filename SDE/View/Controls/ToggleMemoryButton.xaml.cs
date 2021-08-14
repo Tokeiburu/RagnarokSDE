@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using SDE.ApplicationConfiguration;
 using TokeiLibrary;
 using TokeiLibrary.WPF.Styles.ListView;
 using Utilities.Commands;
@@ -26,6 +27,10 @@ namespace SDE.View.Controls {
 
 		public ToggleMemoryButton() {
 			InitializeComponent();
+
+			if (SdeAppConfiguration.ThemeIndex == 1) {
+				_unclickableBorder.Margin = new Thickness(-6, -4, -6, -4);
+			}
 
 			ListViewDataTemplateHelper.GenerateListViewTemplateNew(_listView, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 				new ListViewDataTemplateHelper.GeneralColumnInfo {Header = "Commands", DisplayExpression = "CommandDescription", FixedWidth = 230, TextAlignment = TextAlignment.Left, ToolTipBinding = "CommandDescription" }

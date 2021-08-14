@@ -37,6 +37,10 @@ namespace SDE.Editor.Engines {
 			return File.ReadAllBytes(path);
 		}
 
+		public override IEnumerable<string> ReadAllLines(string path, Encoding encoding) {
+			return File.ReadAllLines(path, encoding);
+		}
+
 		public override Stream OpenRead(string path) {
 			return File.OpenRead(path);
 		}

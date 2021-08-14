@@ -39,6 +39,7 @@ namespace SDE.Editor.Engines {
 		public abstract void WriteAllText(string path, string content, Encoding encoding);
 		public abstract bool Exists(string path);
 		public abstract byte[] ReadAllBytes(string path);
+		public abstract IEnumerable<string> ReadAllLines(string path, Encoding encoding);
 		public abstract Stream OpenRead(string path);
 		public abstract bool CanUseBackupEngine();
 		public abstract bool HasBeenMapped();
@@ -46,7 +47,7 @@ namespace SDE.Editor.Engines {
 		public abstract List<ChannelSftp.LsEntry> GetDirectories(string path);
 	}
 
-	public static class FtpHelper {
+	public static class IOHelper {
 		private static FileManager __interface;
 
 		private static FileManager _interface {
@@ -76,7 +77,7 @@ namespace SDE.Editor.Engines {
 		}
 
 		public static void WriteAllText(string path, string content) {
-			Encoding encoding = SdeAppConfiguration.EncodingServer;
+			Encoding encoding = SdeAppConfiguration.EncodingServer ?? Encoding.Default;
 
 			if (encoding.CodePage == Encoding.UTF8.CodePage)
 				encoding = Extensions.Utf8NoBom;
@@ -90,6 +91,10 @@ namespace SDE.Editor.Engines {
 
 		public static byte[] ReadAllBytes(string path) {
 			return _interface.ReadAllBytes(path);
+		}
+
+		public static IEnumerable<string> ReadAllLines(string path, Encoding encoding) {
+			return _interface.ReadAllLines(path, encoding ?? SdeAppConfiguration.EncodingServer);
 		}
 
 		public static Stream OpenRead(string path) {

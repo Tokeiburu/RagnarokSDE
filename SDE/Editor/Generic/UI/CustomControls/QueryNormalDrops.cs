@@ -7,10 +7,12 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using Database;
 using ErrorManager;
 using SDE.Editor.Engines.DatabaseEngine;
 using SDE.Editor.Engines.TabNavigationEngine;
+using SDE.Editor.Generic.Core;
 using SDE.Editor.Generic.Lists;
 using SDE.Editor.Generic.TabsMakerCore;
 using SDE.View.Dialogs;
@@ -22,7 +24,7 @@ using TokeiLibrary.WpfBugFix;
 using Extensions = SDE.Core.Extensions;
 
 namespace SDE.Editor.Generic.UI.CustomControls {
-	public class QueryNormalDrops<TKey, TValue> : ICustomControl<TKey, TValue> where TValue : Tuple {
+	public class QueryNormalDrops<TKey, TValue> : ICustomControl<TKey, TValue> where TValue : Database.Tuple {
 		private readonly int _rSpan;
 		private readonly int _row;
 		private RangeListView _lv;
@@ -53,6 +55,7 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 
 			Label label = new Label();
 			label.Content = "Normal drops";
+			label.SetValue(TextBlock.ForegroundProperty, Application.Current.Resources["TextForeground"] as Brush);
 			label.FontStyle = FontStyles.Italic;
 			label.Padding = new Thickness(0);
 			label.Margin = new Thickness(3);
@@ -66,12 +69,13 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 			_lv.Margin = new Thickness(3);
 			_lv.BorderThickness = new Thickness(1);
 			_lv.PreviewMouseRightButtonUp += _lv_PreviewMouseRightButtonUp;
+			_lv.Background = Application.Current.Resources["TabItemBackground"] as Brush;
 
-			Extensions.GenerateListViewTemplate(_lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
+			ListViewDataTemplateHelper.GenerateListViewTemplateNew(_lv, new ListViewDataTemplateHelper.GeneralColumnInfo[] {
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = ServerItemAttributes.Id.DisplayName, DisplayExpression = "ID", SearchGetAccessor = "ID", FixedWidth = 45, TextAlignment = TextAlignment.Right, ToolTipBinding = "ID" },
 				new ListViewDataTemplateHelper.RangeColumnInfo { Header = ServerItemAttributes.Name.DisplayName, DisplayExpression = "Name", SearchGetAccessor = "Name", IsFill = true, ToolTipBinding = "Name", TextWrapping = TextWrapping.Wrap, MinWidth = 40 },
 				new ListViewDataTemplateHelper.GeneralColumnInfo { Header = "Drop %", DisplayExpression = "Drop", SearchGetAccessor = "DropOriginal", ToolTipBinding = "DropOriginal", FixedWidth = 60, TextAlignment = TextAlignment.Right },
-			}, new DefaultListViewComparer<MobDropView>(), new string[] { "Deleted", "Red", "Added", "Blue", "Default", "Black", "IsCard", "Green" });
+			}, new DefaultListViewComparer<MobDropView>(), new string[] { "Default", "{DynamicResource TextForeground}", "IsCard", "{DynamicResource CellBrushModified}", "IsRandomGroup", "{DynamicResource CellBrushLzma}" });
 
 			_lv.ContextMenu = new ContextMenu();
 			_lv.MouseDoubleClick += new MouseButtonEventHandler(_lv_MouseDoubleClick);
@@ -132,60 +136,117 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 				string text = Clipboard.GetText();
 				string[] elementsToAdd = text.Split(',');
 
-				if (elementsToAdd.Length % 2 != 0) throw new Exception("The number of arguments must be even.");
+				if (DbPathLocator.IsYamlMob()) {
+					if (elementsToAdd.Length % 4 != 0) throw new Exception("The number of arguments must be even.");
 
-				Table<int, ReadableTuple<int>> btable = _tab.ProjectDatabase.GetMetaTable<int>(ServerDbs.Mobs);
-
-				try {
-					TValue item = (TValue)_tab.List.SelectedItem;
+					Table<int, ReadableTuple<int>> btable = _tab.ProjectDatabase.GetMetaTable<int>(ServerDbs.Mobs);
 
 					try {
-						btable.Commands.Begin();
+						TValue item = (TValue)_tab.List.SelectedItem;
 
-						int startIndex = ServerMobAttributes.Drop1ID.Index;
-						int i = 0;
+						try {
+							btable.Commands.Begin();
 
-						for (int j = 0; j < elementsToAdd.Length; j += 2) {
-							string sid = elementsToAdd[j];
-							string svalue = elementsToAdd[j + 1];
-							int value;
-							int id;
+							int startIndex = ServerMobAttributes.Drop1ID.Index;
+							int i = 0;
 
-							Int32.TryParse(sid, out id);
+							for (int j = 0; j < elementsToAdd.Length; j += 4) {
+								string sid = elementsToAdd[j];
+								string svalue = elementsToAdd[j + 1];
+								string stealProtected = elementsToAdd[j + 2];
+								string randGroup = elementsToAdd[j + 3];
+								int value;
+								int id;
 
-							if (id <= 0)
-								return;
+								Int32.TryParse(sid, out id);
 
-							if (!Extensions.GetIntFromFloatValue(svalue, out value)) {
-								ErrorHandler.HandleException("Invalid format (integer or float value only)");
-								return;
-							}
+								if (id <= 0)
+									return;
 
-							if (id >= 4000 && id < 4700) {
-								btable.Commands.Set((ReadableTuple<int>)(object)item, ServerMobAttributes.DropCardid.Index, id);
-								btable.Commands.Set((ReadableTuple<int>)(object)item, ServerMobAttributes.DropCardid.Index + 1, value);
-							}
-							else {
-								for (; i < 18; i += 2) {
+								if (!Extensions.GetIntFromFloatValue(svalue, out value)) {
+									ErrorHandler.HandleException("Invalid format (integer or float value only)");
+									return;
+								}
+
+								for (; i < 20; i += 2) {
 									if (item.GetValue<int>(startIndex + i) == 0) {
 										btable.Commands.Set((ReadableTuple<int>)(object)item, startIndex + i, id);
 										btable.Commands.Set((ReadableTuple<int>)(object)item, startIndex + i + 1, value);
+										btable.Commands.Set((ReadableTuple<int>)(object)item, ServerMobAttributes.Drop1RandomOptionGroup.Index + (i / 2), randGroup);
+										btable.Commands.Set((ReadableTuple<int>)(object)item, ServerMobAttributes.Drop1Flags.Index + (i / 2), stealProtected);
 										i += 2;
 										break;
 									}
 								}
 							}
 						}
-					}
-					finally {
-						btable.Commands.EndEdit();
-					}
+						finally {
+							btable.Commands.EndEdit();
+						}
 
-					_lv.ItemsSource = null;
-					_updateAction(item);
+						_lv.ItemsSource = null;
+						_updateAction(item);
+					}
+					catch (Exception err) {
+						ErrorHandler.HandleException(err);
+					}
 				}
-				catch (Exception err) {
-					ErrorHandler.HandleException(err);
+				else {
+					if (elementsToAdd.Length % 2 != 0) throw new Exception("The number of arguments must be even.");
+
+					Table<int, ReadableTuple<int>> btable = _tab.ProjectDatabase.GetMetaTable<int>(ServerDbs.Mobs);
+
+					try {
+						TValue item = (TValue)_tab.List.SelectedItem;
+
+						try {
+							btable.Commands.Begin();
+
+							int startIndex = ServerMobAttributes.Drop1ID.Index;
+							int i = 0;
+
+							for (int j = 0; j < elementsToAdd.Length; j += 2) {
+								string sid = elementsToAdd[j];
+								string svalue = elementsToAdd[j + 1];
+								int value;
+								int id;
+
+								Int32.TryParse(sid, out id);
+
+								if (id <= 0)
+									return;
+
+								if (!Extensions.GetIntFromFloatValue(svalue, out value)) {
+									ErrorHandler.HandleException("Invalid format (integer or float value only)");
+									return;
+								}
+
+								if (id >= 4000 && id < 4700) {
+									btable.Commands.Set((ReadableTuple<int>)(object)item, ServerMobAttributes.DropCardid.Index, id);
+									btable.Commands.Set((ReadableTuple<int>)(object)item, ServerMobAttributes.DropCardid.Index + 1, value);
+								}
+								else {
+									for (; i < 18; i += 2) {
+										if (item.GetValue<int>(startIndex + i) == 0) {
+											btable.Commands.Set((ReadableTuple<int>)(object)item, startIndex + i, id);
+											btable.Commands.Set((ReadableTuple<int>)(object)item, startIndex + i + 1, value);
+											i += 2;
+											break;
+										}
+									}
+								}
+							}
+						}
+						finally {
+							btable.Commands.EndEdit();
+						}
+
+						_lv.ItemsSource = null;
+						_updateAction(item);
+					}
+					catch (Exception err) {
+						ErrorHandler.HandleException(err);
+					}
 				}
 			}
 			catch (Exception err) {
@@ -197,11 +258,25 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 			if (_lv.SelectedItems.Count > 0) {
 				StringBuilder builder = new StringBuilder();
 
-				foreach (MobDropView item in _lv.SelectedItems) {
-					builder.Append(item.ID);
-					builder.Append(",");
-					builder.Append(item.DropOriginal);
-					builder.Append(",");
+				if (DbPathLocator.IsYamlMob()) {
+					foreach (MobDropView item in _lv.SelectedItems) {
+						builder.Append(item.ID);
+						builder.Append(",");
+						builder.Append(item.DropOriginal);
+						builder.Append(",");
+						builder.Append(item.StealProtected);
+						builder.Append(",");
+						builder.Append(item.RandomOptionGroup);
+						builder.Append(",");
+					}
+				}
+				else {
+					foreach (MobDropView item in _lv.SelectedItems) {
+						builder.Append(item.ID);
+						builder.Append(",");
+						builder.Append(item.DropOriginal);
+						builder.Append(",");
+					}
 				}
 
 				string res = builder.ToString().Trim(',');
@@ -240,6 +315,9 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 		}
 
 		private void _miAddCardDrop_Click(object sender, RoutedEventArgs e) {
+			if (DbPathLocator.IsYamlMob())
+				return;
+
 			TValue item = (TValue)_tab.List.SelectedItem;
 
 			if (item.GetValue<int>(ServerMobAttributes.DropCardid) != 0) {
@@ -306,14 +384,21 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 			Table<int, ReadableTuple<int>> btable = _tab.ProjectDatabase.GetMetaTable<int>(ServerDbs.Mobs);
 
 			try {
-				DropEditDialog dialog = new DropEditDialog("", "", ServerDbs.Items, _tab.ProjectDatabase, true);
+				DropEditDialog dialog = new DropEditDialog("", "", ServerDbs.Items, _tab.ProjectDatabase, true, (DbPathLocator.IsYamlMob() ? 3 : 0));
 				dialog.Owner = WpfUtilities.TopWindow;
 
 				if (dialog.ShowDialog() == true) {
 					string sid = dialog.Id;
 					string svalue = dialog.DropChance;
+					string randGroup = "";
+					bool stealProtected = false;
 					int value;
 					int id;
+
+					if (DbPathLocator.IsYamlMob()) {
+						randGroup = dialog.RandGroup;
+						stealProtected = dialog.StealProtected;
+					}
 
 					Int32.TryParse(sid, out id);
 
@@ -330,12 +415,18 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 					try {
 						btable.Commands.Begin();
 
+						int count = DbPathLocator.IsYamlMob() ? 20 : 18;
 						int startIndex = ServerMobAttributes.Drop1ID.Index;
 
-						for (int i = 0; i < 18; i += 2) {
+						for (int i = 0; i < count; i += 2) {
 							if (item.GetValue<int>(startIndex + i) == 0) {
 								btable.Commands.Set((ReadableTuple<int>)(object)item, startIndex + i, id);
 								btable.Commands.Set((ReadableTuple<int>)(object)item, startIndex + i + 1, value);
+
+								if (DbPathLocator.IsYamlMob()) {
+									btable.Commands.Set((ReadableTuple<int>)(object)item, ServerMobAttributes.Drop1RandomOptionGroup.Index + (i / 2), randGroup);
+									btable.Commands.Set((ReadableTuple<int>)(object)item, ServerMobAttributes.Drop1Flags.Index + (i / 2), stealProtected);
+								}
 								break;
 							}
 						}
@@ -362,14 +453,27 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 
 			try {
 				var selectedItem = (MobDropView)_lv.SelectedItem;
-				DropEditDialog dialog = new DropEditDialog(selectedItem.ID.ToString(CultureInfo.InvariantCulture), selectedItem.DropOriginal.ToString(CultureInfo.InvariantCulture), ServerDbs.Items, _tab.ProjectDatabase);
+				DropEditDialog dialog = new DropEditDialog(selectedItem.ID.ToString(CultureInfo.InvariantCulture), selectedItem.DropOriginal.ToString(CultureInfo.InvariantCulture), ServerDbs.Items, _tab.ProjectDatabase, false, DbPathLocator.IsYamlMob() ? 3 : 0);
+
+				if (DbPathLocator.IsYamlMob()) {
+					dialog._tbRandGroup.Text = selectedItem.RandomOptionGroup;
+					dialog._tbStealProtected.IsChecked = selectedItem.StealProtected;
+				}
+
 				dialog.Owner = WpfUtilities.TopWindow;
 
 				if (dialog.ShowDialog() == true) {
 					string sid = dialog.Id;
 					string svalue = dialog.DropChance;
+					string randGroup = "";
+					bool stealProtected = false;
 					int value;
 					int id;
+
+					if (DbPathLocator.IsYamlMob()) {
+						randGroup = dialog.RandGroup;
+						stealProtected = dialog.StealProtected;
+					}
 
 					Int32.TryParse(sid, out id);
 
@@ -387,6 +491,15 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 
 						btable.Commands.Set(selectedItem.Tuple, selectedItem.AttributeIndex, id);
 						btable.Commands.Set(selectedItem.Tuple, selectedItem.AttributeIndex + 1, value);
+
+						if (DbPathLocator.IsYamlMob()) {
+							int b = (selectedItem.AttributeIndex - ServerMobAttributes.Drop1ID.Index) / 2;
+							int distRandGroup = ServerMobAttributes.Drop1RandomOptionGroup.Index + b;
+							int distSteal = ServerMobAttributes.Drop1Flags.Index + b;
+
+							btable.Commands.Set(selectedItem.Tuple, distRandGroup, randGroup);
+							btable.Commands.Set(selectedItem.Tuple, distSteal, stealProtected.ToString());
+						}
 					}
 					finally {
 						btable.Commands.EndEdit();
@@ -418,6 +531,15 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 					btable.Commands.Set(p, selectedItem.AttributeIndex, 0);
 					btable.Commands.Set(p, selectedItem.AttributeIndex + 1, 0);
 
+					if (DbPathLocator.IsYamlMob()) {
+						int b = (selectedItem.AttributeIndex - ServerMobAttributes.Drop1ID.Index) / 2;
+						int distRandGroup = ServerMobAttributes.Drop1RandomOptionGroup.Index + b;
+						int distSteal = ServerMobAttributes.Drop1Flags.Index + b;
+
+						btable.Commands.Set(p, distRandGroup, 0);
+						btable.Commands.Set(p, distSteal, "false");
+					}
+
 					((RangeObservableCollection<MobDropView>)_lv.ItemsSource).Remove(selectedItem);
 					i--;
 				}
@@ -435,8 +557,15 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 
 		private void _lv_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e) {
 			try {
-				bool hasItems = _lv.GetObjectAtPoint<ListViewItem>(e.GetPosition(_lv)) != null;
-				_lv.ContextMenu.Items.Cast<UIElement>().Take(5).ToList().ForEach(p => p.Visibility = hasItems ? Visibility.Visible : Visibility.Collapsed);
+				if (DbPathLocator.IsYamlMob()) {
+					bool hasItems = _lv.GetObjectAtPoint<ListViewItem>(e.GetPosition(_lv)) != null;
+					_lv.ContextMenu.Items.Cast<UIElement>().Take(5).ToList().ForEach(p => p.Visibility = hasItems ? Visibility.Visible : Visibility.Collapsed);
+					_lv.ContextMenu.Items.Cast<UIElement>().Last().Visibility = Visibility.Collapsed;
+				}
+				else {	
+					bool hasItems = _lv.GetObjectAtPoint<ListViewItem>(e.GetPosition(_lv)) != null;
+					_lv.ContextMenu.Items.Cast<UIElement>().Take(5).ToList().ForEach(p => p.Visibility = hasItems ? Visibility.Visible : Visibility.Collapsed);
+				}
 			}
 			catch (Exception err) {
 				ErrorHandler.HandleException(err);
@@ -478,13 +607,31 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 			public string Name { get; private set; }
 			public string MVP { get; private set; }
 			public int DropOriginal { get; private set; }
+			public bool StealProtected { get; private set; }
+			public string RandomOptionGroup { get; private set; }
 
 			public bool Default {
 				get { return true; }
 			}
 
+			public bool IsRandomGroup {
+				get {
+					if (DbPathLocator.IsYamlMob()) {
+						return !String.IsNullOrEmpty(RandomOptionGroup);
+					}
+
+					return false;
+				}
+			}
+
 			public bool IsCard {
-				get { return AttributeIndex == ServerMobAttributes.DropCardid.Index; }
+				get {
+					if (DbPathLocator.IsYamlMob()) {
+						return StealProtected;
+					}
+
+					return AttributeIndex == ServerMobAttributes.DropCardid.Index;
+				}
 			}
 
 			#region INotifyPropertyChanged Members
@@ -507,6 +654,15 @@ namespace SDE.Editor.Generic.UI.CustomControls {
 				DropOriginal = Int32.Parse(((string)_tuple.GetRawValue(_index + 1)));
 				Drop = String.Format("{0:0.00} %", DropOriginal / 100f);
 				MVP = _index < ServerMobAttributes.Drop1ID.Index ? "MVP" : "";
+
+				if (DbPathLocator.IsYamlMob()) {
+					int b = (AttributeIndex - ServerMobAttributes.Drop1ID.Index) / 2;
+					int distRandGroup = ServerMobAttributes.Drop1RandomOptionGroup.Index + b;
+					int distSteal = ServerMobAttributes.Drop1Flags.Index + b;
+
+					StealProtected = Boolean.Parse(_tuple.GetRawValue<string>(distSteal));
+					RandomOptionGroup = (_tuple.GetRawValue(distRandGroup) ?? "").ToString();
+				}
 			}
 
 			protected virtual void OnPropertyChanged() {

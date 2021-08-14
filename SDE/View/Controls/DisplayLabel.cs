@@ -13,8 +13,8 @@ namespace SDE.View.Controls {
 		private readonly ServerDbs _dbSource;
 		private bool _isLoaded;
 
-		private Brush _stateBrush = Brushes.Black;
-		private Brush _stateInactiveBrush = new SolidColorBrush(Color.FromArgb(255, 98, 98, 98));
+		private Brush _stateBrush = Application.Current.Resources["TabItemTextSelectedForeground"] as SolidColorBrush;
+		private Brush _stateInactiveBrush = Application.Current.Resources["TabItemTextNormalForeground"] as SolidColorBrush;
 		private string _toString;
 
 		public DisplayLabel() {
@@ -26,7 +26,7 @@ namespace SDE.View.Controls {
 
 			MouseEnter += delegate {
 				if (_dbSource != null) {
-					if (FtpHelper.HasBeenMapped()) {
+					if (IOHelper.HasBeenMapped()) {
 						ToolTip = DbPathLocator.DetectPath(_dbSource);
 					}
 					else {
@@ -75,8 +75,8 @@ namespace SDE.View.Controls {
 				_db.IsEnabledChanged += (e, v) => {
 					this.Dispatch(delegate {
 						if (v) {
-							_stateBrush = Brushes.Black;
-							_stateInactiveBrush = new SolidColorBrush(Color.FromArgb(255, 98, 98, 98));
+							_stateBrush = Application.Current.Resources["TabItemTextSelectedForeground"] as SolidColorBrush;
+							_stateInactiveBrush = Application.Current.Resources["TabItemTextNormalForeground"] as SolidColorBrush;
 						}
 						else {
 							_stateBrush = Brushes.Red;
@@ -103,8 +103,8 @@ namespace SDE.View.Controls {
 		}
 
 		public void ResetEnabled() {
-			_stateBrush = Brushes.Black;
-			_stateInactiveBrush = new SolidColorBrush(Color.FromArgb(255, 98, 98, 98));
+			_stateBrush = Application.Current.Resources["TabItemTextSelectedForeground"] as SolidColorBrush;
+			_stateInactiveBrush = Application.Current.Resources["TabItemTextNormalForeground"] as SolidColorBrush;
 
 			Grid presenter = WpfUtilities.FindParentControl<Grid>(this);
 

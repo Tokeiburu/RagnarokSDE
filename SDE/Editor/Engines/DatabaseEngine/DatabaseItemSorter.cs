@@ -34,8 +34,8 @@ namespace SDE.Editor.Engines.DatabaseEngine {
 		}
 
 		public override int Compare(object x, object y) {
-			Tuple xT = (Tuple)x;
-			Tuple yT = (Tuple)y;
+			Database.Tuple xT = (Database.Tuple)x;
+			Database.Tuple yT = (Database.Tuple)y;
 
 			if (_current != null) {
 				if (_current.DataType == _intType) {
@@ -47,7 +47,7 @@ namespace SDE.Editor.Engines.DatabaseEngine {
 					if (xprop is int)
 						x1 = (int)xprop;
 						//else if (xprop is string)
-						//	x1 = FormatConverters.IntOrHexConverter((string)xprop);
+						//	x1 = FormatConverters.LongOrHexConverter((string)xprop);
 					else
 						x1 = _current.DataConverter.ConvertFrom<int>(xT, xprop);
 
@@ -89,7 +89,7 @@ namespace SDE.Editor.Engines.DatabaseEngine {
 	/// used by the search engine.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public class DatabaseItemSorter<T> : ListViewCustomComparer<T> where T : Tuple {
+	public class DatabaseItemSorter<T> : ListViewCustomComparer<T> where T : Database.Tuple {
 		private readonly AttributeList _list;
 		private Func<T, int, int> _getGetIntDelegate;
 		private Func<T, int, string> _getGetStringDelegate;

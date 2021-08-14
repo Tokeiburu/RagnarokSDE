@@ -4,16 +4,17 @@
               xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
                  xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
                  xmlns:TokeiLibrary="clr-namespace:TokeiLibrary;assembly=TokeiLibrary"
-                 xmlns:Application="clr-namespace:GrfToWpfBridge.Application;assembly=GrfToWpfBridge" MaxWidth="470" MinWidth="470" MinHeight="475" MaxHeight="475">
-    <Grid Background="White">
+                 xmlns:Application="clr-namespace:GrfToWpfBridge.Application;assembly=GrfToWpfBridge" MaxWidth="470" MinWidth="470" MinHeight="475" MaxHeight="475" Foreground="{StaticResource TextForeground}"
+                 Background="{StaticResource TabItemBackground}">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
-        <Border Background="#F7F9FD">
+        <Border Background="{DynamicResource ResourceKey=TabControlBackground}">
             <Grid>
-                <TabControl Style="{DynamicResource ResourceKey=TabControlStyled}" Background="White" Focusable="True" FocusVisualStyle="{x:Null}">
-                    <TabItem Header="General" Style="{DynamicResource ResourceKey=TabItemStyled}">
+                <TabControl Style="{DynamicResource ResourceKey=TabControlStyled}" Focusable="True" FocusVisualStyle="{x:Null}">
+                    <TabItem Header="General" Style="{DynamicResource ResourceKey=TabItemStyled}" Foreground="{StaticResource TextForeground}">
                         <StackPanel Focusable="True" FocusVisualStyle="{x:Null}">
                             <StackPanel>
                                 <Label Content="{Binding Path=Header, RelativeSource={RelativeSource AncestorType={x:Type TabItem}}}" FontWeight="Bold" FontSize="16" Margin="3 10 0 5" />
@@ -21,6 +22,9 @@
                             </StackPanel>
                             <Grid Name="_gridGeneral">
                                 <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                    <RowDefinition />
                                     <RowDefinition />
                                     <RowDefinition />
                                     <RowDefinition />
@@ -57,11 +61,23 @@
                                         </TextBlock>
                                     </Label.ToolTip>
                                 </Label>
+                                <Label Grid.Row="3" Content="Theme" Visibility="Visible" >
+                                    <Label.ToolTip>
+                                        <TextBlock>
+                                        Determines Server Database Editor's UI style.
+                                        </TextBlock>
+                                    </Label.ToolTip>
+                                </Label>
                                 <Application:CompressionMethodPicker Grid.Row="2" Grid.Column="1" Name="_comboBoxCompression" VerticalAlignment="Center" Margin="3" HorizontalAlignment="Left" Width="120" />
+
+                                <ComboBox Grid.Row="3" Grid.Column="1" Name="_comboBoxStyles" VerticalAlignment="Center" Margin="3" Visibility="Visible" Width="120" HorizontalAlignment="Left">
+                                    <ComboBoxItem Content="Default" />
+                                    <ComboBoxItem Content="Dark theme" />
+                                </ComboBox>
                             </Grid>
                         </StackPanel>
                     </TabItem>
-                    <TabItem Header="Dialogs" Style="{DynamicResource ResourceKey=TabItemStyled}">
+                    <TabItem Header="Dialogs" Style="{DynamicResource ResourceKey=TabItemStyled}" Foreground="{StaticResource TextForeground}">
                         <StackPanel>
                             <StackPanel>
                                 <Label Content="Dialogs" FontWeight="Bold" FontSize="16" Margin="3 10 0 5" />
@@ -90,7 +106,7 @@
                             </Grid>
                         </StackPanel>
                     </TabItem>
-                    <TabItem Header="Encoding" Style="{DynamicResource ResourceKey=TabItemStyled}">
+                    <TabItem Header="Encoding" Style="{DynamicResource ResourceKey=TabItemStyled}" Foreground="{StaticResource TextForeground}">
                         <StackPanel>
                             <StackPanel>
                                 <Label Content="Encoding" FontWeight="Bold" FontSize="16" Margin="3 10 0 5" />
@@ -121,7 +137,7 @@
                             </Grid>
                         </StackPanel>
                     </TabItem>
-                    <TabItem Header="Autocomplete" Style="{DynamicResource ResourceKey=TabItemStyled}">
+                    <TabItem Header="Autocomplete" Style="{DynamicResource ResourceKey=TabItemStyled}" Foreground="{StaticResource TextForeground}">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <StackPanel >
                                 <StackPanel>
@@ -231,7 +247,7 @@
                             </StackPanel>
                         </ScrollViewer>
                     </TabItem>
-                    <TabItem Header="Comments" Style="{DynamicResource ResourceKey=TabItemStyled}">
+                    <TabItem Header="Comments" Style="{DynamicResource ResourceKey=TabItemStyled}" Foreground="{StaticResource TextForeground}">
                         <StackPanel>
                             <StackPanel>
                                 <Label Content="Comments" FontWeight="Bold" FontSize="16" Margin="3 10 0 5" />
@@ -260,7 +276,7 @@
                             </Grid>
                         </StackPanel>
                     </TabItem>
-                    <TabItem Header="Db Writer" Style="{DynamicResource ResourceKey=TabItemStyled}">
+                    <TabItem Header="Db Writer" Style="{DynamicResource ResourceKey=TabItemStyled}" Foreground="{StaticResource TextForeground}">
                         <StackPanel>
                             <StackPanel>
                                 <Label Content="Db Writer" FontWeight="Bold" FontSize="16" Margin="3 10 0 5" />
@@ -289,7 +305,7 @@
                             </Grid>
                         </StackPanel>
                     </TabItem>
-                    <TabItem Header="rAthena" Style="{DynamicResource ResourceKey=TabItemStyled}">
+                    <TabItem Header="rAthena" Style="{DynamicResource ResourceKey=TabItemStyled}" Foreground="{StaticResource TextForeground}">
                         <StackPanel>
                             <StackPanel>
                                 <Label Content="rAthena" FontWeight="Bold" FontSize="16" Margin="3 10 0 5" />
@@ -318,7 +334,7 @@
                             </Grid>
                         </StackPanel>
                     </TabItem>
-                    <TabItem Header="Shortcuts" Style="{DynamicResource ResourceKey=TabItemStyled}">
+                    <TabItem Header="Shortcuts" Style="{DynamicResource ResourceKey=TabItemStyled}" Foreground="{StaticResource TextForeground}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="auto" />
@@ -350,7 +366,7 @@
                 </TabControl>
             </Grid>
         </Border>
-        <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="2" Height="40" Background="{x:Static TokeiLibrary:Configuration.UIDialogBackground}">
+        <Grid ListView:WpfUtils.IsDraggable="True" Grid.Row="2" Height="40" Background="{DynamicResource UIDialogBackground}">
             <DockPanel HorizontalAlignment="Right" Margin="0 0 3 0">
                 <Button Content="Ok" Height="25" Margin="3" Width="100" Click="_buttonClose" />
             </DockPanel>

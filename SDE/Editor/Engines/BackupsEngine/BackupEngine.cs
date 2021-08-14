@@ -191,7 +191,7 @@ namespace SDE.Editor.Engines.BackupsEngine {
 			if (file == null) throw new ArgumentNullException("file");
 
 			try {
-				string relativePath = file.ReplaceFirst(GrfPath.GetDirectoryName(ProjectConfiguration.DatabasePath) + FtpHelper.Slash, "");
+				string relativePath = file.ReplaceFirst(GrfPath.GetDirectoryName(ProjectConfiguration.DatabasePath) + IOHelper.Slash, "");
 
 				if (String.IsNullOrEmpty(relativePath)) {
 					return;
@@ -201,7 +201,7 @@ namespace SDE.Editor.Engines.BackupsEngine {
 
 				string fullPath = GrfPath.Combine(_paths[_currentId], relativePath);
 				string tempFile = TemporaryFilesManager.GetTemporaryFilePath("backup_local_copy_{0:0000}");
-				FtpHelper.Copy(file, tempFile);
+				IOHelper.Copy(file, tempFile);
 
 				_localToGrfPath[_currentId][tempFile] = fullPath;
 			}

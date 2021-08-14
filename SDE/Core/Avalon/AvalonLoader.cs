@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Media;
 using System.Xml;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
@@ -20,6 +21,7 @@ namespace SDE.Core.Avalon {
 				"Custom Highlighting", "SDE.Core.Avalon.Syntax.CustomHighlighting.xshd",
 				"Lua", "SDE.Core.Avalon.Syntax.Lua.xshd",
 				"Imf", "SDE.Core.Avalon.Syntax.Imf.xshd",
+				//"DefaultColors", "SDE.Core.Avalon.Syntax.DefaultColors.xshd",
 				"Python", "SDE.Core.Avalon.Syntax.Python.xshd",
 				"DebugDb", "SDE.Core.Avalon.Syntax.DebugDb.xshd",
 			};
@@ -211,6 +213,25 @@ namespace SDE.Core.Avalon {
 			}
 
 			var def = HighlightingManager.Instance.GetDefinition(ext);
+
+			foreach (var color in def.NamedHighlightingColors) {
+				var tb = Application.Current.TryFindResource("Avalon" + ext + color.Name) as TextBlock;
+
+				if (tb != null) {
+					color.Foreground = new SimpleHighlightingBrush(tb.Foreground as SolidColorBrush);
+					color.FontStyle = tb.FontStyle;
+					color.FontWeight = tb.FontWeight;
+				}
+			}
+
+			var tbDef = Application.Current.TryFindResource("Avalon" + ext + "Default") as TextBlock;
+
+			if (tbDef != null) {
+				editor.Foreground = tbDef.Foreground;
+				editor.FontWeight = tbDef.FontWeight;
+				editor.FontStyle = tbDef.FontStyle;
+			}
+
 			editor.SyntaxHighlighting = def;
 		}
 	}

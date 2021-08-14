@@ -45,9 +45,10 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 			OnSetCustomCommands = _onSetCustomCommands;
 			OnPreviewTabInitialize = _onPreviewTabInitialize;
 			OnPreviewGenerateGrid = _onPreviewGenerateGrid;
-			GenerateGrid = _generateGrid;
+			GenerateGrid = GenerateGridDefault;
 			OnGenerateGrid = _onGenerateGrid;
 			OnTabVisualUpdate = TgOnTabVisualUpdate;
+			OnPreviewDatabaseReloaded = null;
 			OnDatabaseReloaded = null;
 			OnTabRefreshed = null;
 			IsTabEnabledMethod = IsTabEnabled;
@@ -73,6 +74,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 		public GenerateGridDelegate OnGenerateGrid { get; set; }
 		public TabGeneratorDelegate OnPreviewTabVisualUpdate { get; set; }
 		public TabGeneratorDelegate OnTabVisualUpdate { get; set; }
+		public TabGeneratorDelegate OnPreviewDatabaseReloaded { get; set; }
 		public TabGeneratorDelegate OnDatabaseReloaded { get; set; }
 		public TabEnabledDelegate IsTabEnabledMethod { get; set; }
 		public TabEvent OnTabRefreshed { get; set; }
@@ -124,7 +126,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 						bool isSet = _isAttributeEnabled(attribute, gdb);
 
 						tab.Dispatch(delegate {
-							var elements = DisplayablePropertyHelper.GetAll(tab._displayGrid, attribute.DisplayName);
+							var elements = DisplayablePropertyHelper.GetAll(tab.PropertiesGrid, attribute.DisplayName);
 
 							foreach (var element in elements) {
 								element.Visibility = isSet ? Visibility.Visible : Visibility.Collapsed;
@@ -187,6 +189,11 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 					ErrorHandler.HandleException(err);
 				}
 			});
+
+			database.PreviewReloaded += delegate {
+				if (OnPreviewDatabaseReloaded != null)
+					OnPreviewDatabaseReloaded(tab, settings, gdb);
+			};
 
 			database.Reloaded += delegate {
 				//if (OnPreviewTabVisualUpdate != null) OnPreviewTabVisualUpdate(tab, settings, gdb);
@@ -269,9 +276,28 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 				List<string> objs = item.GetRawElements().Skip(tabGenerator.StartIndexInCustomMethods).Take(max).Select(p => (p ?? "").ToString()).ToList();
 
 				foreach (var index in toRemove) {
-					objs.RemoveAt(index);
+					if (index < objs.Count) {
+						objs.RemoveAt(index);
+					}
 				}
 
+				builder.AppendLine(string.Join(",", objs.ToArray()));
+			}
+
+			Clipboard.SetDataObject(builder.ToString());
+		}
+
+		public static void CopyTuplesDefault(TabGenerator<TKey> tabGenerator, List<ReadableTuple<TKey>> items, DbAttribute[] attributes) {
+			StringBuilder builder = new StringBuilder();
+
+			for (int i = 0; i < items.Count; i++) {
+				ReadableTuple<TKey> item = items[i];
+				List<string> objs = new List<string>();
+
+				for (int j = 0; j < attributes.Length; j++) {
+					objs.Add((item.GetRawValue(attributes[j].Index) ?? "").ToString());
+				}
+				
 				builder.AppendLine(string.Join(",", objs.ToArray()));
 			}
 
@@ -331,7 +357,7 @@ namespace SDE.Editor.Generic.TabsMakerCore {
 		private void _onPreviewGenerateGrid(ref int line, TabSettings<TKey> settings) {
 		}
 
-		private void _generateGrid(ref int line, TabSettings<TKey> settings) {
+		public void GenerateGridDefault(ref int line, TabSettings<TKey> settings) {
 			if (settings.Gdb.LayoutIndexes != null) {
 				AbstractProvider metaProvider = AbstractProvider.GetProvider(settings.Gdb.LayoutIndexes);
 

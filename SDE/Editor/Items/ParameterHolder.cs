@@ -269,7 +269,7 @@ namespace SDE.Editor.Items {
 
 		private static readonly Regex _parameter = new Regex(@"[^\ \r\n]+.*?:.*?\^[\d]{6}.*?\^[\d]{6}", RegexOptions.Multiline | RegexOptions.Compiled);
 
-		public ParameterHolder(Tuple item) {
+		public ParameterHolder(Database.Tuple item) {
 			string description = item.GetValue<string>(ClientItemAttributes.IdentifiedDescription);
 
 			foreach (string parameter in SearchKnownItemParameters) {

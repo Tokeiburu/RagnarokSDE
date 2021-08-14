@@ -65,14 +65,7 @@ namespace SDE.Editor.Generic.Parsers.Generic {
 				return;
 			}
 
-			DebugStreamReader reader = TextFileHelper.LastReader;
-
-			if (reader != null) {
-				Handle(err, String.Format("ID: {0}, file: '{1}', line: {2}, exception: '{3}'", id, TextFileHelper.LatestFile, line, exception), errorLevel);
-			}
-			else {
-				Handle(err, String.Format("ID: {0}, line: {1}, exception: '{2}'", id, line, exception), errorLevel);
-			}
+			Handle(err, String.Format("ID: {0}, file: '{1}', line: {2}, exception: '{3}'", id, TextFileHelper.LatestFile, line, exception), errorLevel);
 		}
 
 		public static void Handle(Exception err, string exception, string id, ErrorLevel errorLevel) {

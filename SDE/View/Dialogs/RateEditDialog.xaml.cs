@@ -26,8 +26,16 @@ namespace SDE.View.Dialogs {
 
 			WindowStartupLocation = WindowStartupLocation.CenterOwner;
 
-			Binder.Bind(_cbInc1, () => SdeAppConfiguration.RateIncrementBy1);
-			Binder.Bind(_cbInc5, () => SdeAppConfiguration.RateIncrementBy5);
+			Binder.Bind(_cbInc1, () => SdeAppConfiguration.RateIncrementBy1, v => SdeAppConfiguration.RateIncrementBy1 = v, delegate {
+				if (SdeAppConfiguration.RateIncrementBy1 == true) {
+					_cbInc5.IsChecked = false;
+				}
+			});
+			Binder.Bind(_cbInc5, () => SdeAppConfiguration.RateIncrementBy5, v => SdeAppConfiguration.RateIncrementBy5 = v, delegate {
+				if (SdeAppConfiguration.RateIncrementBy5 == true) {
+					_cbInc1.IsChecked = false;
+				}
+			});
 
 			WpfUtils.AddMouseInOutEffectsBox(_cbInc1);
 			WpfUtils.AddMouseInOutEffectsBox(_cbInc5);

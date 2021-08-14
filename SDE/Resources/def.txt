@@ -1,0 +1,289 @@
+//[Flag]
+//Type=required
+//Values=
+//Key	Value	Description
+
+[SkillDamageType]
+NoDamage	auto	No damage skill.
+Splash	auto	Has splash area
+SplashSplit	auto	Damage should be split among targets
+IgnoreAtkCard	auto	Skill ignores caster's % damage cards (misc type always ignores)
+IgnoreElement	auto	Skill ignores elemental adjustments.
+IgnoreDefense	auto	Skill ignores target's defense (misc type always ignores).
+IgnoreFlee	auto	Skill ignores target's flee (magic type always ignores).
+IgnoreDefCard	auto	Skill ignores target's def cards.
+Critical	auto	Skill can crit.
+IgnoreLongCard	auto	Ignore long range card effects.
+
+[SkillCopyType]
+Plagiarism	auto
+Reproduce	auto
+
+[SkillCopyRemoveRequirementType]
+HpCost	auto
+SpCost	auto
+HpRateCost	auto
+SpRateCost	auto
+MaxHpTrigger	auto
+ZenyCost	auto
+Weapon	auto
+Ammo	auto
+State	auto
+Status	auto
+SpiritSphereCost	auto
+ItemCost	auto
+Equipment	auto
+
+[ItemFlagType]
+BuyingStore	auto	If the item is available for Buyingstores. (Default: false)
+DeadBranch	auto	If the item is a Dead Branch. (Default: false)
+Container	auto	If the item is part of a container. (Default: false)
+UniqueId	auto	If the item is a unique stack. (Default: false)
+BindOnEquip	auto	If the item is bound to the character upon equipping. (Default: false)
+DropAnnounce	auto	If the item has a special announcement to self on drop. (Default: false)
+NoConsume	auto	If the item is consumed on use. (Default: false)
+DropEffect	auto	If the item has a special effect when on the ground. (Default: None)	hide
+
+[ItemCustomFlagType]
+HideDropInfo	auto	If the item drop is visible for @iteminfo, @whodrop, etc. (Default: false)
+NoDropProtection	auto	If the item is protcted with @nodrop. (Default: false)
+PicklogAlways	auto	If the item is always logged. (Default: false)
+PicklogNever	auto	If the item is never logged (overrides PicklogAlways). (Default: false)
+IsShadowGearBonus	auto
+
+[ItemMHFlagType]
+CanUseInMH	auto
+MHItem	auto
+MHHuntItem	auto
+ResetUsesOnDeath	auto
+UseIncOnSuccess	auto
+
+[UnitFlagType]
+NoEnemy	auto	If 'defunit_not_enemy' is set, the target is changed to 'friend'.
+NoReiteration	auto	Spell cannot be stacked.
+NoFootSet	auto	Does not show footsteps.
+NoFootStep	auto	Spell cannot be cast near/on targets.
+NoOverlap	auto	Spell effects do not overlap.
+PathCheck	auto
+NoPc	auto	May not target players.
+NoMob	auto	May not target mobs.
+Skill	auto	May not target skill.
+Dance	auto
+Ensemble	auto
+Song	auto
+DualMode	auto	Spells should trigger both ontimer and onplace/onout/onleft effects.
+NoKnockback	auto	Skill unit cannot be knocked back.
+RangedSingleUnit	auto	Hack for ranged layout, only display center.
+CrazyWeedImmune	auto	Immune to Crazy Weed removal.
+RemovedByFireRain	auto	Removed by Fire Rain.
+KnockbackGroup	auto	Removed by Fire Rain.
+HiddenTrap	auto	Hidden trap.
+
+[NoNearNpcType]
+WarpPortal	auto	WarpPortal
+Shop	auto	Shop
+Npc	auto	Npc
+Tomb	auto	Tomb
+
+[NoNearNpcType]
+WarpPortal	auto	WarpPortal
+Shop	auto	Shop
+Npc	auto	Npc
+Tomb	auto	Tomb
+
+[CastingFlags]
+IgnoreDex	auto	Not affected by dex.
+IgnoreStatus	auto	Not affected by statuses (Suffragium, etc).
+IgnoreItemBonus	auto	Not affected by item bonuses (equips, cards).
+
+[WeaponType]
+Fist	0
+Dagger	auto
+1hSword	auto
+2hSword	auto
+1hSpear	auto
+2hSpear	auto
+1hAxe	auto
+2hAxe	auto
+Mace	auto
+2hMace	auto
+Staff	auto
+Bow	auto
+Knuckle	auto
+Musical	auto
+Whip	auto
+Book	auto
+Katar	auto
+Revolver	auto
+Rifle	auto
+Gatling	auto
+Shotgun	auto
+Grenade	auto
+Huuma	auto
+2hStaff	auto
+
+[AmmoType]
+None	0
+Arrow	auto
+Dagger	auto
+Bullet	auto
+Shell	auto
+Grenade	auto
+Shuriken	auto
+Kunai	auto
+Cannonball	auto
+Throwweapon	auto
+
+[UnitTargetType]
+None	0
+Self	0x010000
+Enemy	0x020000
+Party	0x040000
+GuildAlly	0x080000
+Neutral	0x100000
+SameGuild	0x200000
+All	0x3F0000
+WoS	0x400000
+Guild	SameGuild | GuildAlly
+NoGuild	All & ~Guild
+NoParty	All & ~Party
+NoEnemy	All & ~Enemy
+Ally	Party | Guild
+Friend	NoEnemy
+
+[SkillType2TypeNew]
+IsQuest	auto		Quest skill
+IsNpc	auto		Npc skill
+IsWedding	auto		Wedding skill
+IsSpirit	auto		Spirit skill
+IsGuild	auto		Guild skill
+IsSong	auto		Song/dance skill
+IsEnsemble	auto		Ensemble skill
+IsTrap	auto		Trap
+TargetSelf	auto		Skill that damages/targets yourself
+NoTargetSelf	auto		Cannot be casted on self (if inf	4, auto-select target skill)
+PartyOnly	auto		Usable only on party-members (and enemies if skill is offensive)
+GuildOnly	auto		Usable only on guild-mates (and enemies if skill is offensive)
+NoTargetEnemy	auto		Disable usage on enemies (for non-offensive skills).
+IsAutoShadowSpell	auto		Skill that available for SC_AUTOSHADOWSPELL.
+IsChorus	auto		Chorus skill.
+IgnoreBgReduction	auto		Skill that ignore bg reduction.
+IgnoreGvgReduction	auto		Skill that ignore gvg reduction.
+DisableNearNpc	auto		Disable to cast skill if near with NPC.
+TargetTrap	auto		Can hit trap-type skill.
+IgnoreLandProtector	auto		Skill that ignore Land Protector.
+AllowWhenHidden	auto		Skill that can be used in hiding.
+AllowWhenPerforming	auto		Skill that can be used while in dancing state.
+TargetEmperium	auto		Skill that can hit Emperium.
+IgnoreStasis	auto		Skill that can ignore SC_STATIS.
+IgnoreKagehumi	auto		Skill blocked by kagehumi.
+AlterRangeVulture	auto		Skill range affected by AC_VULTURE.
+AlterRangeSnakeEye	auto		Skill range affected by GS_SNAKEEYE.
+AlterRangeShadowJump	auto		Skill range affected by NJ_SHADOWJUMP.
+AlterRangeRadius	auto		Skill range affected by WL_RADIUS.
+AlterRangeResearchTrap	auto		Skill range affected by RA_RESEARCHTRAP.
+IgnoreHovering	auto		Skill that does not affect user that has SC_HOVERING active.
+AllowOnWarg	auto		Skill that can be use while riding warg.
+AllowOnMado	auto		Skill that can be used while on Madogear.
+TargetManhole	auto		Skill that can be used to target while under SC__MANHOLE effect.
+TargetHidden	auto		Skill that affects hidden targets.
+IncreaseDanceWithWugDamage	auto		Skill that is affected by SC_DANCEWITHWUG.
+IgnoreWugBite	auto		Skill blocked by RA_WUGBITE.
+IgnoreAutoGuard	auto		Skill is not blocked by SC_AUTOGUARD (physical-skill only).
+IgnoreCicada	auto		Skill is not blocked by SC_UTSUSEMI or SC_BUNSINJYUTSU (physical-skill only).
+ShowScale	auto		Skill shows AoE area while casting.
+
+[TradeFlag]
+NoDrop	auto	If the item can not be dropped. (Default: false)
+NoTrade	auto	If the item can not be traded. (Default: false)
+TradePartner	auto	If the item can not be traded to the player's partner. (Default: false)
+NoSell	auto	If the item can not be sold. (Default: false)
+NoCart	auto	If the item can not be put in a cart. (Default: false)
+NoStorage	auto	If the item can not be put in a storage. (Default: false)
+NoGuildStorage	auto	If the item can not be put in a guild storage. (Default: false)
+NoMail	auto	If the item can not be put in a mail. (Default: false)
+NoAuction	auto	If the item can not be put in an auction. (Default: false)
+
+[SizeType]
+Small	0
+Medium	1
+Large	2
+
+[ClassType]
+Normal	0
+Boss	1
+Guardian	2
+Battlefield	3
+Event	4
+
+[NewMobModeType]
+CanMove	0x1	Enables the mob to move/chase characters.
+CanAttack	0x80	Enables the mob to attack/retaliate when you are within attack range. Note that this only enables them to use normal attacks, skills are always allowed.
+NoCast	0x40	The mob will not cast skills.
+Looter	0x2	The mob will loot up nearby items on the ground when it's on idle state.
+Aggressive	0x4	Normal aggressive mob, will look for a close-by player to attack.
+Assist	0x8	When a nearby mob of the same class attacks, assist types will join them.
+NoRandomWalk	0x20	The mob will not walk randomly.
+CastSensorChase	0x200	Will go after characters who start casting on them if walking (without a target).
+CastSensorIdle	0x10	Will go after characters who start casting on them if idle (without a target).
+Angry	0x800	These mobs are 'hyper-active'. Apart from 'chase'/'attack', they have the states 'follow'/'angry'. Once hit, they stop using these states and use the normal ones. The new states are used to determine a different skill-set for their 'before attacked' and 'after attacked' states. Also, when 'following', they automatically switch to whoever character is closest.
+ChangeChase	0x400	Allows chasing mobs to switch targets if another player happens to be within attack range (handy on ranged attackers, for example).
+ChangeTargetMelee	0x1000	Enables a mob to switch targets when attacked while attacking someone else.
+ChangeTargetChase	0x2000	Enables a mob to switch targets when attacked while chasing another character.
+TargetWeak	0x4000	Allows aggressive monsters to only be aggressive against characters that are five levels below it's own level. For example, a monster of level 104 will not pick fights with a level 99.
+RandomTarget	0x8000	Picks a new random target in range on each attack / skill.
+IgnoreMagic	0x20000	The mob will take 1 HP damage from 'magic' attack type.
+IgnoreMelee	0x10000	The mob will take 1 HP damage from 'attack' attack type.
+IgnoreMisc	0x100000	The mob will take 1 HP damage from 'none' attack type.
+IgnoreRanged	0x40000	The mob will take 1 HP damage from ranged attacks.
+TeleportBlock	0x400000	The mob cannot teleport.
+FixedItemDrop	0x1000000	
+Detector	0x2000000	Enables mob to detect and attack characters who are in hiding/cloak.
+KnockBackImmune	0x200000	The mob will be unable to be knocked back.
+StatusImmune	0x4000000	The mob cannot be affected by statuses.
+SkillImmune	0x8000000	The mob will take 1 damage from any skill attack.
+Mvp	0x80000	Flagged as MVP which makes mobs resistance to Coma.
+
+[MobRaceType]
+Formless	0
+Undead	1
+Brute	2
+Plant	3
+Insect	4
+Fish	5
+Demon	6
+Demihuman	7
+Angel	8
+Dragon	9
+Player_Human	10
+Player_Doram	11
+Player_All	12
+
+[MobGroup2Type]
+Goblin	auto
+Kobold	auto
+Orc	auto
+Golem	auto
+Guardian	auto
+Ninja	auto
+Gvg	auto
+Battlefield	auto
+Treasure	auto
+Biolab	auto
+Manuk	auto
+Splendide	auto
+Scaraba	auto
+Ogh_Atk_Def	auto
+Ogh_Hidden	auto
+Bio5_Swordman_Thief	auto
+Bio5_Acolyte_Merchant	auto
+Bio5_Mage_Archer	auto
+Bio5_Mvp	auto
+Clocktower	auto
+Thanatos	auto
+Faceworm	auto
+Hearthunter	auto
+Rockridge	auto
+Werner_Lab	auto
+Temple_Demon	auto
+Illusion_Vampire	auto

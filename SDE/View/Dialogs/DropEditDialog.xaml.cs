@@ -14,7 +14,7 @@ namespace SDE.View.Dialogs {
 		private readonly string _id;
 		private readonly ServerDbs _sdb;
 
-		public DropEditDialog(string id, string dropChance, ServerDbs sdb, SdeDatabase gdb, bool selectId = false) : base("Item edit", "cde.ico", SizeToContent.Height, ResizeMode.NoResize) {
+		public DropEditDialog(string id, string dropChance, ServerDbs sdb, SdeDatabase gdb, bool selectId = false, int flag = 0) : base("Item edit", "cde.ico", SizeToContent.Height, ResizeMode.NoResize) {
 			_id = id;
 			_dropChance = dropChance;
 			_sdb = sdb;
@@ -35,6 +35,16 @@ namespace SDE.View.Dialogs {
 				else {
 					_tbChance.SelectAll();
 					_tbChance.Focus();
+				}
+
+				if ((flag & 1) == 1) {
+					_tbDStealProtected.Visibility = Visibility.Visible;
+					_tbStealProtected.Visibility = Visibility.Visible;
+				}
+
+				if ((flag & 2) == 2) {
+					_tbDRandGroup.Visibility = Visibility.Visible;
+					_tbRandGroup.Visibility = Visibility.Visible;
 				}
 			};
 
@@ -59,6 +69,18 @@ namespace SDE.View.Dialogs {
 		public string DropChance {
 			get {
 				return _tbChance.Text;
+			}
+		}
+
+		public bool StealProtected {
+			get {
+				return _tbStealProtected.IsChecked.Value;
+			}
+		}
+
+		public string RandGroup {
+			get {
+				return _tbRandGroup.Text;
 			}
 		}
 
