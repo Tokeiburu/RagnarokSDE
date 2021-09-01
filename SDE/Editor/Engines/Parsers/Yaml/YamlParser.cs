@@ -23,7 +23,7 @@ namespace SDE.Editor.Engines.Parsers.Yaml {
 		private readonly string _idKey;
 		private Dictionary<string, ParserKeyValue> _indexedWriteKeyValues = null;
 		private Dictionary<string, ParserArray> _indexedWriteArrays = null;
-
+		
 		public const string Indent4 = "    ";
 		public const string Indent6 = "      ";
 		public const string Indent8 = "        ";
@@ -82,6 +82,32 @@ namespace SDE.Editor.Engines.Parsers.Yaml {
 			}
 		}
 
+		public class ByteBuilder {
+			private byte[] _data;
+			private int _length = 0;
+
+			public ByteBuilder() {
+				_data = new byte[16];
+			}
+
+			public void Append(byte b) {
+				if (_length >= _data.Length) {
+					byte[] dataExpand = new byte[_length * 2];
+
+					Buffer.BlockCopy(_data, 0, dataExpand, 0, _data.Length);
+
+					_data = dataExpand;
+				}
+
+				_data[_length] = b;
+				_length++;
+			}
+
+			public override string ToString() {
+				return (SdeAppConfiguration.EncodingServer ?? Encoding.Default).GetString(_data, 0, _length);
+			}
+		}
+
 		private class YamlFileData {
 			public byte[] Data;
 			public int Position;
@@ -106,18 +132,32 @@ namespace SDE.Editor.Engines.Parsers.Yaml {
 			}
 
 			public string ReadKey() {
-				StringBuilder b = new StringBuilder();
+				var b = new ByteBuilder();
 
 				while (CanRead) {
-					char c = (char)Data[Position];
+					byte c = Data[Position];
 
-					if (IsLetter(c)) {
-						b.Append(c);
-						Position++;
-					}
-					else {
+					if (c == '\r' || c == '\n' || c == ':')
 						break;
-					}
+
+					b.Append(c);
+					Position++;
+				}
+
+				return b.ToString();
+			}
+
+			public string ReadWord() {
+				var b = new ByteBuilder();
+
+				while (CanRead) {
+					byte c = Data[Position];
+
+					if (c == '\r' || c == '\n' || c == ':' || c == ',' || c == ']')
+						break;
+
+					b.Append(c);
+					Position++;
 				}
 
 				return b.ToString();
@@ -170,7 +210,7 @@ namespace SDE.Editor.Engines.Parsers.Yaml {
 			}
 
 			public string ReadValue() {
-				StringBuilder b = new StringBuilder();
+				var b = new ByteBuilder();
 				ValueLength = 0;
 
 				if (Data[Position] == '\"') {
@@ -182,7 +222,7 @@ namespace SDE.Editor.Engines.Parsers.Yaml {
 							break;
 						}
 
-						b.Append((char)Data[Position]);
+						b.Append(Data[Position]);
 						Position++;
 					}
 
@@ -221,7 +261,7 @@ namespace SDE.Editor.Engines.Parsers.Yaml {
 							MoveToIndentEnd(indent);
 
 							if (read > 0)
-								b.Append(' ');
+								b.Append((byte)' ');
 
 							readLines++;
 							trim = true;
@@ -267,7 +307,7 @@ namespace SDE.Editor.Engines.Parsers.Yaml {
 						}
 
 						trim = false;
-						b.Append(c);
+						b.Append((byte)c);
 						read++;
 						Position++;
 					}
@@ -277,7 +317,7 @@ namespace SDE.Editor.Engines.Parsers.Yaml {
 				}
 				else {
 					while (CanRead && Data[Position] != '\r' && Data[Position] != '\n' && Data[Position] != '#') {
-						b.Append((char)Data[Position]);
+						b.Append(Data[Position]);
 						Position++;
 					}
 
@@ -483,8 +523,8 @@ namespace SDE.Editor.Engines.Parsers.Yaml {
 								if (c == ']')
 									break;
 
-								word_s = c == '\"' ? file.ReadValue() : file.ReadKey();
-								aggregate.AddElement(new ParserString(word_s, file.LineNumber));
+								word_s = c == '\"' ? file.ReadValue() : file.ReadWord();
+								aggregate.AddElement(new ParserString(word_s.Trim(' '), file.LineNumber));
 								c = file.PeekChar();
 
 								while (c != '\n' && (c == ',' || c == ' ' || c == '\r')) {
