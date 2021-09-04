@@ -1,169 +1,208 @@
-﻿using System;
+﻿using Database;
+using Database.Commands;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Database;
-using Database.Commands;
 using Utilities.Commands;
 
-namespace SDE.Editor.Generic {
-	/// <summary>
-	/// A database table which holds multiple tables at the same time.
-	/// </summary>
-	/// <typeparam name="TKey">The type of the key.</typeparam>
-	public class MetaTable<TKey> : Table<TKey, ReadableTuple<TKey>>, IEnumerable<ReadableTuple<TKey>> {
-		private readonly MetaCommandsHolder<TKey> _commands;
-		private readonly List<Table<TKey, ReadableTuple<TKey>>> _tables = new List<Table<TKey, ReadableTuple<TKey>>>();
-		private List<ReadableTuple<TKey>> _bufferedItems = new List<ReadableTuple<TKey>>();
-		private bool _bufferedTable;
+namespace SDE.Editor.Generic
+{
+    /// <summary>
+    /// A database table which holds multiple tables at the same time.
+    /// </summary>
+    /// <typeparam name="TKey">The type of the key.</typeparam>
+    public class MetaTable<TKey> : Table<TKey, ReadableTuple<TKey>>, IEnumerable<ReadableTuple<TKey>>
+    {
+        private readonly MetaCommandsHolder<TKey> _commands;
+        private readonly List<Table<TKey, ReadableTuple<TKey>>> _tables = new List<Table<TKey, ReadableTuple<TKey>>>();
+        private List<ReadableTuple<TKey>> _bufferedItems = new List<ReadableTuple<TKey>>();
+        private bool _bufferedTable;
 
-		public int TablesCount {
-			get { return _tables.Count; }
-		}
+        public int TablesCount
+        {
+            get { return _tables.Count; }
+        }
 
-		public MetaTable(AttributeList list, bool unsafeContext = false) : base(list, unsafeContext) {
-			_commands = new MetaCommandsHolder<TKey>(null);
-		}
+        public MetaTable(AttributeList list, bool unsafeContext = false) : base(list, unsafeContext)
+        {
+            _commands = new MetaCommandsHolder<TKey>(null);
+        }
 
-		public new int Count {
-			get { return FastItems.Count; }
-		}
+        public new int Count
+        {
+            get { return FastItems.Count; }
+        }
 
-		public override CommandsHolder<TKey, ReadableTuple<TKey>> Commands {
-			get { return _commands; }
-		}
+        public override CommandsHolder<TKey, ReadableTuple<TKey>> Commands
+        {
+            get { return _commands; }
+        }
 
-		public override List<ReadableTuple<TKey>> FastItems {
-			get {
-				if (_bufferedTable) {
-					return _bufferedItems;
-				}
+        public override List<ReadableTuple<TKey>> FastItems
+        {
+            get
+            {
+                if (_bufferedTable)
+                {
+                    return _bufferedItems;
+                }
 
-				Dictionary<TKey, ReadableTuple<TKey>> values = new Dictionary<TKey, ReadableTuple<TKey>>(_tables.Last().Tuples);
+                Dictionary<TKey, ReadableTuple<TKey>> values = new Dictionary<TKey, ReadableTuple<TKey>>(_tables.Last().Tuples);
 
-				for (int i = _tables.Count - 2; i >= 0; i--) {
-					foreach (var pair in _tables[i].Tuples) {
-						values[pair.Key] = pair.Value;
-					}
-				}
+                for (int i = _tables.Count - 2; i >= 0; i--)
+                {
+                    foreach (var pair in _tables[i].Tuples)
+                    {
+                        values[pair.Key] = pair.Value;
+                    }
+                }
 
-				return values.Values.ToList();
-			}
-		}
+                return values.Values.ToList();
+            }
+        }
 
-		#region IEnumerable<ReadableTuple<TKey>> Members
-		IEnumerator<ReadableTuple<TKey>> IEnumerable<ReadableTuple<TKey>>.GetEnumerator() {
-			return FastItems.GetEnumerator();
-		}
+        #region IEnumerable<ReadableTuple<TKey>> Members
 
-		IEnumerator IEnumerable.GetEnumerator() {
-			return FastItems.GetEnumerator();
-		}
-		#endregion
+        IEnumerator<ReadableTuple<TKey>> IEnumerable<ReadableTuple<TKey>>.GetEnumerator()
+        {
+            return FastItems.GetEnumerator();
+        }
 
-		public void AddTable(Table<TKey, ReadableTuple<TKey>> table) {
-			_tables.Insert(0, table);
-			_commands.AddTable(table);
-		}
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return FastItems.GetEnumerator();
+        }
 
-		public override bool ContainsKey(TKey key) {
-			return _tables.Any(table => table.ContainsKey(key));
-		}
+        #endregion IEnumerable<ReadableTuple<TKey>> Members
 
-		public override T Get<T>(TKey key, DbAttribute attribute) {
-			return _tables.First(p => p.ContainsKey(key)).Get<T>(key, attribute);
-		}
+        public void AddTable(Table<TKey, ReadableTuple<TKey>> table)
+        {
+            _tables.Insert(0, table);
+            _commands.AddTable(table);
+        }
 
-		public override object Get(TKey key, DbAttribute attribute) {
-			return _tables.First(p => p.ContainsKey(key)).Get(key, attribute);
-		}
+        public override bool ContainsKey(TKey key)
+        {
+            return _tables.Any(table => table.ContainsKey(key));
+        }
 
-		public override ReadableTuple<TKey> TryGetTuple(TKey key) {
-			ReadableTuple<TKey> tuple;
+        public override T Get<T>(TKey key, DbAttribute attribute)
+        {
+            return _tables.First(p => p.ContainsKey(key)).Get<T>(key, attribute);
+        }
 
-			for (int i = 0; i < _tables.Count; i++) {
-				tuple = _tables[i].TryGetTuple(key);
+        public override object Get(TKey key, DbAttribute attribute)
+        {
+            return _tables.First(p => p.ContainsKey(key)).Get(key, attribute);
+        }
 
-				if (tuple != null)
-					return tuple;
-			}
+        public override ReadableTuple<TKey> TryGetTuple(TKey key)
+        {
+            ReadableTuple<TKey> tuple;
 
-			return null;
-		}
+            for (int i = 0; i < _tables.Count; i++)
+            {
+                tuple = _tables[i].TryGetTuple(key);
 
-		public override object GetRaw(TKey key, DbAttribute attribute) {
-			return _tables.First(p => p.ContainsKey(key)).GetRaw(key, attribute);
-		}
+                if (tuple != null)
+                    return tuple;
+            }
 
-		public override ReadableTuple<TKey> GetTuple(TKey key) {
-			return _tables.First(p => p.ContainsKey(key)).GetTuple(key);
-		}
+            return null;
+        }
 
-		public void MergeOnce() {
-			_bufferedTable = true;
+        public override object GetRaw(TKey key, DbAttribute attribute)
+        {
+            return _tables.First(p => p.ContainsKey(key)).GetRaw(key, attribute);
+        }
 
-			Dictionary<TKey, ReadableTuple<TKey>> values = new Dictionary<TKey, ReadableTuple<TKey>>(_tables.Last().Tuples);
+        public override ReadableTuple<TKey> GetTuple(TKey key)
+        {
+            return _tables.First(p => p.ContainsKey(key)).GetTuple(key);
+        }
 
-			for (int i = _tables.Count - 2; i >= 0; i--) {
-				foreach (var pair in _tables[i].Tuples) {
-					values[pair.Key] = pair.Value;
-				}
-			}
+        public void MergeOnce()
+        {
+            _bufferedTable = true;
 
-			_bufferedItems = values.Values.ToList();
-		}
-	}
+            Dictionary<TKey, ReadableTuple<TKey>> values = new Dictionary<TKey, ReadableTuple<TKey>>(_tables.Last().Tuples);
 
-	public class MetaCommandsHolder<TKey> : CommandsHolder<TKey, ReadableTuple<TKey>> {
-		private readonly List<Table<TKey, ReadableTuple<TKey>>> _tables = new List<Table<TKey, ReadableTuple<TKey>>>();
+            for (int i = _tables.Count - 2; i >= 0; i--)
+            {
+                foreach (var pair in _tables[i].Tuples)
+                {
+                    values[pair.Key] = pair.Value;
+                }
+            }
 
-		public MetaCommandsHolder(Table<TKey, ReadableTuple<TKey>> table) : base(table) {
-		}
+            _bufferedItems = values.Values.ToList();
+        }
+    }
 
-		public void AddTable(Table<TKey, ReadableTuple<TKey>> table) {
-			_tables.Insert(0, table);
-		}
+    public class MetaCommandsHolder<TKey> : CommandsHolder<TKey, ReadableTuple<TKey>>
+    {
+        private readonly List<Table<TKey, ReadableTuple<TKey>>> _tables = new List<Table<TKey, ReadableTuple<TKey>>>();
 
-		public override void Store(ITableCommand<TKey, ReadableTuple<TKey>> command) {
-			throw new NotImplementedException();
-		}
+        public MetaCommandsHolder(Table<TKey, ReadableTuple<TKey>> table) : base(table)
+        {
+        }
 
-		public override void BeginEdit(IGroupCommand<ITableCommand<TKey, ReadableTuple<TKey>>> command) {
-			_tables.ForEach(p => p.Commands.Begin());
-		}
+        public void AddTable(Table<TKey, ReadableTuple<TKey>> table)
+        {
+            _tables.Insert(0, table);
+        }
 
-		public override void EndEdit() {
-			_tables.ForEach(p => p.Commands.EndEdit());
-		}
+        public override void Store(ITableCommand<TKey, ReadableTuple<TKey>> command)
+        {
+            throw new NotImplementedException();
+        }
 
-		public override void StoreAndExecute(ITableCommand<TKey, ReadableTuple<TKey>> command) {
-			var cmd1 = command as ChangeTupleProperty<TKey, ReadableTuple<TKey>>;
+        public override void BeginEdit(IGroupCommand<ITableCommand<TKey, ReadableTuple<TKey>>> command)
+        {
+            _tables.ForEach(p => p.Commands.Begin());
+        }
 
-			if (cmd1 != null) {
-				for (int i = 0; i < _tables.Count; i++) {
-					if (_tables[i].ContainsKey(command.Key)) {
-						_tables[i].Commands.StoreAndExecute(command);
-						return;
-					}
-				}
+        public override void EndEdit()
+        {
+            _tables.ForEach(p => p.Commands.EndEdit());
+        }
 
-				return;
-			}
+        public override void StoreAndExecute(ITableCommand<TKey, ReadableTuple<TKey>> command)
+        {
+            var cmd1 = command as ChangeTupleProperty<TKey, ReadableTuple<TKey>>;
 
-			var cmd2 = command as DeleteTuple<TKey, ReadableTuple<TKey>>;
+            if (cmd1 != null)
+            {
+                for (int i = 0; i < _tables.Count; i++)
+                {
+                    if (_tables[i].ContainsKey(command.Key))
+                    {
+                        _tables[i].Commands.StoreAndExecute(command);
+                        return;
+                    }
+                }
 
-			if (cmd2 != null) {
-				for (int i = 0; i < _tables.Count; i++) {
-					if (_tables[i].ContainsKey(command.Key)) {
-						_tables[i].Commands.StoreAndExecute(command);
-						//return; Removes in all tables
-					}
-				}
+                return;
+            }
 
-				return;
-			}
+            var cmd2 = command as DeleteTuple<TKey, ReadableTuple<TKey>>;
 
-			throw new NotImplementedException();
-		}
-	}
+            if (cmd2 != null)
+            {
+                for (int i = 0; i < _tables.Count; i++)
+                {
+                    if (_tables[i].ContainsKey(command.Key))
+                    {
+                        _tables[i].Commands.StoreAndExecute(command);
+                        //return; Removes in all tables
+                    }
+                }
+
+                return;
+            }
+
+            throw new NotImplementedException();
+        }
+    }
 }

@@ -1,37 +1,44 @@
-﻿using System.Collections.Generic;
+﻿using GRF.FileFormats.ActFormat;
+using SDE.Tools.ActViewer.DrawingComponents;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using GRF.FileFormats.ActFormat;
-using SDE.Tools.ActViewer.DrawingComponents;
 using Utilities.Tools;
 
-namespace SDE.Tools.ActViewer {
-	/// <summary>
-	/// Interface for a preview editor.
-	/// </summary>
-	public interface IPreview {
-		Canvas Canva { get; }
-		int CenterX { get; }
-		int CenterY { get; }
-		ZoomEngine ZoomEngine { get; }
-		Act Act { get; }
-		int SelectedAction { get; }
-		int SelectedFrame { get; }
-		List<DrawingComponent> Components { get; }
-		Point PointToScreen(Point point);
-	}
+namespace SDE.Tools.ActViewer
+{
+    /// <summary>
+    /// Interface for a preview editor.
+    /// </summary>
+    public interface IPreview
+    {
+        Canvas Canva { get; }
+        int CenterX { get; }
+        int CenterY { get; }
+        ZoomEngine ZoomEngine { get; }
+        Act Act { get; }
+        int SelectedAction { get; }
+        int SelectedFrame { get; }
+        List<DrawingComponent> Components { get; }
 
-	public static class ActHelper {
-		public delegate void FrameIndexChangedDelegate(object sender, int actionIndex);
-	}
+        Point PointToScreen(Point point);
+    }
 
-	public interface ISelector {
-		event ActHelper.FrameIndexChangedDelegate ActionChanged;
-		event ActHelper.FrameIndexChangedDelegate FrameChanged;
-		event ActHelper.FrameIndexChangedDelegate SpecialFrameChanged;
+    public static class ActHelper
+    {
+        public delegate void FrameIndexChangedDelegate(object sender, int actionIndex);
+    }
 
-		int SelectedAction { get; }
-		int SelectedFrame { get; }
-		Act Act { get; }
-	}
+    public interface ISelector
+    {
+        event ActHelper.FrameIndexChangedDelegate ActionChanged;
+
+        event ActHelper.FrameIndexChangedDelegate FrameChanged;
+
+        event ActHelper.FrameIndexChangedDelegate SpecialFrameChanged;
+
+        int SelectedAction { get; }
+        int SelectedFrame { get; }
+        Act Act { get; }
+    }
 }

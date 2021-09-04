@@ -6,27 +6,27 @@
   <Color name="Label" foreground="#000DBA" />
   <Color name="Orange" fontWeight="bold" foreground="#FFDA7000" />
   <Color name="Goto" fontWeight="bold" foreground="DarkBlue" />
-	
-	<!-- This is the main ruleset. -->
-	<RuleSet>
+
+  <!-- This is the main ruleset. -->
+  <RuleSet>
     <Span color="Comment" begin="//" />
     <Span color="Error" begin="-- DECOMPILER ERROR" />
     <Span color="Error" begin="-- GRF Editor Decompiler" />
     <Span color="Orange" begin="-- Using GRF Editor Decompiler" />
-    
+
     <Span color="Comment" begin="--" />
     <Span color="Comment" multiline="true" begin="--\[\[" end="--\]\]" />
     <Span color="Goto" begin="::" end="::" />
     <Span color="Goto" begin="goto " />
 
     <Span color="String">
-			<Begin>"</Begin>
-			<End>"</End>
-			<RuleSet>
-				<!-- nested span for escape sequences -->
-				<Span begin="\\" end="." />
-			</RuleSet>
-		</Span>
+      <Begin>"</Begin>
+      <End>"</End>
+      <RuleSet>
+        <!-- nested span for escape sequences -->
+        <Span begin="\\" end="." />
+      </RuleSet>
+    </Span>
 
     <Span color="String">
       <Begin>'</Begin>
@@ -36,7 +36,7 @@
         <Span begin="\\" end="." />
       </RuleSet>
     </Span>
-    
+
     <Keywords fontStyle="italic" foreground="#FF000F96">
       <Word>openfile</Word>
       <Word>closefile</Word>
@@ -89,7 +89,7 @@
       <Word>os.time</Word>
       <Word>os.tmpname</Word>
     </Keywords>
-    
+
     <Keywords foreground="Blue">
       <Word>and</Word>
       <Word>break</Word>
@@ -252,15 +252,14 @@
       <Word>math.tan</Word>
     </Keywords>
 
-
     <!-- Digits -->
-		<Rule foreground="Orange">
-            \b0[xX][0-9a-fA-F]+  # hex number
-        |    \b
-            (    \d+(\.[0-9]+)?   #number with optional floating point
-            |    \.[0-9]+         #or just starting with floating point
-            )
-            ([eE][+-]?[0-9]+)? # optional exponent
-        </Rule>
-	</RuleSet>
+    <Rule foreground="Orange">
+      \b0[xX][0-9a-fA-F]+  # hex number
+      |    \b
+      (    \d+(\.[0-9]+)?   #number with optional floating point
+      |    \.[0-9]+         #or just starting with floating point
+      )
+      ([eE][+-]?[0-9]+)? # optional exponent
+    </Rule>
+  </RuleSet>
 </SyntaxDefinition>

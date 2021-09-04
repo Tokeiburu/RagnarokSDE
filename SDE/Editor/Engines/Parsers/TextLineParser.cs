@@ -1,21 +1,25 @@
 ﻿using System;
 using System.IO;
 
-namespace SDE.Editor.Engines.Parsers {
-	public class TextLineParser {
-		public static string ReadNextLine(StreamReader reader) {
-			string line;
+namespace SDE.Editor.Engines.Parsers
+{
+    public class TextLineParser
+    {
+        public static string ReadNextLine(StreamReader reader)
+        {
+            string line;
 
-			while (!reader.EndOfStream) {
-				line = reader.ReadLine();
+            while (!reader.EndOfStream)
+            {
+                line = reader.ReadLine();
 
-				if (String.IsNullOrEmpty(line) || (line.Length >= 2 && line[0] == '/' && line[1] == '/'))
-					continue;
+                if (String.IsNullOrEmpty(line) || (line.Length >= 2 && line[0] == '/' && line[1] == '/'))
+                    continue;
 
-				return line;
-			}
+                return line;
+            }
 
-			return null;
-		}
-	}
+            return null;
+        }
+    }
 }

@@ -12,27 +12,27 @@
   <Color name="KeywordsOthers" fontStyle="italic" foreground="#ff0000" />
   <Color name="KeywordsDigit" foreground="Orange" />
   <Color name="KeywordsConstant" foreground="#069906" />
-	
-	<!-- This is the main ruleset. -->
-	<RuleSet ignoreCase="true">
+
+  <!-- This is the main ruleset. -->
+  <RuleSet ignoreCase="true">
     <Span color="Comment" begin="//" />
     <Span color="Error" begin="-- DECOMPILER ERROR" />
     <Span color="Error" begin="-- GRF Editor Decompiler" />
     <Span color="Orange" begin="-- Using GRF Editor Decompiler" />
-    
+
     <Span color="Comment" begin="--" />
     <Span color="Comment" multiline="true" begin="--\[\[" end="--\]\]" />
     <Span color="Goto" begin="::" end="::" />
     <Span color="Goto" begin="goto " />
 
     <Span color="String">
-			<Begin>"</Begin>
-			<End>"</End>
-			<RuleSet>
-				<!-- nested span for escape sequences -->
-				<Span begin="\\" end="." />
-			</RuleSet>
-		</Span>
+      <Begin>"</Begin>
+      <End>"</End>
+      <RuleSet>
+        <!-- nested span for escape sequences -->
+        <Span begin="\\" end="." />
+      </RuleSet>
+    </Span>
 
     <Span color="String">
       <Begin>'</Begin>
@@ -42,7 +42,7 @@
         <Span begin="\\" end="." />
       </RuleSet>
     </Span>
-    
+
     <Keywords color="KeywordsStructure">
       <Word>mes</Word>
       <Word>next</Word>
@@ -9330,14 +9330,14 @@
       <Word>BG_INFO_DESERTER_TIME</Word>
     </Keywords>
 
-      <!-- Digits -->
-		<Rule color="KeywordsDigit">
-            \b0[xX][0-9a-fA-F]+  # hex number
-        |    \b
-            (    \d+(\.[0-9]+)?   #number with optional floating point
-            |    \.[0-9]+         #or just starting with floating point
-            )
-            ([eE][+-]?[0-9]+)? # optional exponent
-        </Rule>
-	</RuleSet>
+    <!-- Digits -->
+    <Rule color="KeywordsDigit">
+      \b0[xX][0-9a-fA-F]+  # hex number
+      |    \b
+      (    \d+(\.[0-9]+)?   #number with optional floating point
+      |    \.[0-9]+         #or just starting with floating point
+      )
+      ([eE][+-]?[0-9]+)? # optional exponent
+    </Rule>
+  </RuleSet>
 </SyntaxDefinition>

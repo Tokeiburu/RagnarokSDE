@@ -1,13 +1,12 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:WPF="clr-namespace:TokeiLibrary.WPF;assembly=TokeiLibrary"
+                    xmlns:application="clr-namespace:GrfToWpfBridge.Application;assembly=GrfToWpfBridge"
                     xmlns:TreeViewManager="clr-namespace:GrfToWpfBridge.TreeViewManager;assembly=GrfToWpfBridge"
-                    xmlns:styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
-                    xmlns:controls="clr-namespace:SDE.View.Controls"
-                    xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit"
-                    xmlns:wpfBugFix="clr-namespace:TokeiLibrary.WpfBugFix;assembly=TokeiLibrary"
                     xmlns:themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
-                    xmlns:application="clr-namespace:GrfToWpfBridge.Application;assembly=GrfToWpfBridge">
+                    xmlns:controls="clr-namespace:SDE.View.Controls"
+                    xmlns:styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
+                    xmlns:WPF="clr-namespace:TokeiLibrary.WPF;assembly=TokeiLibrary"
+                    xmlns:wpfBugFix="clr-namespace:TokeiLibrary.WpfBugFix;assembly=TokeiLibrary">
     <!-- Dark theme colors and brushes -->
     <Color x:Key="UIThemeDefaultTextColor">#D6D4D8</Color>
     <Color x:Key="UIThemeBackground1Color">#2F3136</Color>
@@ -40,7 +39,7 @@
     <Color x:Key="UIThemeListViewBorderColor">#242529</Color>
     <Color x:Key="UIThemeListViewMouseOverBackgroundColor">#4C4F57</Color>
     <Color x:Key="UIThemeComboBoxDisabled">#3D4146</Color>
-    
+
     <SolidColorBrush x:Key="UIThemeBackground1Brush" Color="{StaticResource UIThemeBackground1Color}" />
     <SolidColorBrush x:Key="UIThemeBackground2Brush" Color="{StaticResource UIThemeBackground2Color}" />
     <SolidColorBrush x:Key="UIThemeSelectBorderBrush" Color="{StaticResource UIThemeSelectBorderColor}" />
@@ -59,15 +58,15 @@
     <SolidColorBrush x:Key="UIThemeContextMenuMouseOverBackgroundBrush" Color="{StaticResource UIThemeContextMenuMouseOverBackgroundColor}" />
     <SolidColorBrush x:Key="UIThemeTextBoxBorderBrush" Color="{StaticResource UIThemeTextBoxBorderColor}" />
     <SolidColorBrush x:Key="UIThemeTextBoxBackgroundBrush" Color="{StaticResource UIThemeTextBoxBackgroundColor}" />
-    <SolidColorBrush x:Key="UIThemePopupBorderBrush" Color="{StaticResource UIThemePopupBorderColor}"/>
-    <SolidColorBrush x:Key="UIThemePopupBackgroundBrush" Color="{StaticResource UIThemePopupBackgroundColor}"/>
-    <SolidColorBrush x:Key="UIThemeListViewBorderBrush" Color="{StaticResource UIThemeListViewBorderColor}"/>
-    <SolidColorBrush x:Key="UIThemeListViewMouseOverBackgroundBrush" Color="{StaticResource UIThemeListViewMouseOverBackgroundColor}"/>
-    <SolidColorBrush x:Key="UIThemeComboBoxDisabledBrush" Color="{StaticResource UIThemeComboBoxDisabled}"/>
+    <SolidColorBrush x:Key="UIThemePopupBorderBrush" Color="{StaticResource UIThemePopupBorderColor}" />
+    <SolidColorBrush x:Key="UIThemePopupBackgroundBrush" Color="{StaticResource UIThemePopupBackgroundColor}" />
+    <SolidColorBrush x:Key="UIThemeListViewBorderBrush" Color="{StaticResource UIThemeListViewBorderColor}" />
+    <SolidColorBrush x:Key="UIThemeListViewMouseOverBackgroundBrush" Color="{StaticResource UIThemeListViewMouseOverBackgroundColor}" />
+    <SolidColorBrush x:Key="UIThemeComboBoxDisabledBrush" Color="{StaticResource UIThemeComboBoxDisabled}" />
 
-    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="{StaticResource UIThemeMouseOverBorderColor}"/>
-    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrush}" Color="White"/>
-    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="White"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="{StaticResource UIThemeMouseOverBorderColor}" />
+    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrush}" Color="White" />
+    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="White" />
     <Color x:Key="{x:Static SystemColors.HighlightTextColor}">Red</Color>
     <Color x:Key="{x:Static SystemColors.HighlightTextColorKey}">Red</Color>
     <Color x:Key="{x:Static SystemColors.HighlightColorKey}">Red</Color>
@@ -79,52 +78,52 @@
     <Color x:Key="UIThemePropertyRemovedColor">#FF5858</Color>
     <Color x:Key="UIThemePropertyAddedColor">#A2A2FF</Color>
 
-    <SolidColorBrush x:Key="CellBrushDefault" Color="{StaticResource UIThemePropertyDefaultColor}"/>
-    <SolidColorBrush x:Key="CellBrushLzma" Color="{StaticResource UIThemePropertyLzmaColor}"/>
-    <SolidColorBrush x:Key="CellBrushEncrypted" Color="{StaticResource UIThemePropertyEncryptedColor}"/>
-    <SolidColorBrush x:Key="CellBrushRemoved" Color="{StaticResource UIThemePropertyRemovedColor}"/>
-    <SolidColorBrush x:Key="CellBrushAdded" Color="{StaticResource UIThemePropertyAddedColor}"/>
-    <SolidColorBrush x:Key="CellBrushModified" Color="#00DA00"/>
-    <SolidColorBrush x:Key="CellBrushMvp" Color="{StaticResource UIThemePropertyEncryptedColor}"/>
+    <SolidColorBrush x:Key="CellBrushDefault" Color="{StaticResource UIThemePropertyDefaultColor}" />
+    <SolidColorBrush x:Key="CellBrushLzma" Color="{StaticResource UIThemePropertyLzmaColor}" />
+    <SolidColorBrush x:Key="CellBrushEncrypted" Color="{StaticResource UIThemePropertyEncryptedColor}" />
+    <SolidColorBrush x:Key="CellBrushRemoved" Color="{StaticResource UIThemePropertyRemovedColor}" />
+    <SolidColorBrush x:Key="CellBrushAdded" Color="{StaticResource UIThemePropertyAddedColor}" />
+    <SolidColorBrush x:Key="CellBrushModified" Color="#00DA00" />
+    <SolidColorBrush x:Key="CellBrushMvp" Color="{StaticResource UIThemePropertyEncryptedColor}" />
 
     <!-- GRF Editor style overrides - TabControl -->
-    <SolidColorBrush x:Key="TabControlBackground" Color="{StaticResource UIThemeBackground1Color}"/>
-    <SolidColorBrush x:Key="TabControlBorder" Color="{StaticResource UIThemeSeparatorLineColor}"/>
-    <SolidColorBrush x:Key="TabItemBackground" Color="{StaticResource UIThemeBackground2Color}"/>
-    <SolidColorBrush x:Key="TabItemMouseOverBackground" Color="{StaticResource UIThemeMouseOverBackgroundColor}"/>
-    <SolidColorBrush x:Key="TabItemMouseOverBorder" Color="{StaticResource UIThemeMouseOverBorderColor}"/>
-    <SolidColorBrush x:Key="TabItemSelectedBackground" Color="{StaticResource UIThemeSelectBackgroundColor}"/>
-    <SolidColorBrush x:Key="TabItemSelectedBorder" Color="{StaticResource UIThemeSelectBorderColor}"/>
-    <SolidColorBrush x:Key="TabItemTextSelectedForeground" Color="{StaticResource UIThemeSelectTextColor}"/>
-    <SolidColorBrush x:Key="TabItemTextNormalForeground" Color="{StaticResource UIThemeMainTabDefaultTextColor}"/>
-    <SolidColorBrush x:Key="SeperatorBrush" Color="{StaticResource UIThemeSeparatorLineColor}"/>
+    <SolidColorBrush x:Key="TabControlBackground" Color="{StaticResource UIThemeBackground1Color}" />
+    <SolidColorBrush x:Key="TabControlBorder" Color="{StaticResource UIThemeSeparatorLineColor}" />
+    <SolidColorBrush x:Key="TabItemBackground" Color="{StaticResource UIThemeBackground2Color}" />
+    <SolidColorBrush x:Key="TabItemMouseOverBackground" Color="{StaticResource UIThemeMouseOverBackgroundColor}" />
+    <SolidColorBrush x:Key="TabItemMouseOverBorder" Color="{StaticResource UIThemeMouseOverBorderColor}" />
+    <SolidColorBrush x:Key="TabItemSelectedBackground" Color="{StaticResource UIThemeSelectBackgroundColor}" />
+    <SolidColorBrush x:Key="TabItemSelectedBorder" Color="{StaticResource UIThemeSelectBorderColor}" />
+    <SolidColorBrush x:Key="TabItemTextSelectedForeground" Color="{StaticResource UIThemeSelectTextColor}" />
+    <SolidColorBrush x:Key="TabItemTextNormalForeground" Color="{StaticResource UIThemeMainTabDefaultTextColor}" />
+    <SolidColorBrush x:Key="SeperatorBrush" Color="{StaticResource UIThemeSeparatorLineColor}" />
 
     <!-- GRF Editor style overrides - FancyButton -->
-    <SolidColorBrush x:Key="FancyButtonHeaderForeground" Color="White"/>
-    <SolidColorBrush x:Key="FancyButtonDisabledBorderBrush" Color="#81202225"/>
-    <SolidColorBrush x:Key="FancyButtonDisabledBackgroundBrush" Color="#81202225"/>
-    <SolidColorBrush x:Key="FancyButtonMouseOverBorderBrush" Color="{StaticResource UIThemeMouseOverBorderColor}"/>
-    <SolidColorBrush x:Key="FancyButtonMouseOverBackgroundBrush" Color="{StaticResource UIThemeMouseOverBackgroundColor}"/>
-    <SolidColorBrush x:Key="FancyButtonPressedBorderBrush" Color="{StaticResource UIThemeSelectBorderColor}"/>
-    <SolidColorBrush x:Key="FancyButtonPressedBackgroundBrush" Color="{StaticResource UIThemeSelectBackgroundColor}"/>
+    <SolidColorBrush x:Key="FancyButtonHeaderForeground" Color="White" />
+    <SolidColorBrush x:Key="FancyButtonDisabledBorderBrush" Color="#81202225" />
+    <SolidColorBrush x:Key="FancyButtonDisabledBackgroundBrush" Color="#81202225" />
+    <SolidColorBrush x:Key="FancyButtonMouseOverBorderBrush" Color="{StaticResource UIThemeMouseOverBorderColor}" />
+    <SolidColorBrush x:Key="FancyButtonMouseOverBackgroundBrush" Color="{StaticResource UIThemeMouseOverBackgroundColor}" />
+    <SolidColorBrush x:Key="FancyButtonPressedBorderBrush" Color="{StaticResource UIThemeSelectBorderColor}" />
+    <SolidColorBrush x:Key="FancyButtonPressedBackgroundBrush" Color="{StaticResource UIThemeSelectBackgroundColor}" />
 
     <!-- GRF Editor style overrides - Avalon -->
     <Color x:Key="UIThemeAvalonSelectionColor">#A0AEB7C0</Color>
     <Color x:Key="UIThemeAvalonMarkerColor">#02A90B</Color>
-    
-    <SolidColorBrush x:Key="AvalonEditorBackground" Color="{StaticResource UIThemeBackground2Color}"/>
+
+    <SolidColorBrush x:Key="AvalonEditorBackground" Color="{StaticResource UIThemeBackground2Color}" />
     <SolidColorBrush x:Key="AvalonEditorSelectionBrush" Color="{StaticResource UIThemeAvalonSelectionColor}" />
     <SolidColorBrush x:Key="AvalonEditorMarkerBrush" Color="{StaticResource UIThemeAvalonMarkerColor}" />
-    
+
     <!-- GRF Editor style overrides - Others -->
     <SolidColorBrush x:Key="MouseOverTextBrush" Color="{StaticResource UIThemeHyperlinkColor}" />
-    <SolidColorBrush x:Key="TextForeground" Color="{StaticResource UIThemeDefaultTextColor}"/>
-    <SolidColorBrush x:Key="ListItemSearchBackground" Color="{StaticResource UIThemeBackground1Color}"/>
+    <SolidColorBrush x:Key="TextForeground" Color="{StaticResource UIThemeDefaultTextColor}" />
+    <SolidColorBrush x:Key="ListItemSearchBackground" Color="{StaticResource UIThemeBackground1Color}" />
     <SolidColorBrush x:Key="UIDialogBackground" Color="{StaticResource UIThemeDialogFooterColor}" />
     <SolidColorBrush x:Key="UIBackgroundBrush" Color="{StaticResource UIThemeBackground2Color}" />
     <SolidColorBrush x:Key="EncryptionDialogBorderBrush" Color="{StaticResource UIThemeDialogFooterColor}" />
-    <SolidColorBrush x:Key="ToggleMemoryBorderBrush" Color="{StaticResource UIThemePopupBorderColor}"/>
-    <SolidColorBrush x:Key="UIDragDropBrush" Color="{StaticResource UIThemeTextBoxBorderColor}"/>
+    <SolidColorBrush x:Key="ToggleMemoryBorderBrush" Color="{StaticResource UIThemePopupBorderColor}" />
+    <SolidColorBrush x:Key="UIDragDropBrush" Color="{StaticResource UIThemeTextBoxBorderColor}" />
 
     <LinearGradientBrush x:Key="ToggleMemoryBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
         <GradientStop Offset="0" Color="{StaticResource UIThemePopupBackgroundColor}" />
@@ -135,19 +134,19 @@
         <GradientStop Offset="0" Color="{StaticResource UIThemePopupBackgroundColor}" />
         <GradientStop Offset="0.5" Color="{StaticResource UIThemePopupBackgroundColor}" />
     </LinearGradientBrush>
-    
+
     <!-- TreeView -->
-    <SolidColorBrush x:Key="UITreeViewDefaultForegroundBrush" Color="{StaticResource UIThemeFadeTextColor}"/>
-    <SolidColorBrush x:Key="UITreeViewSelectedBorderBrush" Color="{StaticResource UIThemeSelectBorderColor}"/>
-    <SolidColorBrush x:Key="UITreeViewSelectedBackgroundBrush" Color="{StaticResource UIThemeSelectBackgroundColor}"/>
-    <SolidColorBrush x:Key="UITreeViewSelectedForegroundBrush" Color="{StaticResource UIThemeSelectTextColor}"/>
-    <SolidColorBrush x:Key="UITreeViewMouseOverBorderBrush" Color="{StaticResource UIThemeMouseOverBorderColor}"/>
-    <SolidColorBrush x:Key="UITreeViewMouseOverBackgroundBrush" Color="{StaticResource UIThemeMouseOverBackgroundColor}"/>
-    <SolidColorBrush x:Key="UITreeViewMouseOverForegroundBrush" Color="{StaticResource UIThemeMouseOverTextColor}"/>
-    <SolidColorBrush x:Key="UITreeViewDragEnterBorderBrush" Color="{StaticResource UIThemeTreeViewDragEnterBorderColor}"/>
-    <SolidColorBrush x:Key="UITreeViewDragEnterBackgroundBrush" Color="{StaticResource UIThemeTreeViewDragEnterBackgroundColor}"/>
-    <SolidColorBrush x:Key="UITreeViewUnableBorderBrush" Color="{StaticResource UIThemeTreeViewDragUnableBorderColor}"/>
-    <SolidColorBrush x:Key="UITreeViewUnableBackgroundBrush" Color="{StaticResource UIThemeTreeViewDragUnableBackgroundColor}"/>
+    <SolidColorBrush x:Key="UITreeViewDefaultForegroundBrush" Color="{StaticResource UIThemeFadeTextColor}" />
+    <SolidColorBrush x:Key="UITreeViewSelectedBorderBrush" Color="{StaticResource UIThemeSelectBorderColor}" />
+    <SolidColorBrush x:Key="UITreeViewSelectedBackgroundBrush" Color="{StaticResource UIThemeSelectBackgroundColor}" />
+    <SolidColorBrush x:Key="UITreeViewSelectedForegroundBrush" Color="{StaticResource UIThemeSelectTextColor}" />
+    <SolidColorBrush x:Key="UITreeViewMouseOverBorderBrush" Color="{StaticResource UIThemeMouseOverBorderColor}" />
+    <SolidColorBrush x:Key="UITreeViewMouseOverBackgroundBrush" Color="{StaticResource UIThemeMouseOverBackgroundColor}" />
+    <SolidColorBrush x:Key="UITreeViewMouseOverForegroundBrush" Color="{StaticResource UIThemeMouseOverTextColor}" />
+    <SolidColorBrush x:Key="UITreeViewDragEnterBorderBrush" Color="{StaticResource UIThemeTreeViewDragEnterBorderColor}" />
+    <SolidColorBrush x:Key="UITreeViewDragEnterBackgroundBrush" Color="{StaticResource UIThemeTreeViewDragEnterBackgroundColor}" />
+    <SolidColorBrush x:Key="UITreeViewUnableBorderBrush" Color="{StaticResource UIThemeTreeViewDragUnableBorderColor}" />
+    <SolidColorBrush x:Key="UITreeViewUnableBackgroundBrush" Color="{StaticResource UIThemeTreeViewDragUnableBackgroundColor}" />
 
     <!-- Dark theme styles -->
     <Style TargetType="WPF:TkTreeViewItem">
@@ -191,7 +190,7 @@
         <Setter Property="UnableBackgroundBrush" Value="{StaticResource UITreeViewUnableBackgroundBrush}" />
         <Setter Property="UnableBorderBrush" Value="{StaticResource UITreeViewUnableBorderBrush}" />
     </Style>
-    
+
     <Style TargetType="styles:TkWindow">
         <Setter Property="Foreground" Value="{DynamicResource TextForeground}" />
         <Setter Property="Background" Value="{DynamicResource TabControlBackground}" />
@@ -260,23 +259,23 @@
         </Border>
         <ControlTemplate.Triggers>
             <Trigger Property="IsSuspendingPopupAnimation" Value="true">
-                <Setter TargetName="Popup" Property="PopupAnimation" Value="None"/>
+                <Setter TargetName="Popup" Property="PopupAnimation" Value="None" />
             </Trigger>
             <Trigger Property="IsHighlighted" Value="true">
-                <Setter TargetName="Border" Property="Background" Value="{DynamicResource UIThemePopupBackgroundBrush}"/>
-                <Setter Property="Foreground" Value="{StaticResource UIThemeContextMenuMouseOverTextBrush}"/>
+                <Setter TargetName="Border" Property="Background" Value="{DynamicResource UIThemePopupBackgroundBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource UIThemeContextMenuMouseOverTextBrush}" />
             </Trigger>
             <Trigger Property="IsHighlighted" Value="false">
-                <Setter TargetName="Border" Property="Background" Value="{DynamicResource UIThemePopupBackgroundBrush}"/>
-                <Setter Property="Foreground" Value="{StaticResource UIThemeContextMenuDefaultTextBrush}"/>
+                <Setter TargetName="Border" Property="Background" Value="{DynamicResource UIThemePopupBackgroundBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource UIThemeContextMenuDefaultTextBrush}" />
             </Trigger>
             <!--Snippettoplevelheader-->
             <Trigger SourceName="Popup" Property="Popup.AllowsTransparency" Value="True">
-                <Setter TargetName="SubmenuBorder" Property="CornerRadius" Value="0,0,4,4"/>
-                <Setter TargetName="SubmenuBorder" Property="Padding" Value="0,0,0,3"/>
+                <Setter TargetName="SubmenuBorder" Property="CornerRadius" Value="0,0,4,4" />
+                <Setter TargetName="SubmenuBorder" Property="Padding" Value="0,0,0,3" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="Foreground" Value="{StaticResource UIThemeContextMenuDisabledTextBrush}"/>
+                <Setter Property="Foreground" Value="{StaticResource UIThemeContextMenuDisabledTextBrush}" />
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
@@ -361,12 +360,12 @@
     </ControlTemplate>
 
     <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="Separator">
-        <Setter Property="Height" Value="1"/>
-        <Setter Property="Margin" Value="0,4,0,4"/>
+        <Setter Property="Height" Value="1" />
+        <Setter Property="Margin" Value="0,4,0,4" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Separator}">
-                    <Border Margin="30,0,3,0" BorderBrush="{StaticResource UIThemeContextMenuDefaultTextBrush}" BorderThickness="1"/>
+                    <Border Margin="30,0,3,0" BorderBrush="{StaticResource UIThemeContextMenuDefaultTextBrush}" BorderThickness="1" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -382,17 +381,17 @@
     <SolidColorBrush x:Key="GlyphBrush" Color="{StaticResource UIThemeSelectBackgroundColor}" />
     <SolidColorBrush x:Key="HoverBrush2" Color="{StaticResource UIThemeBackground2Color}" />
     <SolidColorBrush x:Key="PressedBrush2" Color="{StaticResource UIThemeBackground2Color}" />
-    <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="{StaticResource UIThemeSelectBackgroundColor}"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="{StaticResource UIThemeSelectBackgroundColor}" />
 
     <!-- SrollViewer ScrollBar Repeat Buttons (at each end) -->
     <Style x:Key="ScrollBarLineButton" TargetType="{x:Type RepeatButton}">
-        <Setter Property="SnapsToDevicePixels" Value="True"/>
-        <Setter Property="OverridesDefaultStyle" Value="true"/>
-        <Setter Property="Focusable" Value="false"/>
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="OverridesDefaultStyle" Value="true" />
+        <Setter Property="Focusable" Value="false" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type RepeatButton}">
-                    <Border Name="Border" Margin="1" Background="{StaticResource ScrollbarForeground}" >
+                    <Border Name="Border" Margin="1" Background="{StaticResource ScrollbarForeground}">
                         <Path HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{StaticResource GlyphBrush}" Data="{Binding Path=Content, RelativeSource={RelativeSource TemplatedParent}}" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -409,10 +408,10 @@
     </Style>
 
     <Style x:Key="ScrollBarPageButton" TargetType="{x:Type RepeatButton}">
-        <Setter Property="SnapsToDevicePixels" Value="True"/>
-        <Setter Property="OverridesDefaultStyle" Value="true"/>
-        <Setter Property="IsTabStop" Value="false"/>
-        <Setter Property="Focusable" Value="false"/>
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="OverridesDefaultStyle" Value="true" />
+        <Setter Property="IsTabStop" Value="false" />
+        <Setter Property="Focusable" Value="false" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type RepeatButton}">
@@ -423,10 +422,10 @@
     </Style>
 
     <Style x:Key="ScrollBarThumb" TargetType="{x:Type Thumb}">
-        <Setter Property="SnapsToDevicePixels" Value="True"/>
-        <Setter Property="OverridesDefaultStyle" Value="true"/>
-        <Setter Property="IsTabStop" Value="false"/>
-        <Setter Property="Focusable" Value="false"/>
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="OverridesDefaultStyle" Value="true" />
+        <Setter Property="IsTabStop" Value="false" />
+        <Setter Property="Focusable" Value="false" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Thumb}">
@@ -441,13 +440,12 @@
         </Setter>
     </Style>
 
-
     <ControlTemplate x:Key="VerticalScrollBar" TargetType="{x:Type ScrollBar}">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition MaxHeight="18"/>
-                <RowDefinition Height="0.00001*"/>
-                <RowDefinition MaxHeight="18"/>
+                <RowDefinition MaxHeight="18" />
+                <RowDefinition Height="0.00001*" />
+                <RowDefinition MaxHeight="18" />
             </Grid.RowDefinitions>
             <Border Grid.RowSpan="3" Background="{StaticResource ScrollbarBackground}" />
             <RepeatButton Grid.Row="0" Style="{StaticResource ScrollBarLineButton}" Height="18" Command="ScrollBar.LineUpCommand" Content="M 0 4 L 8 4 L 4 0 Z" />
@@ -462,16 +460,16 @@
                     <RepeatButton Style="{StaticResource ScrollBarPageButton}" Command="ScrollBar.PageDownCommand" />
                 </Track.IncreaseRepeatButton>
             </Track>
-            <RepeatButton Grid.Row="2" Style="{StaticResource ScrollBarLineButton}" Height="18" Command="ScrollBar.LineDownCommand" Content="M 0 0 L 4 4 L 8 0 Z"/>
+            <RepeatButton Grid.Row="2" Style="{StaticResource ScrollBarLineButton}" Height="18" Command="ScrollBar.LineDownCommand" Content="M 0 0 L 4 4 L 8 0 Z" />
         </Grid>
     </ControlTemplate>
 
     <ControlTemplate x:Key="HorizontalScrollBar" TargetType="{x:Type ScrollBar}">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition MaxWidth="18"/>
-                <ColumnDefinition Width="0.00001*"/>
-                <ColumnDefinition MaxWidth="18"/>
+                <ColumnDefinition MaxWidth="18" />
+                <ColumnDefinition Width="0.00001*" />
+                <ColumnDefinition MaxWidth="18" />
             </Grid.ColumnDefinitions>
             <Border Grid.ColumnSpan="3" Background="{StaticResource ScrollbarBackground}" />
             <RepeatButton Grid.Column="0" Style="{StaticResource ScrollBarLineButton}" Width="18" Command="ScrollBar.LineLeftCommand" Content="M 4 0 L 4 8 L 0 4 Z" />
@@ -486,21 +484,21 @@
                     <RepeatButton Style="{StaticResource ScrollBarPageButton}" Command="ScrollBar.PageRightCommand" />
                 </Track.IncreaseRepeatButton>
             </Track>
-            <RepeatButton Grid.Column="2" Style="{StaticResource ScrollBarLineButton}" Width="18" Command="ScrollBar.LineRightCommand" Content="M 0 0 L 4 4 L 0 8 Z"/>
+            <RepeatButton Grid.Column="2" Style="{StaticResource ScrollBarLineButton}" Width="18" Command="ScrollBar.LineRightCommand" Content="M 0 0 L 4 4 L 0 8 Z" />
         </Grid>
     </ControlTemplate>
 
     <Style x:Key="{x:Type ScrollBar}" TargetType="{x:Type ScrollBar}">
-        <Setter Property="SnapsToDevicePixels" Value="True"/>
-        <Setter Property="OverridesDefaultStyle" Value="true"/>
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="OverridesDefaultStyle" Value="true" />
         <Style.Triggers>
             <Trigger Property="Orientation" Value="Horizontal">
-                <Setter Property="Width" Value="Auto"/>
+                <Setter Property="Width" Value="Auto" />
                 <Setter Property="Height" Value="18" />
                 <Setter Property="Template" Value="{StaticResource HorizontalScrollBar}" />
             </Trigger>
             <Trigger Property="Orientation" Value="Vertical">
-                <Setter Property="Width" Value="18"/>
+                <Setter Property="Width" Value="18" />
                 <Setter Property="Height" Value="Auto" />
                 <Setter Property="Template" Value="{StaticResource VerticalScrollBar}" />
             </Trigger>
@@ -557,7 +555,7 @@
     </Style>
 
     <Style x:Key="TabItemStyled2" TargetType="{x:Type TabItem}">
-        <Setter Property="Foreground" Value="{StaticResource TextForeground}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextForeground}" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
 
         <Setter Property="Template">
@@ -684,7 +682,7 @@
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type ListViewItem}">
                                 <Border BorderThickness="0">
-                                    <GridViewRowPresenter HorizontalAlignment="Stretch" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Width="Auto" Margin="0" Content="{TemplateBinding Content}"/>
+                                    <GridViewRowPresenter HorizontalAlignment="Stretch" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Width="Auto" Margin="0" Content="{TemplateBinding Content}" />
                                 </Border>
                             </ControlTemplate>
                         </Setter.Value>
@@ -693,7 +691,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <!--
     <ControlTemplate x:Key="DefaultListViewControlTemplate" TargetType="ListBoxItem">
         <Border Name="BorderListBox" Padding="1" Margin="0 0 1 0" BorderThickness="1" CornerRadius="2" SnapsToDevicePixels="true" Background="Transparent">
@@ -711,7 +709,7 @@
         </ControlTemplate.Triggers>
     </ControlTemplate>
     -->
-    
+
     <!-- Other styles -->
     <Style x:Key="DefaultListViewItemStyle" TargetType="{x:Type ListViewItem}">
         <Setter Property="HorizontalAlignment" Value="Left" />
@@ -737,13 +735,13 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <Style TargetType="{x:Type TextBox}">
-        <Setter Property="Foreground" Value="{StaticResource TextForeground}"/>
-        <Setter Property="Background" Value="{StaticResource UIThemeTextBoxBorderBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource UIThemeTextBoxBorderBrush}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="1"/>
+        <Setter Property="Foreground" Value="{StaticResource TextForeground}" />
+        <Setter Property="Background" Value="{StaticResource UIThemeTextBoxBorderBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource UIThemeTextBoxBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="1" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TextBoxBase}">
@@ -759,7 +757,7 @@
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="Border" Property="Background" Value="{StaticResource UIThemeComboBoxDisabledBrush}" />
                             <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource UIThemeComboBoxDisabledBrush}" />
-                            <Setter Property="Foreground" Value="{StaticResource TextBoxOverlayBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource TextBoxOverlayBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -769,17 +767,17 @@
 
     <Style TargetType="{x:Type Label}">
         <Setter Property="Foreground"
-            Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}"/>
+            Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}" />
     </Style>
 
     <Style TargetType="{x:Type RadioButton}">
         <Setter Property="Foreground"
-            Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}"/>
+            Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}" />
     </Style>
 
     <Style TargetType="{x:Type CheckBox}">
         <Setter Property="Foreground"
-            Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}"/>
+            Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}" />
     </Style>
 
     <Style TargetType="{x:Type GridViewColumnHeader}">
@@ -790,7 +788,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type GridViewColumnHeader}">
                     <Border Name="BorderGrid" BorderThickness="0,0,1,1" BorderBrush="{StaticResource UIThemeListViewBorderBrush}" Background="{StaticResource UIThemeBackground1Brush}">
-                        <ContentPresenter Name="HeaderContent" Margin="0,2,0,2"/>
+                        <ContentPresenter Name="HeaderContent" Margin="0,2,0,2" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="true">
@@ -802,33 +800,33 @@
         </Setter>
     </Style>
 
-    <TextBlock x:Key="AvalonPythonComment" Foreground="#A0A0A0" FontWeight="Bold"/>
-    <TextBlock x:Key="AvalonPythonString" Foreground="#E5DB6D" FontWeight="Bold"/>
-    <TextBlock x:Key="AvalonPythonKeywordsStructure" Foreground="#FE9700" FontWeight="Bold"/>
-    <TextBlock x:Key="AvalonPythonKeywordsDb" Foreground="#FB1E70" FontWeight="Bold" FontStyle="Italic"/>
-    <TextBlock x:Key="AvalonPythonKeywordsApi" Foreground="#60D8F0" FontWeight="Bold"/>
-    <TextBlock x:Key="AvalonPythonKeywordsOthers" Foreground="#A3E305" FontWeight="Bold" FontStyle="Italic"/>
-    <TextBlock x:Key="AvalonPythonKeywordsDigit" Foreground="#AE7DFE" FontWeight="Bold"/>
+    <TextBlock x:Key="AvalonPythonComment" Foreground="#A0A0A0" FontWeight="Bold" />
+    <TextBlock x:Key="AvalonPythonString" Foreground="#E5DB6D" FontWeight="Bold" />
+    <TextBlock x:Key="AvalonPythonKeywordsStructure" Foreground="#FE9700" FontWeight="Bold" />
+    <TextBlock x:Key="AvalonPythonKeywordsDb" Foreground="#FB1E70" FontWeight="Bold" FontStyle="Italic" />
+    <TextBlock x:Key="AvalonPythonKeywordsApi" Foreground="#60D8F0" FontWeight="Bold" />
+    <TextBlock x:Key="AvalonPythonKeywordsOthers" Foreground="#A3E305" FontWeight="Bold" FontStyle="Italic" />
+    <TextBlock x:Key="AvalonPythonKeywordsDigit" Foreground="#AE7DFE" FontWeight="Bold" />
     <TextBlock x:Key="AvalonPythonCommentFont" Foreground="#A0A0A0" FontWeight="Bold" />
     <TextBlock x:Key="AvalonPythonDefault" Foreground="{StaticResource TextForeground}" FontWeight="Bold" />
 
-    <TextBlock x:Key="AvalonDebugDbComment" Foreground="#A0A0A0" FontWeight="Bold"/>
-    <TextBlock x:Key="AvalonDebugDbString" Foreground="#E5DB6D" FontWeight="Bold"/>
-    <TextBlock x:Key="AvalonDebugDbKeywordsStructure" Foreground="#FE9700" FontWeight="Bold"/>
-    <TextBlock x:Key="AvalonDebugDbKeywordsDb" Foreground="#FB1E70" FontWeight="Bold" FontStyle="Italic"/>
-    <TextBlock x:Key="AvalonDebugDbKeywordsApi" Foreground="#60D8F0" FontWeight="Bold"/>
-    <TextBlock x:Key="AvalonDebugDbKeywordsOthers" Foreground="#FB1E70" FontWeight="Bold"/>
-    <TextBlock x:Key="AvalonDebugDbKeywordsDigit" Foreground="#AE7DFE" FontWeight="Bold"/>
+    <TextBlock x:Key="AvalonDebugDbComment" Foreground="#A0A0A0" FontWeight="Bold" />
+    <TextBlock x:Key="AvalonDebugDbString" Foreground="#E5DB6D" FontWeight="Bold" />
+    <TextBlock x:Key="AvalonDebugDbKeywordsStructure" Foreground="#FE9700" FontWeight="Bold" />
+    <TextBlock x:Key="AvalonDebugDbKeywordsDb" Foreground="#FB1E70" FontWeight="Bold" FontStyle="Italic" />
+    <TextBlock x:Key="AvalonDebugDbKeywordsApi" Foreground="#60D8F0" FontWeight="Bold" />
+    <TextBlock x:Key="AvalonDebugDbKeywordsOthers" Foreground="#FB1E70" FontWeight="Bold" />
+    <TextBlock x:Key="AvalonDebugDbKeywordsDigit" Foreground="#AE7DFE" FontWeight="Bold" />
     <TextBlock x:Key="AvalonDebugDbCommentFont" Foreground="#A0A0A0" FontWeight="Bold" />
     <TextBlock x:Key="AvalonDebugDbDefault" Foreground="{StaticResource TextForeground}" FontWeight="Bold" />
 
-    <TextBlock x:Key="AvalonScriptComment" Foreground="#A0A0A0" FontWeight="Bold"/>
-    <TextBlock x:Key="AvalonScriptString" Foreground="#E5DB6D" FontWeight="Bold"/>
-    <TextBlock x:Key="AvalonScriptKeywordsStructure" Foreground="#FE9700" FontWeight="Bold"/>
-    <TextBlock x:Key="AvalonScriptKeywordsDb" Foreground="#FB1E70" FontWeight="Bold" FontStyle="Italic"/>
-    <TextBlock x:Key="AvalonScriptKeywordsApi" Foreground="#60D8F0" FontWeight="Bold"/>
-    <TextBlock x:Key="AvalonScriptKeywordsOthers" Foreground="#FB1E70" FontWeight="Bold"/>
-    <TextBlock x:Key="AvalonScriptKeywordsDigit" Foreground="#AE7DFE" FontWeight="Bold"/>
+    <TextBlock x:Key="AvalonScriptComment" Foreground="#A0A0A0" FontWeight="Bold" />
+    <TextBlock x:Key="AvalonScriptString" Foreground="#E5DB6D" FontWeight="Bold" />
+    <TextBlock x:Key="AvalonScriptKeywordsStructure" Foreground="#FE9700" FontWeight="Bold" />
+    <TextBlock x:Key="AvalonScriptKeywordsDb" Foreground="#FB1E70" FontWeight="Bold" FontStyle="Italic" />
+    <TextBlock x:Key="AvalonScriptKeywordsApi" Foreground="#60D8F0" FontWeight="Bold" />
+    <TextBlock x:Key="AvalonScriptKeywordsOthers" Foreground="#FB1E70" FontWeight="Bold" />
+    <TextBlock x:Key="AvalonScriptKeywordsDigit" Foreground="#AE7DFE" FontWeight="Bold" />
     <TextBlock x:Key="AvalonScriptCommentFont" Foreground="#A0A0A0" FontWeight="Bold" />
     <TextBlock x:Key="AvalonScriptKeywordsConstant" Foreground="#A3E305" FontWeight="Bold" />
     <TextBlock x:Key="AvalonScriptDefault" Foreground="{StaticResource TextForeground}" FontWeight="Bold" />
@@ -839,53 +837,53 @@
         <Setter Property="Background" Value="{StaticResource TabItemBackground}" />
     </Style>
 
-    <SolidColorBrush x:Key="TVIMouseDragOverBackground" Color="{StaticResource UIThemeTreeViewDragEnterBackgroundColor}"/>
-    <SolidColorBrush x:Key="TVIMouseDragOverBorder" Color="{StaticResource UIThemeTreeViewDragEnterBorderColor}"/>
-    <SolidColorBrush x:Key="TVIMouseOverBackground" Color="{StaticResource UIThemeMouseOverBackgroundColor}"/>
-    <SolidColorBrush x:Key="TVIMouseOverBorder" Color="{StaticResource UIThemeMouseOverBorderColor}"/>
-    <SolidColorBrush x:Key="TVISelectBackground" Color="{StaticResource UIThemeSelectBackgroundColor}"/>
-    <SolidColorBrush x:Key="TVISelectBorder" Color="{StaticResource UIThemeSelectBorderColor}"/>
-    <SolidColorBrush x:Key="TVIDefaultBackground" Color="Transparent"/>
-    <SolidColorBrush x:Key="TVIDefaultBorder" Color="Transparent"/>
+    <SolidColorBrush x:Key="TVIMouseDragOverBackground" Color="{StaticResource UIThemeTreeViewDragEnterBackgroundColor}" />
+    <SolidColorBrush x:Key="TVIMouseDragOverBorder" Color="{StaticResource UIThemeTreeViewDragEnterBorderColor}" />
+    <SolidColorBrush x:Key="TVIMouseOverBackground" Color="{StaticResource UIThemeMouseOverBackgroundColor}" />
+    <SolidColorBrush x:Key="TVIMouseOverBorder" Color="{StaticResource UIThemeMouseOverBorderColor}" />
+    <SolidColorBrush x:Key="TVISelectBackground" Color="{StaticResource UIThemeSelectBackgroundColor}" />
+    <SolidColorBrush x:Key="TVISelectBorder" Color="{StaticResource UIThemeSelectBorderColor}" />
+    <SolidColorBrush x:Key="TVIDefaultBackground" Color="Transparent" />
+    <SolidColorBrush x:Key="TVIDefaultBorder" Color="Transparent" />
 
     <ControlTemplate x:Key="DefaultListViewControlTemplate" TargetType="ListBoxItem">
         <ContentPresenter />
     </ControlTemplate>
 
-    <SolidColorBrush x:Key="GSearchEngineOk" Color="{StaticResource UIThemeTextBoxBackgroundColor}"/>
-    <SolidColorBrush x:Key="GSearchEngineProcessing" Color="#5020763E"/>
-    <SolidColorBrush x:Key="GSearchEnginePredicate" Color="#306F0078"/>
-    <SolidColorBrush x:Key="GSearchEngineError" Color="#50940000"/>
-    
-    <SolidColorBrush x:Key="GSearchEngineExtendBorder" Color="Black"/>
-    <SolidColorBrush x:Key="GSearchEngineExtendBackground" Color="{StaticResource UIThemeBackground2Color}"/>
+    <SolidColorBrush x:Key="GSearchEngineOk" Color="{StaticResource UIThemeTextBoxBackgroundColor}" />
+    <SolidColorBrush x:Key="GSearchEngineProcessing" Color="#5020763E" />
+    <SolidColorBrush x:Key="GSearchEnginePredicate" Color="#306F0078" />
+    <SolidColorBrush x:Key="GSearchEngineError" Color="#50940000" />
 
-    <SolidColorBrush x:Key="PreviewItemTextForeground" Color="#D6D4D8"/>
-    <SolidColorBrush x:Key="PreviewItemTextBackground" Color="#2F3136"/>
+    <SolidColorBrush x:Key="GSearchEngineExtendBorder" Color="Black" />
+    <SolidColorBrush x:Key="GSearchEngineExtendBackground" Color="{StaticResource UIThemeBackground2Color}" />
 
-    <SolidColorBrush x:Key="ListBorder" Color="#828790"/>
-    <SolidColorBrush x:Key="TextBoxOverlayBrush" Color="#A0A0A0"/>
-    
+    <SolidColorBrush x:Key="PreviewItemTextForeground" Color="#D6D4D8" />
+    <SolidColorBrush x:Key="PreviewItemTextBackground" Color="#2F3136" />
+
+    <SolidColorBrush x:Key="ListBorder" Color="#828790" />
+    <SolidColorBrush x:Key="TextBoxOverlayBrush" Color="#A0A0A0" />
+
     <Style x:Key="Test22"
            TargetType="{x:Type ListView}">
         <Setter Property="Background"
-                Value="Red"/>
+                Value="Red" />
         <Setter Property="BorderBrush"
-                Value="Orange"/>
+                Value="Orange" />
         <Setter Property="BorderThickness"
-                Value="5"/>
+                Value="5" />
         <Setter Property="Foreground"
-                Value="#FF042271"/>
+                Value="#FF042271" />
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
-                Value="Auto"/>
+                Value="Auto" />
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
-                Value="Auto"/>
+                Value="Auto" />
         <Setter Property="ScrollViewer.CanContentScroll"
-                Value="true"/>
+                Value="true" />
         <Setter Property="Stylus.IsFlicksEnabled"
-                Value="False"/>
+                Value="False" />
         <Setter Property="VerticalContentAlignment"
-                Value="Center"/>
+                Value="Center" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ListView}">
@@ -898,7 +896,7 @@
                                          SnapsToDevicePixels="true">
                         <ScrollViewer Style="{DynamicResource {x:Static GridView.GridViewScrollViewerStyleKey}}"
                                       Padding="{TemplateBinding Padding}">
-                            <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                            <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                         </ScrollViewer>
                     </themes:ListBoxChrome>
                     <ControlTemplate.Triggers>
@@ -906,7 +904,7 @@
                                  Value="false">
                             <Setter TargetName="Bd"
                                     Property="Background"
-                                    Value="Red"/>
+                                    Value="Red" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -921,29 +919,28 @@
                 <ColumnDefinition Width="20" />
             </Grid.ColumnDefinitions>
             <Border
-                  x:Name="Border" 
+                  x:Name="Border"
                   Grid.ColumnSpan="2"
                   CornerRadius="2"
                   Background="{StaticResource UIThemeTextBoxBorderBrush}"
                   BorderBrush="{StaticResource UIThemeMouseOverBorderBrush}"
                   BorderThickness="1" />
-            <Border 
+            <Border
                   x:Name="ContentBorder"
                   Grid.Column="0"
-                  CornerRadius="2 0 0 2" 
-                  Margin="1" 
+                  CornerRadius="2 0 0 2"
+                  Margin="1"
                   Background="{StaticResource UIThemeTextBoxBorderBrush}"
                   BorderThickness="0" />
-            <Path 
+            <Path
                   x:Name="Arrow"
                   IsHitTestVisible="False"
-                  Grid.Column="1"     
+                  Grid.Column="1"
                   Fill="#B8BABD"
                   Margin="-2 0 0 0"
                   HorizontalAlignment="Center"
                   VerticalAlignment="Center"
-                  Data="M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z"
-                />
+                  Data="M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z" />
         </Grid>
         <ControlTemplate.Triggers>
             <Trigger Property="ToggleButton.IsMouseOver" Value="true">
@@ -961,7 +958,7 @@
                 <Setter TargetName="Border" Property="Background" Value="{StaticResource UIThemeComboBoxDisabledBrush}" />
                 <Setter TargetName="ContentBorder" Property="Background" Value="{StaticResource UIThemeComboBoxDisabledBrush}" />
                 <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource UIThemeComboBoxDisabledBrush}" />
-                <Setter Property="Foreground" Value="{StaticResource TextBoxOverlayBrush}"/>
+                <Setter Property="Foreground" Value="{StaticResource TextBoxOverlayBrush}" />
                 <Setter TargetName="Arrow" Property="Fill" Value="#888888" />
             </Trigger>
         </ControlTemplate.Triggers>
@@ -973,20 +970,20 @@
 
     <Style x:Key="ComboBoxTheme" TargetType="{x:Type ComboBox}">
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-        <Setter Property="SnapsToDevicePixels" Value="true"/>
-        <Setter Property="OverridesDefaultStyle" Value="true"/>
-        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
-        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
-        <Setter Property="ScrollViewer.CanContentScroll" Value="true"/>
-        <Setter Property="Foreground" Value="{DynamicResource TextForeground}"/>
+        <Setter Property="SnapsToDevicePixels" Value="true" />
+        <Setter Property="OverridesDefaultStyle" Value="true" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+        <Setter Property="ScrollViewer.CanContentScroll" Value="true" />
+        <Setter Property="Foreground" Value="{DynamicResource TextForeground}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ComboBox}">
                     <Grid>
-                        <ToggleButton 
-                            Name="ToggleButton" 
-                            Template="{StaticResource ComboBoxToggleButton}" 
-                            Grid.Column="2" 
+                        <ToggleButton
+                            Name="ToggleButton"
+                            Template="{StaticResource ComboBoxToggleButton}"
+                            Grid.Column="2"
                             Focusable="false"
                             IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}"
                             ClickMode="Press">
@@ -998,21 +995,21 @@
                             VerticalAlignment="Center"
                             HorizontalAlignment="Left" />
                         <TextBox x:Name="PART_EditableTextBox"
-                            Style="{x:Null}" 
-                            Template="{StaticResource ComboBoxTextBox}" 
-                            HorizontalAlignment="Stretch" 
-                            VerticalAlignment="Center" 
+                            Style="{x:Null}"
+                            Template="{StaticResource ComboBoxTextBox}"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
                             Margin="6,3,21,3"
-                            Focusable="True" 
+                            Focusable="True"
                             Background="{StaticResource UIThemeTextBoxBorderBrush}"
                             Foreground="{StaticResource CellBrushModified}"
                             Visibility="Hidden"
-                            IsReadOnly="{TemplateBinding IsReadOnly}"/>
-                        <Popup 
+                            IsReadOnly="{TemplateBinding IsReadOnly}" />
+                        <Popup
                             Name="Popup"
                             Placement="Bottom"
                             IsOpen="{TemplateBinding IsDropDownOpen}"
-                            AllowsTransparency="True" 
+                            AllowsTransparency="True"
                             Focusable="False"
                             PopupAnimation="Slide">
 
@@ -1025,7 +1022,7 @@
                                         Background="{StaticResource UIThemeBackground1Brush}"
                                         CornerRadius="0 0 0 0"
                                         BorderThickness="1"
-                                        BorderBrush="{StaticResource UIThemePopupBorderBrush}"/>
+                                        BorderBrush="{StaticResource UIThemePopupBorderBrush}" />
                                 <ScrollViewer Margin="1" SnapsToDevicePixels="True">
                                     <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
                                 </ScrollViewer>
@@ -1034,18 +1031,18 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="HasItems" Value="false">
-                            <Setter TargetName="DropDownBorder" Property="MinHeight" Value="95"/>
+                            <Setter TargetName="DropDownBorder" Property="MinHeight" Value="95" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="false">
-                            <Setter Property="Foreground" Value="#888888"/>
+                            <Setter Property="Foreground" Value="#888888" />
                         </Trigger>
                         <Trigger Property="IsGrouping" Value="true">
-                            <Setter Property="ScrollViewer.CanContentScroll" Value="false"/>
+                            <Setter Property="ScrollViewer.CanContentScroll" Value="false" />
                         </Trigger>
                         <Trigger Property="IsEditable" Value="true">
-                            <Setter Property="IsTabStop" Value="false"/>
-                            <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible"/>
-                            <Setter TargetName="ContentSite" Property="Visibility" Value="Hidden"/>
+                            <Setter Property="IsTabStop" Value="false" />
+                            <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="ContentSite" Property="Visibility" Value="Hidden" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -1063,11 +1060,11 @@
     </Style>
 
     <Style TargetType="{x:Type controls:ClickSelectTextBox}">
-        <Setter Property="Foreground" Value="{StaticResource TextForeground}"/>
-        <Setter Property="Background" Value="{StaticResource UIThemeTextBoxBorderBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource UIThemeTextBoxBorderBrush}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="1"/>
+        <Setter Property="Foreground" Value="{StaticResource TextForeground}" />
+        <Setter Property="Background" Value="{StaticResource UIThemeTextBoxBorderBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource UIThemeTextBoxBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="1" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TextBoxBase}">
@@ -1083,7 +1080,7 @@
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="Border" Property="Background" Value="{StaticResource UIThemeComboBoxDisabledBrush}" />
                             <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource UIThemeComboBoxDisabledBrush}" />
-                            <Setter Property="Foreground" Value="{StaticResource TextBoxOverlayBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource TextBoxOverlayBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -1094,8 +1091,8 @@
     <!-- SimpleStyles: ComboBoxItem -->
     <Style x:Key="{x:Type ComboBoxItem}" TargetType="{x:Type ComboBoxItem}">
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-        <Setter Property="SnapsToDevicePixels" Value="true"/>
-        <Setter Property="OverridesDefaultStyle" Value="true"/>
+        <Setter Property="SnapsToDevicePixels" Value="true" />
+        <Setter Property="OverridesDefaultStyle" Value="true" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ComboBoxItem}">
@@ -1107,16 +1104,16 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsSelected" Value="false">
-                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource UIThemePopupBackgroundBrush}"/>
-                            <Setter Property="Foreground" Value="{StaticResource UIThemeContextMenuDefaultTextBrush}"/>
+                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource UIThemePopupBackgroundBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource UIThemeContextMenuDefaultTextBrush}" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="true">
-                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource TabItemSelectedBackground}"/>
-                            <Setter Property="Foreground" Value="{StaticResource TabItemTextSelectedForeground}"/>
+                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource TabItemSelectedBackground}" />
+                            <Setter Property="Foreground" Value="{StaticResource TabItemTextSelectedForeground}" />
                         </Trigger>
                         <Trigger Property="IsHighlighted" Value="true">
-                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource UIThemeContextMenuMouseOverBackgroundBrush}"/>
-                            <Setter Property="Foreground" Value="{StaticResource UIThemeContextMenuMouseOverTextBrush}"/>
+                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource UIThemeContextMenuMouseOverBackgroundBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource UIThemeContextMenuMouseOverTextBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -1153,7 +1150,7 @@
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="Border" Property="Background" Value="{StaticResource UIThemeComboBoxDisabledBrush}" />
                             <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource UIThemeComboBoxDisabledBrush}" />
-                            <Setter Property="Foreground" Value="{StaticResource TextBoxOverlayBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource TextBoxOverlayBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

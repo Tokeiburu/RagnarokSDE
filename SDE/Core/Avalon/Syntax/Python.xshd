@@ -1,18 +1,18 @@
 ﻿<?xml version="1.0"?>
-  <SyntaxDefinition name="Python" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
-    <Color name="Comment" foreground="#008000" />
-    <Color name="String" foreground="#808080" />
-    <Color name="Label" foreground="#000DBA" />
-    <Color name="Orange" foreground="#F2981D" />
-    <Color name="Goto" fontWeight="bold" foreground="DarkBlue" />
-    <Color name="KeywordsStructure" foreground="Blue" />
-    <Color name="KeywordsDb" fontStyle="italic" foreground="#00B000" />
-    <Color name="KeywordsApi" foreground="#638AFF" />
-    <Color name="KeywordsOthers" fontStyle="italic" foreground="#ff0000" />
-    <Color name="KeywordsDigit" foreground="#ff0000" />
-    
-	<!-- This is the main ruleset. -->
-	<RuleSet>
+<SyntaxDefinition name="Python" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+  <Color name="Comment" foreground="#008000" />
+  <Color name="String" foreground="#808080" />
+  <Color name="Label" foreground="#000DBA" />
+  <Color name="Orange" foreground="#F2981D" />
+  <Color name="Goto" fontWeight="bold" foreground="DarkBlue" />
+  <Color name="KeywordsStructure" foreground="Blue" />
+  <Color name="KeywordsDb" fontStyle="italic" foreground="#00B000" />
+  <Color name="KeywordsApi" foreground="#638AFF" />
+  <Color name="KeywordsOthers" fontStyle="italic" foreground="#ff0000" />
+  <Color name="KeywordsDigit" foreground="#ff0000" />
+
+  <!-- This is the main ruleset. -->
+  <RuleSet>
     <Span color="Comment" begin="//" />
     <Span color="Comment" begin="#" />
     <Span color="Orange" multiline="true" begin="&quot;&quot;&quot;" end="&quot;&quot;&quot;" />
@@ -34,7 +34,7 @@
         <Span begin="\\" end="." />
       </RuleSet>
     </Span>
-    
+
     <Keywords color="KeywordsStructure">
       <Word>and</Word>
       <Word>as</Word>
@@ -203,13 +203,13 @@
     </Keywords>
 
     <!-- Digits -->
-		<Rule color="KeywordsDigit">
-            \b0[xX][0-9a-fA-F]+  # hex number
-        |    \b
-            (    \d+(\.[0-9]+)?   #number with optional floating point
-            |    \.[0-9]+         #or just starting with floating point
-            )
-            ([eE][+-]?[0-9]+)? # optional exponent
-        </Rule>
-	</RuleSet>
+    <Rule color="KeywordsDigit">
+      \b0[xX][0-9a-fA-F]+  # hex number
+      |    \b
+      (    \d+(\.[0-9]+)?   #number with optional floating point
+      |    \.[0-9]+         #or just starting with floating point
+      )
+      ([eE][+-]?[0-9]+)? # optional exponent
+    </Rule>
+  </RuleSet>
 </SyntaxDefinition>

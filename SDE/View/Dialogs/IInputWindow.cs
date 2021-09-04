@@ -1,108 +1,122 @@
-﻿using System;
+﻿using GRF.Threading;
+using SDE.ApplicationConfiguration;
+using SDE.Core;
+using System;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using GRF.Threading;
-using SDE.ApplicationConfiguration;
-using SDE.Core;
 using TokeiLibrary;
 using Utilities;
 
-namespace SDE.View.Dialogs {
-	public interface IInputWindow {
-		string Text { get; }
-		Grid Footer { get; }
-		event Action ValueChanged;
-	}
+namespace SDE.View.Dialogs
+{
+    public interface IInputWindow
+    {
+        string Text { get; }
+        Grid Footer { get; }
 
-	public static class InputWindowHelper {
-		public static void Edit(Window dialog, TextBox tb, Button button, bool canIntegrated = true) {
-			IInputWindow inputWindow = (IInputWindow) dialog;
+        event Action ValueChanged;
+    }
 
-			bool isScript = dialog is ScriptEditDialog && SdeAppConfiguration.UseIntegratedDialogsForScripts;
-			bool isLevel = dialog is LevelEditDialog && SdeAppConfiguration.UseIntegratedDialogsForLevels;
-			bool isFlag = dialog is GenericFlagDialog && SdeAppConfiguration.UseIntegratedDialogsForFlags;
-			bool isJob = dialog is JobEditDialog && SdeAppConfiguration.UseIntegratedDialogsForJobs;
-			bool isTime = dialog is TimeEditDialog && SdeAppConfiguration.UseIntegratedDialogsForTime;
-			bool isRate = dialog is RateEditDialog;
-			bool isOther = !(dialog is ScriptEditDialog || dialog is LevelEditDialog || dialog is GenericFlagDialog || dialog is JobEditDialog || dialog is TimeEditDialog) && SdeAppConfiguration.UseIntegratedDialogsForFlags;
+    public static class InputWindowHelper
+    {
+        public static void Edit(Window dialog, TextBox tb, Button button, bool canIntegrated = true)
+        {
+            IInputWindow inputWindow = (IInputWindow)dialog;
 
-			if (canIntegrated && (isScript || isLevel || isFlag || isJob || isTime || isRate || isOther)) {
-				inputWindow.Footer.Visibility = Visibility.Collapsed;
-				dialog.WindowStyle = WindowStyle.None;
-				var content = dialog.Content;
+            bool isScript = dialog is ScriptEditDialog && SdeAppConfiguration.UseIntegratedDialogsForScripts;
+            bool isLevel = dialog is LevelEditDialog && SdeAppConfiguration.UseIntegratedDialogsForLevels;
+            bool isFlag = dialog is GenericFlagDialog && SdeAppConfiguration.UseIntegratedDialogsForFlags;
+            bool isJob = dialog is JobEditDialog && SdeAppConfiguration.UseIntegratedDialogsForJobs;
+            bool isTime = dialog is TimeEditDialog && SdeAppConfiguration.UseIntegratedDialogsForTime;
+            bool isRate = dialog is RateEditDialog;
+            bool isOther = !(dialog is ScriptEditDialog || dialog is LevelEditDialog || dialog is GenericFlagDialog || dialog is JobEditDialog || dialog is TimeEditDialog) && SdeAppConfiguration.UseIntegratedDialogsForFlags;
 
-				Border border = new Border {BorderBrush = Brushes.Black, BorderThickness = new Thickness(1)};
-				dialog.Content = null;
-				border.Child = content as UIElement;
-				dialog.Content = border;
+            if (canIntegrated && (isScript || isLevel || isFlag || isJob || isTime || isRate || isOther))
+            {
+                inputWindow.Footer.Visibility = Visibility.Collapsed;
+                dialog.WindowStyle = WindowStyle.None;
+                var content = dialog.Content;
 
-				dialog.Owner = null;
+                Border border = new Border { BorderBrush = Brushes.Black, BorderThickness = new Thickness(1) };
+                dialog.Content = null;
+                border.Child = content as UIElement;
+                dialog.Content = border;
 
-				Extensions.SetMinimalSize(dialog);
-				dialog.ResizeMode = ResizeMode.NoResize;
+                dialog.Owner = null;
 
-				Point p = button.PointToScreen(new Point(0, 0));
-				var par = WpfUtilities.FindParentControl<Window>(button);
+                Extensions.SetMinimalSize(dialog);
+                dialog.ResizeMode = ResizeMode.NoResize;
 
-				dialog.Loaded += delegate {
-					if (dialog == null) return;
+                Point p = button.PointToScreen(new Point(0, 0));
+                var par = WpfUtilities.FindParentControl<Window>(button);
 
-					button.IsEnabled = false;
-					dialog.WindowStartupLocation = WindowStartupLocation.Manual;
-					
-					int dpiXI = (int)typeof(SystemParameters).GetProperty("DpiX", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null, null);
-					double dpiX = dpiXI;
-					double ratio = dpiX / 96;
+                dialog.Loaded += delegate
+                {
+                    if (dialog == null) return;
 
-					p.X /= ratio;
-					p.Y /= ratio;
+                    button.IsEnabled = false;
+                    dialog.WindowStartupLocation = WindowStartupLocation.Manual;
 
-					// The dialog's position scales with the DPI
-					dialog.Left = p.X - dialog.MinWidth + button.ActualWidth;
-					dialog.Top = p.Y + button.ActualHeight;
+                    int dpiXI = (int)typeof(SystemParameters).GetProperty("DpiX", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null, null);
+                    double dpiX = dpiXI;
+                    double ratio = dpiX / 96;
 
-					if (dialog.Left < 0) {
-						dialog.Left = 0;
-					}
+                    p.X /= ratio;
+                    p.Y /= ratio;
 
-					if (dialog.Top + dialog.Height > SystemParameters.WorkArea.Bottom) {
-						dialog.Top = p.Y - dialog.MinHeight;
-					}
+                    // The dialog's position scales with the DPI
+                    dialog.Left = p.X - dialog.MinWidth + button.ActualWidth;
+                    dialog.Top = p.Y + button.ActualHeight;
 
-					if (dialog.Top < 0) {
-						dialog.Top = 0;
-					}
+                    if (dialog.Left < 0)
+                    {
+                        dialog.Left = 0;
+                    }
 
-					dialog.Owner = par;
-				};
+                    if (dialog.Top + dialog.Height > SystemParameters.WorkArea.Bottom)
+                    {
+                        dialog.Top = p.Y - dialog.MinHeight;
+                    }
 
-				inputWindow.ValueChanged += () => tb.Text = inputWindow.Text;
-				dialog.Closed += delegate {
-					button.IsEnabled = true;
-				};
-				dialog.Deactivated += (sender, args) => GrfThread.Start(() => dialog.Dispatch(() => Debug.Ignore(dialog.Close)));
+                    if (dialog.Top < 0)
+                    {
+                        dialog.Top = 0;
+                    }
 
-				dialog.Show();
-			}
-			else {
-				dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    dialog.Owner = par;
+                };
 
-				Extensions.SetMinimalSize(dialog);
+                inputWindow.ValueChanged += () => tb.Text = inputWindow.Text;
+                dialog.Closed += delegate
+                {
+                    button.IsEnabled = true;
+                };
+                dialog.Deactivated += (sender, args) => GrfThread.Start(() => dialog.Dispatch(() => Debug.Ignore(dialog.Close)));
 
-				dialog.Loaded += delegate {
-					dialog.SizeToContent = SizeToContent.Manual;
-					dialog.Left = dialog.Owner.Left + (dialog.Owner.Width - dialog.MinWidth) / 2;
-					dialog.Top = dialog.Owner.Top + (dialog.Owner.Height - dialog.MinHeight) / 2;
-				};
+                dialog.Show();
+            }
+            else
+            {
+                dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
 
-				dialog.Owner = WpfUtilities.FindParentControl<Window>(button);
+                Extensions.SetMinimalSize(dialog);
 
-				if (dialog.ShowDialog() == true) {
-					tb.Text = ((IInputWindow)dialog).Text;
-				}
-			}
-		}
-	}
+                dialog.Loaded += delegate
+                {
+                    dialog.SizeToContent = SizeToContent.Manual;
+                    dialog.Left = dialog.Owner.Left + (dialog.Owner.Width - dialog.MinWidth) / 2;
+                    dialog.Top = dialog.Owner.Top + (dialog.Owner.Height - dialog.MinHeight) / 2;
+                };
+
+                dialog.Owner = WpfUtilities.FindParentControl<Window>(button);
+
+                if (dialog.ShowDialog() == true)
+                {
+                    tb.Text = ((IInputWindow)dialog).Text;
+                }
+            }
+        }
+    }
 }

@@ -1,101 +1,115 @@
-﻿using System;
+﻿using ErrorManager;
+using SDE.ApplicationConfiguration;
+using SDE.Editor.Engines;
+using SDE.Editor.Generic;
+using SDE.Editor.Generic.Lists;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using ErrorManager;
-using SDE.ApplicationConfiguration;
-using SDE.Editor.Engines;
-using SDE.Editor.Generic;
-using SDE.Editor.Generic.Lists;
 using TokeiLibrary.WPF.Styles;
 using TokeiLibrary.WPF.Styles.ListView;
-using Utilities;
 
-namespace SDE.View.Dialogs {
-	/// <summary>
-	/// Interaction logic for ScriptEditDialog.xaml
-	/// </summary>
-	public partial class NouseEditDialog : TkWindow, IInputWindow {
-		private readonly List<CheckBox> _boxes = new List<CheckBox>();
-		private int _eventId;
-		private int _flag;
+namespace SDE.View.Dialogs
+{
+    /// <summary>
+    /// Interaction logic for ScriptEditDialog.xaml
+    /// </summary>
+    public partial class NouseEditDialog : TkWindow, IInputWindow
+    {
+        private readonly List<CheckBox> _boxes = new List<CheckBox>();
+        private int _eventId;
+        private int _flag;
 
-		public NouseEditDialog(ReadableTuple<int> tuple)
-			: base("NoUse edit", "cde.ico", SizeToContent.Height, ResizeMode.CanResize) {
-			InitializeComponent();
+        public NouseEditDialog(ReadableTuple<int> tuple)
+            : base("NoUse edit", "cde.ico", SizeToContent.Height, ResizeMode.CanResize)
+        {
+            InitializeComponent();
 
-			ToolTipsBuilder.Initialize(new string[] {
-				"Cannot use the item while sitting."
-			}, this);
+            ToolTipsBuilder.Initialize(new string[] {
+                "Cannot use the item while sitting."
+            }, this);
 
-			_flag = tuple.GetIntNoThrow(ServerItemAttributes.NoUseFlag);
+            _flag = tuple.GetIntNoThrow(ServerItemAttributes.NoUseFlag);
 
-			_cbUpper1.Tag = 1 << 0;
+            _cbUpper1.Tag = 1 << 0;
 
-			_boxes.Add(_cbUpper1);
+            _boxes.Add(_cbUpper1);
 
-			_eventId = 0;
-			_boxes.ForEach(_addEvents);
+            _eventId = 0;
+            _boxes.ForEach(_addEvents);
 
-			WindowStartupLocation = WindowStartupLocation.CenterOwner;
-		}
+            WindowStartupLocation = WindowStartupLocation.CenterOwner;
+        }
 
-		public string Text {
-			get { return _flag.ToString(CultureInfo.InvariantCulture); }
-		}
+        public string Text
+        {
+            get { return _flag.ToString(CultureInfo.InvariantCulture); }
+        }
 
-		public Grid Footer { get { return _footerGrid; } }
-		public event Action ValueChanged;
+        public Grid Footer { get { return _footerGrid; } }
 
-		public void OnValueChanged() {
-			Action handler = ValueChanged;
-			if (handler != null) handler();
-		}
+        public event Action ValueChanged;
 
-		private void _addEvents(CheckBox cb) {
-			ToolTipsBuilder.SetupNextToolTip(cb, this);
-			cb.IsChecked = (_flag & (1 << _eventId)) == (1 << _eventId);
+        public void OnValueChanged()
+        {
+            Action handler = ValueChanged;
+            if (handler != null) handler();
+        }
 
-			cb.Checked += (e, a) => _update();
-			cb.Unchecked += (e, a) => _update();
+        private void _addEvents(CheckBox cb)
+        {
+            ToolTipsBuilder.SetupNextToolTip(cb, this);
+            cb.IsChecked = (_flag & (1 << _eventId)) == (1 << _eventId);
 
-			WpfUtils.AddMouseInOutEffectsBox(cb);
-			_eventId++;
-		}
+            cb.Checked += (e, a) => _update();
+            cb.Unchecked += (e, a) => _update();
 
-		private void _update() {
-			try {
-				int flag = 0;
+            WpfUtils.AddMouseInOutEffectsBox(cb);
+            _eventId++;
+        }
 
-				foreach (CheckBox box in _boxes) {
-					if (box.IsChecked == true) {
-						flag += (int)box.Tag;
-					}
-				}
+        private void _update()
+        {
+            try
+            {
+                int flag = 0;
 
-				_flag = flag;
-				OnValueChanged();
-			}
-			catch (Exception err) {
-				ErrorHandler.HandleException(err);
-			}
-		}
+                foreach (CheckBox box in _boxes)
+                {
+                    if (box.IsChecked == true)
+                    {
+                        flag += (int)box.Tag;
+                    }
+                }
 
-		protected override void GRFEditorWindowKeyDown(object sender, KeyEventArgs e) {
-			if (e.Key == Key.Escape)
-				Close();
-		}
+                _flag = flag;
+                OnValueChanged();
+            }
+            catch (Exception err)
+            {
+                ErrorHandler.HandleException(err);
+            }
+        }
 
-		private void _buttonCancel_Click(object sender, RoutedEventArgs e) {
-			Close();
-		}
+        protected override void GRFEditorWindowKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+                Close();
+        }
 
-		private void _buttonOk_Click(object sender, RoutedEventArgs e) {
-			if (!SdeAppConfiguration.UseIntegratedDialogsForFlags)
-				DialogResult = true;
-			Close();
-		}
-	}
+        private void _buttonCancel_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        private void _buttonOk_Click(object sender, RoutedEventArgs e)
+        {
+            if (!SdeAppConfiguration.UseIntegratedDialogsForFlags)
+                DialogResult = true;
+            Close();
+        }
+    }
 }

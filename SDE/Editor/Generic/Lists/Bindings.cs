@@ -1,256 +1,310 @@
+using Database;
+using SDE.Editor.Generic.Core;
+using SDE.View;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Database;
-using SDE.Editor.Generic.Core;
-using SDE.View;
 
-namespace SDE.Editor.Generic.Lists {
-	/// Bindings are normally used to change the display of the list view
-	public class ComboBinding : IBinding {
-		#region IBinding Members
-		public Database.Tuple Tuple { get; set; }
-		public DbAttribute AttachedAttribute { get; set; }
-		#endregion
+namespace SDE.Editor.Generic.Lists
+{
+    /// Bindings are normally used to change the display of the list view
+    public class ComboBinding : IBinding
+    {
+        #region IBinding Members
 
-		public override string ToString() {
-			if (AttachedAttribute.AttachedObject == null)
-				return "NULL BINDING";
+        public Database.Tuple Tuple { get; set; }
+        public DbAttribute AttachedAttribute { get; set; }
 
-			Table<int, ReadableTuple<int>> btable = ((BaseDb)AttachedAttribute.AttachedObject).GetMeta<int>(ServerDbs.Items);
+        #endregion IBinding Members
 
-			string value = Tuple.GetValue<string>(0);
+        public override string ToString()
+        {
+            if (AttachedAttribute.AttachedObject == null)
+                return "NULL BINDING";
 
-			List<string> values = value.Split(':').ToList();
-			List<string> output = new List<string>();
+            Table<int, ReadableTuple<int>> btable = ((BaseDb)AttachedAttribute.AttachedObject).GetMeta<int>(ServerDbs.Items);
 
-			for (int i = 0; i < values.Count; i++) {
-				int val;
+            string value = Tuple.GetValue<string>(0);
 
-				Int32.TryParse(values[i], out val);
+            List<string> values = value.Split(':').ToList();
+            List<string> output = new List<string>();
 
-				if (val == 0) {
-					output.Add("");
-				}
-				else {
-					Database.Tuple tuple = btable.TryGetTuple(val);
+            for (int i = 0; i < values.Count; i++)
+            {
+                int val;
 
-					if (tuple == null)
-						output.Add("Unknown");
-					else
-						output.Add(tuple.GetValue<string>(ServerItemAttributes.Name));
-				}
-			}
+                Int32.TryParse(values[i], out val);
 
-			return string.Join(Environment.NewLine, output.ToArray());
-		}
-	}
+                if (val == 0)
+                {
+                    output.Add("");
+                }
+                else
+                {
+                    Database.Tuple tuple = btable.TryGetTuple(val);
 
-	public class ItemGroupBinding : IBinding {
-		#region IBinding Members
-		public Database.Tuple Tuple { get; set; }
-		public DbAttribute AttachedAttribute { get; set; }
-		#endregion
+                    if (tuple == null)
+                        output.Add("Unknown");
+                    else
+                        output.Add(tuple.GetValue<string>(ServerItemAttributes.Name));
+                }
+            }
 
-		public override string ToString() {
-			if (AttachedAttribute.AttachedObject == null)
-				return "";
+            return string.Join(Environment.NewLine, output.ToArray());
+        }
+    }
 
-			Table<string, ReadableTuple<string>> btable = ((BaseDb)AttachedAttribute.AttachedObject).Get<string>(ServerDbs.Constants);
+    public class ItemGroupBinding : IBinding
+    {
+        #region IBinding Members
 
-			string value = Tuple.GetKey<int>().ToString(CultureInfo.InvariantCulture);
+        public Database.Tuple Tuple { get; set; }
+        public DbAttribute AttachedAttribute { get; set; }
 
-			var res = btable.FastItems.FirstOrDefault(p => p.GetStringValue(1) == value && p.GetStringValue(0).StartsWith("IG_", StringComparison.Ordinal));
+        #endregion IBinding Members
 
-			if (res != null) {
-				return res.GetKey<string>();
-			}
-			// This is an item table property
-			Table<int, ReadableTuple<int>> table = ((BaseDb)AttachedAttribute.AttachedObject).GetMeta<int>(ServerDbs.Items);
-			int key = Tuple.GetKey<int>();
+        public override string ToString()
+        {
+            if (AttachedAttribute.AttachedObject == null)
+                return "";
 
-			var res2 = table.TryGetTuple(key);
+            Table<string, ReadableTuple<string>> btable = ((BaseDb)AttachedAttribute.AttachedObject).Get<string>(ServerDbs.Constants);
 
-			if (res2 != null) {
-				return res2.GetValue(ServerItemAttributes.AegisName).ToString();
-			}
+            string value = Tuple.GetKey<int>().ToString(CultureInfo.InvariantCulture);
 
-			return "";
-		}
-	}
+            var res = btable.FastItems.FirstOrDefault(p => p.GetStringValue(1) == value && p.GetStringValue(0).StartsWith("IG_", StringComparison.Ordinal));
 
-	public class DropPercentageBinding : IBinding {
-		#region IBinding Members
-		public Database.Tuple Tuple { get; set; }
-		public DbAttribute AttachedAttribute { get; set; }
-		#endregion
+            if (res != null)
+            {
+                return res.GetKey<string>();
+            }
+            // This is an item table property
+            Table<int, ReadableTuple<int>> table = ((BaseDb)AttachedAttribute.AttachedObject).GetMeta<int>(ServerDbs.Items);
+            int key = Tuple.GetKey<int>();
 
-		public override string ToString() {
-			int parentGroup = Tuple.GetValue<int>(ServerItemGroupSubAttributes.ParentGroup);
-			Table<int, ReadableTuple<int>> btable = SdeEditor.Instance.ProjectDatabase.GetDb<int>(ServerDbs.ItemGroups).Table;
+            var res2 = table.TryGetTuple(key);
 
-			var tuple = btable.TryGetTuple(parentGroup);
+            if (res2 != null)
+            {
+                return res2.GetValue(ServerItemAttributes.AegisName).ToString();
+            }
 
-			if (tuple != null) {
-				Dictionary<int, ReadableTuple<int>> groups = (Dictionary<int, ReadableTuple<int>>)tuple.GetRawValue(1);
+            return "";
+        }
+    }
 
-				if (groups != null) {
-					ulong total = 0;
+    public class DropPercentageBinding : IBinding
+    {
+        #region IBinding Members
 
-					foreach (var subTuple in groups.Values) {
-						total += (ulong)subTuple.GetValue<int>(ServerItemGroupSubAttributes.Rate);
-					}
+        public Database.Tuple Tuple { get; set; }
+        public DbAttribute AttachedAttribute { get; set; }
 
-					if (total <= 0)
-						return "";
+        #endregion IBinding Members
 
-					return String.Format("{0:0.00} %", (Tuple.GetValue<int>(ServerItemGroupSubAttributes.Rate) / (float)total) * 100f);
-				}
-			}
+        public override string ToString()
+        {
+            int parentGroup = Tuple.GetValue<int>(ServerItemGroupSubAttributes.ParentGroup);
+            Table<int, ReadableTuple<int>> btable = SdeEditor.Instance.ProjectDatabase.GetDb<int>(ServerDbs.ItemGroups).Table;
 
-			return "";
-		}
-	}
+            var tuple = btable.TryGetTuple(parentGroup);
 
-	public class DropPercentageMobBinding : IBinding {
-		#region IBinding Members
-		public Database.Tuple Tuple { get; set; }
-		public DbAttribute AttachedAttribute { get; set; }
-		#endregion
+            if (tuple != null)
+            {
+                Dictionary<int, ReadableTuple<int>> groups = (Dictionary<int, ReadableTuple<int>>)tuple.GetRawValue(1);
 
-		public override string ToString() {
-			int parentGroup = Tuple.GetValue<int>(ServerMobGroupSubAttributes.ParentGroup);
-			Table<int, ReadableTuple<int>> btable = SdeEditor.Instance.ProjectDatabase.GetDb<int>(ServerDbs.MobGroups).Table;
+                if (groups != null)
+                {
+                    ulong total = 0;
 
-			var tuple = btable.TryGetTuple(parentGroup);
+                    foreach (var subTuple in groups.Values)
+                    {
+                        total += (ulong)subTuple.GetValue<int>(ServerItemGroupSubAttributes.Rate);
+                    }
 
-			if (tuple != null) {
-				Dictionary<int, ReadableTuple<int>> groups = (Dictionary<int, ReadableTuple<int>>)tuple.GetRawValue(1);
+                    if (total <= 0)
+                        return "";
 
-				if (groups != null) {
-					ulong total = 0;
-					int currentRate = 0;
+                    return String.Format("{0:0.00} %", (Tuple.GetValue<int>(ServerItemGroupSubAttributes.Rate) / (float)total) * 100f);
+                }
+            }
 
-					foreach (var subTuple in groups.Values) {
-						int ival;
-						Int32.TryParse(subTuple.GetValue<string>(ServerMobGroupSubAttributes.Rate) ?? "0", out ival);
+            return "";
+        }
+    }
 
-						if (subTuple.Key == Tuple.GetKey<int>())
-							currentRate = ival;
+    public class DropPercentageMobBinding : IBinding
+    {
+        #region IBinding Members
 
-						total += (ulong)ival;
-					}
+        public Database.Tuple Tuple { get; set; }
+        public DbAttribute AttachedAttribute { get; set; }
 
-					if (total <= 0)
-						return "0 %";
+        #endregion IBinding Members
 
-					return String.Format("{0:0.00} %", (currentRate / (float)total) * 100f);
-				}
-			}
+        public override string ToString()
+        {
+            int parentGroup = Tuple.GetValue<int>(ServerMobGroupSubAttributes.ParentGroup);
+            Table<int, ReadableTuple<int>> btable = SdeEditor.Instance.ProjectDatabase.GetDb<int>(ServerDbs.MobGroups).Table;
 
-			return "0 %";
-		}
-	}
+            var tuple = btable.TryGetTuple(parentGroup);
 
-	public class ItemGroupSubBinding : IBinding {
-		#region IBinding Members
-		public Database.Tuple Tuple { get; set; }
-		public DbAttribute AttachedAttribute { get; set; }
-		#endregion
+            if (tuple != null)
+            {
+                Dictionary<int, ReadableTuple<int>> groups = (Dictionary<int, ReadableTuple<int>>)tuple.GetRawValue(1);
 
-		public override string ToString() {
-			Table<int, ReadableTuple<int>> btable = SdeEditor.Instance.ProjectDatabase.GetMetaTable<int>(ServerDbs.Items);
+                if (groups != null)
+                {
+                    ulong total = 0;
+                    int currentRate = 0;
 
-			int key = Tuple.GetValue<int>(0);
+                    foreach (var subTuple in groups.Values)
+                    {
+                        int ival;
+                        Int32.TryParse(subTuple.GetValue<string>(ServerMobGroupSubAttributes.Rate) ?? "0", out ival);
 
-			var tuple = btable.TryGetTuple(key);
+                        if (subTuple.Key == Tuple.GetKey<int>())
+                            currentRate = ival;
 
-			if (tuple != null) {
-				return tuple.GetStringValue(ServerItemAttributes.Name.Index);
-			}
+                        total += (ulong)ival;
+                    }
 
-			return "";
-		}
-	}
+                    if (total <= 0)
+                        return "0 %";
 
-	public class MobGroupsBinding : IBinding {
-		#region IBinding Members
-		public Database.Tuple Tuple { get; set; }
-		public DbAttribute AttachedAttribute { get; set; }
-		#endregion
+                    return String.Format("{0:0.00} %", (currentRate / (float)total) * 100f);
+                }
+            }
 
-		public override string ToString() {
-			switch(Tuple.GetKey<int>()) {
-				case 0:
-					return "Dead Branch";
-				case 1:
-					return "Poring Box";
-				case 2:
-					return "Bloody Branch";
-				case 3:
-					return "Red Pouch";
-				case 4:
-					return "Hocus Pocus (Abracadabra)";
-				default:
-					return "Unknown";
-			}
-		}
-	}
+            return "0 %";
+        }
+    }
 
-	public class MobBinding : IBinding {
-		#region IBinding Members
-		public Database.Tuple Tuple { get; set; }
-		public DbAttribute AttachedAttribute { get; set; }
-		#endregion
+    public class ItemGroupSubBinding : IBinding
+    {
+        #region IBinding Members
 
-		public override string ToString() {
-			Table<int, ReadableTuple<int>> btable = ((BaseDb)AttachedAttribute.AttachedObject).GetMeta<int>(ServerDbs.Mobs);
+        public Database.Tuple Tuple { get; set; }
+        public DbAttribute AttachedAttribute { get; set; }
 
-			int key;
+        #endregion IBinding Members
 
-			if (Tuple.Attributes.PrimaryAttribute.DataType == typeof(string))
-				key = Tuple.GetValue<int>((int)AttachedAttribute.Default);
-			else
-				key = Tuple.GetValue<int>(0);
+        public override string ToString()
+        {
+            Table<int, ReadableTuple<int>> btable = SdeEditor.Instance.ProjectDatabase.GetMetaTable<int>(ServerDbs.Items);
 
-			var tuple = btable.TryGetTuple(key);
+            int key = Tuple.GetValue<int>(0);
 
-			if (tuple != null) {
-				return tuple.GetStringValue(ServerMobAttributes.KRoName.Index);
-			}
+            var tuple = btable.TryGetTuple(key);
 
-			return "";
-		}
-	}
+            if (tuple != null)
+            {
+                return tuple.GetStringValue(ServerItemAttributes.Name.Index);
+            }
 
-	public class SkillBinding : IBinding {
-		#region IBinding Members
-		public Database.Tuple Tuple { get; set; }
-		public DbAttribute AttachedAttribute { get; set; }
-		#endregion
+            return "";
+        }
+    }
 
-		public override string ToString() {
-			if (AttachedAttribute.AttachedObject == null) {
-				return "NULL BINDING";
-			}
+    public class MobGroupsBinding : IBinding
+    {
+        #region IBinding Members
 
-			Table<int, ReadableTuple<int>> btable = ((BaseDb)AttachedAttribute.AttachedObject).Get<int>(ServerDbs.Skills);
+        public Database.Tuple Tuple { get; set; }
+        public DbAttribute AttachedAttribute { get; set; }
 
-			int key;
+        #endregion IBinding Members
 
-			if (Tuple.Attributes.PrimaryAttribute.DataType == typeof(string))
-				key = Tuple.GetValue<int>((int)AttachedAttribute.Default);
-			else
-				key = Tuple.GetValue<int>(0);
+        public override string ToString()
+        {
+            switch (Tuple.GetKey<int>())
+            {
+                case 0:
+                    return "Dead Branch";
 
-			var tuple = btable.TryGetTuple(key);
+                case 1:
+                    return "Poring Box";
 
-			if (tuple != null) {
-				return tuple.GetStringValue(ServerSkillAttributes.Desc.Index);
-			}
+                case 2:
+                    return "Bloody Branch";
 
-			return "";
-		}
-	}
+                case 3:
+                    return "Red Pouch";
+
+                case 4:
+                    return "Hocus Pocus (Abracadabra)";
+
+                default:
+                    return "Unknown";
+            }
+        }
+    }
+
+    public class MobBinding : IBinding
+    {
+        #region IBinding Members
+
+        public Database.Tuple Tuple { get; set; }
+        public DbAttribute AttachedAttribute { get; set; }
+
+        #endregion IBinding Members
+
+        public override string ToString()
+        {
+            Table<int, ReadableTuple<int>> btable = ((BaseDb)AttachedAttribute.AttachedObject).GetMeta<int>(ServerDbs.Mobs);
+
+            int key;
+
+            if (Tuple.Attributes.PrimaryAttribute.DataType == typeof(string))
+                key = Tuple.GetValue<int>((int)AttachedAttribute.Default);
+            else
+                key = Tuple.GetValue<int>(0);
+
+            var tuple = btable.TryGetTuple(key);
+
+            if (tuple != null)
+            {
+                return tuple.GetStringValue(ServerMobAttributes.KRoName.Index);
+            }
+
+            return "";
+        }
+    }
+
+    public class SkillBinding : IBinding
+    {
+        #region IBinding Members
+
+        public Database.Tuple Tuple { get; set; }
+        public DbAttribute AttachedAttribute { get; set; }
+
+        #endregion IBinding Members
+
+        public override string ToString()
+        {
+            if (AttachedAttribute.AttachedObject == null)
+            {
+                return "NULL BINDING";
+            }
+
+            Table<int, ReadableTuple<int>> btable = ((BaseDb)AttachedAttribute.AttachedObject).Get<int>(ServerDbs.Skills);
+
+            int key;
+
+            if (Tuple.Attributes.PrimaryAttribute.DataType == typeof(string))
+                key = Tuple.GetValue<int>((int)AttachedAttribute.Default);
+            else
+                key = Tuple.GetValue<int>(0);
+
+            var tuple = btable.TryGetTuple(key);
+
+            if (tuple != null)
+            {
+                return tuple.GetStringValue(ServerSkillAttributes.Desc.Index);
+            }
+
+            return "";
+        }
+    }
 }

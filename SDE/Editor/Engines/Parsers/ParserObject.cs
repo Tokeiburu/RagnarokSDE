@@ -3,183 +3,217 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SDE.Editor.Engines.Parsers {
-	public class ParserObject : IEnumerable<ParserObject> {
-		public ParserTypes ParserType { get; private set; }
-		public ParserObject Parent { get; set; }
-		public List<string> Lines;
-		public int Line { get; private set; }
-		public int Length { get; set; }
-		public int Indent { get; set; }
-		public int ChildrenIndent { get; set; }
+namespace SDE.Editor.Engines.Parsers
+{
+    public class ParserObject : IEnumerable<ParserObject>
+    {
+        public ParserTypes ParserType { get; private set; }
+        public ParserObject Parent { get; set; }
+        public List<string> Lines;
+        public int Line { get; private set; }
+        public int Length { get; set; }
+        public int Indent { get; set; }
+        public int ChildrenIndent { get; set; }
 
-		public bool Added { get; set; }
-		public bool Modified { get; set; }
+        public bool Added { get; set; }
+        public bool Modified { get; set; }
 
-		public string ObjectValue {
-			get {
-				var confString = this as ParserString;
+        public string ObjectValue
+        {
+            get
+            {
+                var confString = this as ParserString;
 
-				if (confString != null)
-					return confString.Value;
+                if (confString != null)
+                    return confString.Value;
 
-				var confAggregate = this as ParserAggregate;
+                var confAggregate = this as ParserAggregate;
 
-				if (confAggregate != null) {
-					StringBuilder builder = new StringBuilder();
-					builder.Append("[");
+                if (confAggregate != null)
+                {
+                    StringBuilder builder = new StringBuilder();
+                    builder.Append("[");
 
-					for (int i = 0; i < confAggregate.Objects.Count; i++) {
-						builder.Append(confAggregate.Objects[i]);
+                    for (int i = 0; i < confAggregate.Objects.Count; i++)
+                    {
+                        builder.Append(confAggregate.Objects[i]);
 
-						if (i != confAggregate.Objects.Count - 1)
-							builder.Append(", ");
-					}
+                        if (i != confAggregate.Objects.Count - 1)
+                            builder.Append(", ");
+                    }
 
-					builder.Append("]");
-					return builder.ToString();
-				}
+                    builder.Append("]");
+                    return builder.ToString();
+                }
 
-				var confKeyValue = this as ParserKeyValue;
+                var confKeyValue = this as ParserKeyValue;
 
-				if (confKeyValue != null)
-					return confKeyValue.Value;
+                if (confKeyValue != null)
+                    return confKeyValue.Value;
 
-				return null;
-			}
-		}
+                return null;
+            }
+        }
 
-		protected ParserObject(ParserTypes confType, int line) {
-			ParserType = confType;
-			Line = line;
-			//Length = 1;
-		}
+        protected ParserObject(ParserTypes confType, int line)
+        {
+            ParserType = confType;
+            Line = line;
+            //Length = 1;
+        }
 
-		public ParserObject this[string key] {
-			get {
-				if (key.Contains(".")) {
-					string[] keys = key.Split(new char[] { '.' }, 2);
+        public ParserObject this[string key]
+        {
+            get
+            {
+                if (key.Contains("."))
+                {
+                    string[] keys = key.Split(new char[] { '.' }, 2);
 
-					var obj = this[keys[0]];
+                    var obj = this[keys[0]];
 
-					if (obj == null)
-						return null;
+                    if (obj == null)
+                        return null;
 
-					return obj[keys[1]];
-				}
+                    return obj[keys[1]];
+                }
 
-				var keyValue = this as ParserKeyValue;
+                var keyValue = this as ParserKeyValue;
 
-				if (keyValue != null && keyValue.Key == key)
-					return keyValue.Value;
+                if (keyValue != null && keyValue.Key == key)
+                    return keyValue.Value;
 
-				var arrayBase = this as ParserArrayBase;
+                var arrayBase = this as ParserArrayBase;
 
-				if (arrayBase != null && (keyValue = arrayBase.Objects.OfType<ParserKeyValue>().FirstOrDefault(p => p.Key == key)) != null) {
-					return keyValue.Value;
-				}
+                if (arrayBase != null && (keyValue = arrayBase.Objects.OfType<ParserKeyValue>().FirstOrDefault(p => p.Key == key)) != null)
+                {
+                    return keyValue.Value;
+                }
 
-				return null;
-			}
-		}
+                return null;
+            }
+        }
 
-		public T To<T>() where T : class {
-			return this as T;
-		}
+        public T To<T>() where T : class
+        {
+            return this as T;
+        }
 
-		public IEnumerator<ParserObject> GetEnumerator() {
-			var arrayBase = this as ParserArrayBase;
+        public IEnumerator<ParserObject> GetEnumerator()
+        {
+            var arrayBase = this as ParserArrayBase;
 
-			if (arrayBase != null)
-				return arrayBase.Objects.GetEnumerator();
+            if (arrayBase != null)
+                return arrayBase.Objects.GetEnumerator();
 
-			return new List<ParserObject>().GetEnumerator();
-		}
+            return new List<ParserObject>().GetEnumerator();
+        }
 
-		IEnumerator IEnumerable.GetEnumerator() {
-			return GetEnumerator();
-		}
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
 
-		public static implicit operator string(ParserObject item) {
-			return item.ObjectValue;
-		}
-	}
+        public static implicit operator string(ParserObject item)
+        {
+            return item.ObjectValue;
+        }
+    }
 
-	public class ParserString : ParserObject {
-		public string Value { get; set; }
+    public class ParserString : ParserObject
+    {
+        public string Value { get; set; }
 
-		public ParserString(string value, int line)
-			: base(ParserTypes.String, line) {
-			Value = value;
-		}
+        public ParserString(string value, int line)
+            : base(ParserTypes.String, line)
+        {
+            Value = value;
+        }
 
-		public override string ToString() {
-			return "String: " + Value;
-		}
-	}
+        public override string ToString()
+        {
+            return "String: " + Value;
+        }
+    }
 
-	public class ParserArrayBase : ParserObject {
-		public List<ParserObject> Objects = new List<ParserObject>();
+    public class ParserArrayBase : ParserObject
+    {
+        public List<ParserObject> Objects = new List<ParserObject>();
 
-		protected ParserArrayBase(ParserTypes confType, int line) : base(confType, line) {
-		}
+        protected ParserArrayBase(ParserTypes confType, int line) : base(confType, line)
+        {
+        }
 
-		public void AddElement(ParserObject obj) {
-			Objects.Add(obj);
-		}
-	}
+        public void AddElement(ParserObject obj)
+        {
+            Objects.Add(obj);
+        }
+    }
 
-	public class ParserArray : ParserArrayBase {
-		public ParserArray(int line)
-			: base(ParserTypes.Array, line) {
-		}
+    public class ParserArray : ParserArrayBase
+    {
+        public ParserArray(int line)
+            : base(ParserTypes.Array, line)
+        {
+        }
 
-		public override string ToString() {
-			return "Array: " + Objects.Count + " elements.";
-		}
-	}
+        public override string ToString()
+        {
+            return "Array: " + Objects.Count + " elements.";
+        }
+    }
 
-	public class ParserList : ParserArrayBase {
-		public ParserList(int line)
-			: base(ParserTypes.List, line) {
-		}
+    public class ParserList : ParserArrayBase
+    {
+        public ParserList(int line)
+            : base(ParserTypes.List, line)
+        {
+        }
 
-		public override string ToString() {
-			return "List: " + Objects.Count + " elements.";
-		}
-	}
+        public override string ToString()
+        {
+            return "List: " + Objects.Count + " elements.";
+        }
+    }
 
-	public class ParserAggregate : ParserArrayBase {
-		public ParserAggregate(int line)
-			: base(ParserTypes.Aggregate, line) {
-		}
+    public class ParserAggregate : ParserArrayBase
+    {
+        public ParserAggregate(int line)
+            : base(ParserTypes.Aggregate, line)
+        {
+        }
 
-		public override string ToString() {
-			return "Aggregate: " + Objects.Count + " elements.";
-		}
-	}
+        public override string ToString()
+        {
+            return "Aggregate: " + Objects.Count + " elements.";
+        }
+    }
 
-	public class ParserKeyValue : ParserObject {
-		public string Key { get; private set; }
-		public ParserObject Value { get; set; }
+    public class ParserKeyValue : ParserObject
+    {
+        public string Key { get; private set; }
+        public ParserObject Value { get; set; }
 
-		public ParserKeyValue(string key, int line)
-			: base(ParserTypes.KeyValue, line) {
-			Key = key;
-		}
+        public ParserKeyValue(string key, int line)
+            : base(ParserTypes.KeyValue, line)
+        {
+            Key = key;
+        }
 
-		public override string ToString() {
-			return "Key: " + Key + ", Value: { " + Value + " }";
-		}
-	}
+        public override string ToString()
+        {
+            return "Key: " + Key + ", Value: { " + Value + " }";
+        }
+    }
 
-	public enum ParserTypes {
-		List,
-		KeyValue,
-		String,
-		Array,
-		Number,
-		Aggregate,
-		Null
-	}
+    public enum ParserTypes
+    {
+        List,
+        KeyValue,
+        String,
+        Array,
+        Number,
+        Aggregate,
+        Null
+    }
 }

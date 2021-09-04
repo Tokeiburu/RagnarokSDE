@@ -1,144 +1,168 @@
-﻿using System;
+﻿using ErrorManager;
+using SDE.Editor.Generic;
+using SDE.Editor.Generic.Lists;
+using SDE.Editor.Generic.TabsMakerCore;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
-using Database;
-using ErrorManager;
-using SDE.Editor.Generic;
-using SDE.Editor.Generic.Lists;
-using SDE.Editor.Generic.TabsMakerCore;
 using TokeiLibrary;
 using TokeiLibrary.WPF.Styles;
 using TokeiLibrary.WPF.Styles.ListView;
 using Utilities;
 using Tuple = Database.Tuple;
 
-namespace SDE.View.Dialogs {
-	/// <summary>
-	/// Interaction logic for ScriptEditDialog.xaml
-	/// </summary>
-	public partial class AddRangeDialog : TkWindow {
-		private Database.Tuple _based;
-		private readonly GDbTab _tab;
+namespace SDE.View.Dialogs
+{
+    /// <summary>
+    /// Interaction logic for ScriptEditDialog.xaml
+    /// </summary>
+    public partial class AddRangeDialog : TkWindow
+    {
+        private Database.Tuple _based;
+        private readonly GDbTab _tab;
 
-		public AddRangeDialog(SdeEditor editor)
-			: base("Add range...", "add.png", SizeToContent.WidthAndHeight, ResizeMode.NoResize) {
-			InitializeComponent();
+        public AddRangeDialog(SdeEditor editor)
+            : base("Add range...", "add.png", SizeToContent.WidthAndHeight, ResizeMode.NoResize)
+        {
+            InitializeComponent();
 
-			_tab = editor.FindTopmostTab();
+            _tab = editor.FindTopmostTab();
 
-			if (_tab == null) {
-				throw new Exception("No table selected.");
-			}
+            if (_tab == null)
+            {
+                throw new Exception("No table selected.");
+            }
 
-			if (!(_tab is GDbTabWrapper<int, ReadableTuple<int>>)) {
-				throw new Exception("This table doesn't support this operation.");
-			}
+            if (!(_tab is GDbTabWrapper<int, ReadableTuple<int>>))
+            {
+                throw new Exception("This table doesn't support this operation.");
+            }
 
-			List<ServerDbs> dbSources = new List<ServerDbs>();
+            List<ServerDbs> dbSources = new List<ServerDbs>();
 
-			dbSources.Add(_tab.DbComponent.DbSource);
+            dbSources.Add(_tab.DbComponent.DbSource);
 
-			if (_tab.DbComponent.DbSource.AdditionalTable != null) {
-				dbSources.Add(_tab.DbComponent.DbSource.AdditionalTable);
-			}
+            if (_tab.DbComponent.DbSource.AdditionalTable != null)
+            {
+                dbSources.Add(_tab.DbComponent.DbSource.AdditionalTable);
+            }
 
-			_destTable.ItemsSource = dbSources;
-			_destTable.SelectedIndex = 0;
-			
-			WpfUtils.AddMouseInOutEffects(_imReset);
+            _destTable.ItemsSource = dbSources;
+            _destTable.SelectedIndex = 0;
 
-			this.Loaded += delegate {
-				_tbRange.Text = "1";
-				_tbFrom.Text = "0";
+            WpfUtils.AddMouseInOutEffects(_imReset);
 
-				if (_tab._listView.SelectedItem != null) {
-					_based = (Tuple) _tab._listView.SelectedItem;
-					_tbBasedOn.Text = _based.GetKey<int>().ToString(CultureInfo.InvariantCulture);
-					_imReset.Visibility = System.Windows.Visibility.Visible;
+            this.Loaded += delegate
+            {
+                _tbRange.Text = "1";
+                _tbFrom.Text = "0";
 
-					_tbFrom.Text = (_based.GetKey<int>() + 1).ToString(CultureInfo.InvariantCulture);
-				}
-			};
+                if (_tab._listView.SelectedItem != null)
+                {
+                    _based = (Tuple)_tab._listView.SelectedItem;
+                    _tbBasedOn.Text = _based.GetKey<int>().ToString(CultureInfo.InvariantCulture);
+                    _imReset.Visibility = System.Windows.Visibility.Visible;
 
-			WindowStartupLocation = WindowStartupLocation.CenterOwner;
-			Owner = WpfUtilities.TopWindow;
-		}
+                    _tbFrom.Text = (_based.GetKey<int>() + 1).ToString(CultureInfo.InvariantCulture);
+                }
+            };
 
-		protected override void GRFEditorWindowKeyDown(object sender, KeyEventArgs e) {
-			if (e.Key == Key.Escape)
-				Close();
-		}
+            WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            Owner = WpfUtilities.TopWindow;
+        }
 
-		private void _buttonCancel_Click(object sender, RoutedEventArgs e) {
-			Close();
-		}
+        protected override void GRFEditorWindowKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+                Close();
+        }
 
-		private void _buttonOk_Click(object sender, RoutedEventArgs e) {
-			try {
-				_addRange();
-			}
-			catch (Exception err) {
-				ErrorHandler.HandleException(err);
-			}
-		}
+        private void _buttonCancel_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
 
-		private void _addRange() {
-			var tab = _tab.To<int>();
+        private void _buttonOk_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                _addRange();
+            }
+            catch (Exception err)
+            {
+                ErrorHandler.HandleException(err);
+            }
+        }
 
-			var range = FormatConverters.IntOrHexConverter(_tbRange.Text);
-			var from = FormatConverters.IntOrHexConverter(_tbFrom.Text);
-			var table = tab.GetDb<int>((ServerDbs) _destTable.SelectedItem).Table;
+        private void _addRange()
+        {
+            var tab = _tab.To<int>();
 
-			try {
-				table.Commands.Begin();
+            var range = FormatConverters.IntOrHexConverter(_tbRange.Text);
+            var from = FormatConverters.IntOrHexConverter(_tbFrom.Text);
+            var table = tab.GetDb<int>((ServerDbs)_destTable.SelectedItem).Table;
 
-				for (int i = 0; i < range; i++) {
-					var tuple = new ReadableTuple<int>(i + from, tab.DbComponent.AttributeList);
+            try
+            {
+                table.Commands.Begin();
 
-					if (_based != null) {
-						tuple.Copy(_based);
-						tuple.SetRawValue(0, i + from);
-					}
+                for (int i = 0; i < range; i++)
+                {
+                    var tuple = new ReadableTuple<int>(i + from, tab.DbComponent.AttributeList);
 
-					tuple.Added = true;
-					table.Commands.AddTuple(i + from, tuple);
-				}
-			}
-			catch (Exception err) {
-				table.Commands.CancelEdit();
-				ErrorHandler.HandleException(err);
-			}
-			finally {
-				table.Commands.End();
-				tab.Filter();
-			}
-		}
+                    if (_based != null)
+                    {
+                        tuple.Copy(_based);
+                        tuple.SetRawValue(0, i + from);
+                    }
 
-		private void _imReset_MouseLeftButtonUp(object sender, MouseButtonEventArgs e) {
-			_tbBasedOn.Text = "None";
-			_imReset.Visibility = Visibility.Collapsed;
-			_based = null;
-		}
+                    tuple.Added = true;
+                    table.Commands.AddTuple(i + from, tuple);
+                }
+            }
+            catch (Exception err)
+            {
+                table.Commands.CancelEdit();
+                ErrorHandler.HandleException(err);
+            }
+            finally
+            {
+                table.Commands.End();
+                tab.Filter();
+            }
+        }
 
-		private void _buttonSearch_Click(object sender, RoutedEventArgs e) {
-			try {
-				SelectFromDialog dialog = new SelectFromDialog(_tab.To<int>().Table, _tab.DbComponent.DbSource, _tab._listView.SelectedItem == null ? "" : (_tab._listView.SelectedItem as ReadableTuple<int>).Key.ToString());
-				if (dialog.ShowDialog() == true) {
-					var id = Int32.Parse(dialog.Id);
+        private void _imReset_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            _tbBasedOn.Text = "None";
+            _imReset.Visibility = Visibility.Collapsed;
+            _based = null;
+        }
 
-					_based = _tab.To<int>().GetMetaTable<int>(_tab.DbComponent.DbSource).TryGetTuple(id);
+        private void _buttonSearch_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                SelectFromDialog dialog = new SelectFromDialog(_tab.To<int>().Table, _tab.DbComponent.DbSource, _tab._listView.SelectedItem == null ? "" : (_tab._listView.SelectedItem as ReadableTuple<int>).Key.ToString());
+                if (dialog.ShowDialog() == true)
+                {
+                    var id = Int32.Parse(dialog.Id);
 
-					if (_based != null) {
-						_tbBasedOn.Text = id.ToString(CultureInfo.InvariantCulture);
-						_imReset.Visibility = Visibility.Visible;
-					}
-				}
-			}
-			catch (Exception err) {
-				ErrorHandler.HandleException(err);
-			}
-		}
-	}
+                    _based = _tab.To<int>().GetMetaTable<int>(_tab.DbComponent.DbSource).TryGetTuple(id);
+
+                    if (_based != null)
+                    {
+                        _tbBasedOn.Text = id.ToString(CultureInfo.InvariantCulture);
+                        _imReset.Visibility = Visibility.Visible;
+                    }
+                }
+            }
+            catch (Exception err)
+            {
+                ErrorHandler.HandleException(err);
+            }
+        }
+    }
 }

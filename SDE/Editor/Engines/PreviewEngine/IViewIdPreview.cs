@@ -1,178 +1,230 @@
-using System;
-using System.Collections.Generic;
 using SDE.Editor.Engines.LuaEngine;
 using SDE.Editor.Engines.Parsers;
 using SDE.Editor.Generic;
 using SDE.Editor.Generic.Lists;
 using SDE.Editor.Jobs;
+using System;
+using System.Collections.Generic;
 
-namespace SDE.Editor.Engines.PreviewEngine {
-	public interface IViewIdPreview {
-		int SuggestedAction { get; }
-		bool CanRead(ReadableTuple<int> tuple);
-		void Read(ReadableTuple<int> tuple, PreviewHelper helper, List<Job> jobs);
-		string GetSpriteFromJob(ReadableTuple<int> tuple, PreviewHelper helper);
-	}
+namespace SDE.Editor.Engines.PreviewEngine
+{
+    public interface IViewIdPreview
+    {
+        int SuggestedAction { get; }
 
-	public class HeadgearPreview : IViewIdPreview {
-		#region IViewIdPreview Members
-		public int SuggestedAction {
-			get { return 33; }
-		}
+        bool CanRead(ReadableTuple<int> tuple);
 
-		public bool CanRead(ReadableTuple<int> tuple) {
-			return ItemParser.IsArmorType(tuple) && (tuple.GetIntNoThrow(ServerItemAttributes.Location) & 7937) != 0;
-		}
+        void Read(ReadableTuple<int> tuple, PreviewHelper helper, List<Job> jobs);
 
-		public void Read(ReadableTuple<int> tuple, PreviewHelper helper, List<Job> jobs) {
-			helper.PreviewSprite = LuaHelper.GetSpriteFromViewId(tuple.GetIntNoThrow(ServerItemAttributes.ClassNumber), LuaHelper.ViewIdTypes.Headgear, helper.Db, tuple);
+        string GetSpriteFromJob(ReadableTuple<int> tuple, PreviewHelper helper);
+    }
 
-			if (String.IsNullOrEmpty(helper.PreviewSprite)) {
-				helper.PreviewSprite = null;
-				helper.SetError(PreviewHelper.ViewIdNotSet);
-				return;
-			}
+    public class HeadgearPreview : IViewIdPreview
+    {
+        #region IViewIdPreview Members
 
-			helper.SetJobs(jobs);
-		}
+        public int SuggestedAction
+        {
+            get { return 33; }
+        }
 
-		public string GetSpriteFromJob(ReadableTuple<int> tuple, PreviewHelper helper) {
-			if (helper.PreviewSprite == PreviewHelper.SpriteNone)
-				return helper.PreviewSprite;
+        public bool CanRead(ReadableTuple<int> tuple)
+        {
+            return ItemParser.IsArmorType(tuple) && (tuple.GetIntNoThrow(ServerItemAttributes.Location) & 7937) != 0;
+        }
 
-			return LuaHelper.GetSpriteFromJob(helper.Grf, helper.Job, helper, helper.PreviewSprite, LuaHelper.ViewIdTypes.Headgear) + ".act";
-		}
-		#endregion
-	}
+        public void Read(ReadableTuple<int> tuple, PreviewHelper helper, List<Job> jobs)
+        {
+            helper.PreviewSprite = LuaHelper.GetSpriteFromViewId(tuple.GetIntNoThrow(ServerItemAttributes.ClassNumber), LuaHelper.ViewIdTypes.Headgear, helper.Db, tuple);
 
-	public class ShieldPreview : IViewIdPreview {
-		#region IViewIdPreview Members
-		public int SuggestedAction {
-			get { return 33; }
-		}
+            if (String.IsNullOrEmpty(helper.PreviewSprite))
+            {
+                helper.PreviewSprite = null;
+                helper.SetError(PreviewHelper.ViewIdNotSet);
+                return;
+            }
 
-		public bool CanRead(ReadableTuple<int> tuple) {
-			return ItemParser.IsArmorType(tuple) && tuple.GetIntNoThrow(ServerItemAttributes.Location) == 32;
-		}
+            helper.SetJobs(jobs);
+        }
 
-		public void Read(ReadableTuple<int> tuple, PreviewHelper helper, List<Job> jobs) {
-			helper.PreviewSprite = LuaHelper.GetSpriteFromViewId(tuple.GetIntNoThrow(ServerItemAttributes.ClassNumber), LuaHelper.ViewIdTypes.Shield, helper.Db, tuple);
+        public string GetSpriteFromJob(ReadableTuple<int> tuple, PreviewHelper helper)
+        {
+            if (helper.PreviewSprite == PreviewHelper.SpriteNone)
+                return helper.PreviewSprite;
 
-			if (helper.PreviewSprite == null) {
-				helper.SetError(PreviewHelper.ViewIdNotSet);
-				return;
-			}
+            return LuaHelper.GetSpriteFromJob(helper.Grf, helper.Job, helper, helper.PreviewSprite, LuaHelper.ViewIdTypes.Headgear) + ".act";
+        }
 
-			helper.SetJobs(jobs);
-		}
+        #endregion IViewIdPreview Members
+    }
 
-		public string GetSpriteFromJob(ReadableTuple<int> tuple, PreviewHelper helper) {
-			return LuaHelper.GetSpriteFromJob(helper.Grf, helper.Job, helper, helper.PreviewSprite, LuaHelper.ViewIdTypes.Shield) + ".act";
-		}
-		#endregion
-	}
+    public class ShieldPreview : IViewIdPreview
+    {
+        #region IViewIdPreview Members
 
-	public class WeaponPreview : IViewIdPreview {
-		#region IViewIdPreview Members
-		public int SuggestedAction {
-			get { return 33; }
-		}
+        public int SuggestedAction
+        {
+            get { return 33; }
+        }
 
-		public bool CanRead(ReadableTuple<int> tuple) {
-			return ItemParser.IsWeaponType(tuple);
-		}
+        public bool CanRead(ReadableTuple<int> tuple)
+        {
+            return ItemParser.IsArmorType(tuple) && tuple.GetIntNoThrow(ServerItemAttributes.Location) == 32;
+        }
 
-		public void Read(ReadableTuple<int> tuple, PreviewHelper helper, List<Job> jobs) {
-			helper.PreviewSprite = LuaHelper.GetSpriteFromViewId(tuple.GetIntNoThrow(ServerItemAttributes.ClassNumber), LuaHelper.ViewIdTypes.Weapon, helper.Db, tuple);
+        public void Read(ReadableTuple<int> tuple, PreviewHelper helper, List<Job> jobs)
+        {
+            helper.PreviewSprite = LuaHelper.GetSpriteFromViewId(tuple.GetIntNoThrow(ServerItemAttributes.ClassNumber), LuaHelper.ViewIdTypes.Shield, helper.Db, tuple);
 
-			if (helper.PreviewSprite == null) {
-				helper.SetError(PreviewHelper.ViewIdNotSet);
-				return;
-			}
+            if (helper.PreviewSprite == null)
+            {
+                helper.SetError(PreviewHelper.ViewIdNotSet);
+                return;
+            }
 
-			helper.SetJobs(jobs);
-		}
+            helper.SetJobs(jobs);
+        }
 
-		public string GetSpriteFromJob(ReadableTuple<int> tuple, PreviewHelper helper) {
-			return LuaHelper.GetSpriteFromJob(helper.Grf, helper.Job, helper, helper.PreviewSprite, LuaHelper.ViewIdTypes.Weapon) + ".act";
-		}
-		#endregion
-	}
+        public string GetSpriteFromJob(ReadableTuple<int> tuple, PreviewHelper helper)
+        {
+            return LuaHelper.GetSpriteFromJob(helper.Grf, helper.Job, helper, helper.PreviewSprite, LuaHelper.ViewIdTypes.Shield) + ".act";
+        }
 
-	public class GarmentPreview : IViewIdPreview {
-		#region IViewIdPreview Members
-		public int SuggestedAction {
-			get { return 9; }
-		}
+        #endregion IViewIdPreview Members
+    }
 
-		public bool CanRead(ReadableTuple<int> tuple) {
-			return ItemParser.IsArmorType(tuple) && (tuple.GetIntNoThrow(ServerItemAttributes.Location) == 4 || tuple.GetIntNoThrow(ServerItemAttributes.Location) == 8192);
-		}
+    public class WeaponPreview : IViewIdPreview
+    {
+        #region IViewIdPreview Members
 
-		public void Read(ReadableTuple<int> tuple, PreviewHelper helper, List<Job> jobs) {
-			helper.PreviewSprite = LuaHelper.GetSpriteFromViewId(tuple.GetIntNoThrow(ServerItemAttributes.ClassNumber), LuaHelper.ViewIdTypes.Garment, helper.Db, tuple);
+        public int SuggestedAction
+        {
+            get { return 33; }
+        }
 
-			if (helper.PreviewSprite == null) {
-				helper.SetError(PreviewHelper.ViewIdNotSet);
-				return;
-			}
+        public bool CanRead(ReadableTuple<int> tuple)
+        {
+            return ItemParser.IsWeaponType(tuple);
+        }
 
-			helper.SetJobs(jobs);
-		}
+        public void Read(ReadableTuple<int> tuple, PreviewHelper helper, List<Job> jobs)
+        {
+            helper.PreviewSprite = LuaHelper.GetSpriteFromViewId(tuple.GetIntNoThrow(ServerItemAttributes.ClassNumber), LuaHelper.ViewIdTypes.Weapon, helper.Db, tuple);
 
-		public string GetSpriteFromJob(ReadableTuple<int> tuple, PreviewHelper helper) {
-			return LuaHelper.GetSpriteFromJob(helper.Grf, helper.Job, helper, helper.PreviewSprite, LuaHelper.ViewIdTypes.Garment) + ".act";
-		}
-		#endregion
-	}
+            if (helper.PreviewSprite == null)
+            {
+                helper.SetError(PreviewHelper.ViewIdNotSet);
+                return;
+            }
 
-	public class NpcPreview : IViewIdPreview {
-		#region IViewIdPreview Members
-		public int SuggestedAction {
-			get { return 4; }
-		}
+            helper.SetJobs(jobs);
+        }
 
-		public bool CanRead(ReadableTuple<int> tuple) {
-			return false;
-		}
+        public string GetSpriteFromJob(ReadableTuple<int> tuple, PreviewHelper helper)
+        {
+            return LuaHelper.GetSpriteFromJob(helper.Grf, helper.Job, helper, helper.PreviewSprite, LuaHelper.ViewIdTypes.Weapon) + ".act";
+        }
 
-		public void Read(ReadableTuple<int> tuple, PreviewHelper helper, List<Job> jobs) {
-			helper.PreviewSprite = LuaHelper.GetSpriteFromViewId(helper.ViewId, LuaHelper.ViewIdTypes.Npc, helper.Db, tuple);
+        #endregion IViewIdPreview Members
+    }
 
-			if (helper.PreviewSprite == null) {
-				helper.SetError(PreviewHelper.ViewIdNotSet);
-				return;
-			}
+    public class GarmentPreview : IViewIdPreview
+    {
+        #region IViewIdPreview Members
 
-			helper.SetJobs(new List<Job>());
-		}
+        public int SuggestedAction
+        {
+            get { return 9; }
+        }
 
-		public string GetSpriteFromJob(ReadableTuple<int> tuple, PreviewHelper helper) {
-			var name = LuaHelper.GetSpriteFromJob(helper.Grf, null, helper, helper.PreviewSprite, LuaHelper.ViewIdTypes.Npc);
-			if (name.EndsWith(".gr2"))
-				return name;
-			return name + ".act";
-		}
-		#endregion
-	}
+        public bool CanRead(ReadableTuple<int> tuple)
+        {
+            return ItemParser.IsArmorType(tuple) && (tuple.GetIntNoThrow(ServerItemAttributes.Location) == 4 || tuple.GetIntNoThrow(ServerItemAttributes.Location) == 8192);
+        }
 
-	public class NullPreview : IViewIdPreview {
-		#region IViewIdPreview Members
-		public int SuggestedAction {
-			get { return 0; }
-		}
+        public void Read(ReadableTuple<int> tuple, PreviewHelper helper, List<Job> jobs)
+        {
+            helper.PreviewSprite = LuaHelper.GetSpriteFromViewId(tuple.GetIntNoThrow(ServerItemAttributes.ClassNumber), LuaHelper.ViewIdTypes.Garment, helper.Db, tuple);
 
-		public bool CanRead(ReadableTuple<int> tuple) {
-			return true;
-		}
+            if (helper.PreviewSprite == null)
+            {
+                helper.SetError(PreviewHelper.ViewIdNotSet);
+                return;
+            }
 
-		public void Read(ReadableTuple<int> tuple, PreviewHelper helper, List<Job> jobs) {
-			helper.SetError("Item type not supported.");
-		}
+            helper.SetJobs(jobs);
+        }
 
-		public string GetSpriteFromJob(ReadableTuple<int> tuple, PreviewHelper helper) {
-			return PreviewHelper.SpriteNone;
-		}
-		#endregion
-	}
+        public string GetSpriteFromJob(ReadableTuple<int> tuple, PreviewHelper helper)
+        {
+            return LuaHelper.GetSpriteFromJob(helper.Grf, helper.Job, helper, helper.PreviewSprite, LuaHelper.ViewIdTypes.Garment) + ".act";
+        }
+
+        #endregion IViewIdPreview Members
+    }
+
+    public class NpcPreview : IViewIdPreview
+    {
+        #region IViewIdPreview Members
+
+        public int SuggestedAction
+        {
+            get { return 4; }
+        }
+
+        public bool CanRead(ReadableTuple<int> tuple)
+        {
+            return false;
+        }
+
+        public void Read(ReadableTuple<int> tuple, PreviewHelper helper, List<Job> jobs)
+        {
+            helper.PreviewSprite = LuaHelper.GetSpriteFromViewId(helper.ViewId, LuaHelper.ViewIdTypes.Npc, helper.Db, tuple);
+
+            if (helper.PreviewSprite == null)
+            {
+                helper.SetError(PreviewHelper.ViewIdNotSet);
+                return;
+            }
+
+            helper.SetJobs(new List<Job>());
+        }
+
+        public string GetSpriteFromJob(ReadableTuple<int> tuple, PreviewHelper helper)
+        {
+            var name = LuaHelper.GetSpriteFromJob(helper.Grf, null, helper, helper.PreviewSprite, LuaHelper.ViewIdTypes.Npc);
+            if (name.EndsWith(".gr2"))
+                return name;
+            return name + ".act";
+        }
+
+        #endregion IViewIdPreview Members
+    }
+
+    public class NullPreview : IViewIdPreview
+    {
+        #region IViewIdPreview Members
+
+        public int SuggestedAction
+        {
+            get { return 0; }
+        }
+
+        public bool CanRead(ReadableTuple<int> tuple)
+        {
+            return true;
+        }
+
+        public void Read(ReadableTuple<int> tuple, PreviewHelper helper, List<Job> jobs)
+        {
+            helper.SetError("Item type not supported.");
+        }
+
+        public string GetSpriteFromJob(ReadableTuple<int> tuple, PreviewHelper helper)
+        {
+            return PreviewHelper.SpriteNone;
+        }
+
+        #endregion IViewIdPreview Members
+    }
 }

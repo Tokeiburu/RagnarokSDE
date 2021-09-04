@@ -1,61 +1,67 @@
-﻿using System;
+﻿using SDE.View.Controls;
+using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using SDE.View.Controls;
 using TokeiLibrary;
 
-namespace SDE.View {
-	/// <summary>
-	/// Adjusts the width for the PatcherErrorView items in the ListView
-	/// </summary>
-	public class WidthAdjusterConverter : IValueConverter {
-		#region IValueConverter Members
+namespace SDE.View
+{
+    /// <summary>
+    /// Adjusts the width for the PatcherErrorView items in the ListView
+    /// </summary>
+    public class WidthAdjusterConverter : IValueConverter
+    {
+        #region IValueConverter Members
 
-		public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
-			if (targetType != typeof(double)) { return null; }
-			if (!(value is Border)) { return 0; }
-			
-			Border text = (Border)value;
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (targetType != typeof(double)) { return null; }
+            if (!(value is Border)) { return 0; }
 
-			TextViewItem res = WpfUtilities.FindDirectParentControl<TextViewItem>(text);
+            Border text = (Border)value;
 
-			if (res == null)
-				return text.ActualWidth;
+            TextViewItem res = WpfUtilities.FindDirectParentControl<TextViewItem>(text);
 
-			ListView view = res.ListView;
+            if (res == null)
+                return text.ActualWidth;
 
-			if (view == null)
-				return text.ActualWidth;
+            ListView view = res.ListView;
 
-			if (view.ActualWidth < 0)
-				return 0;
+            if (view == null)
+                return text.ActualWidth;
 
-			double dParentWidth = view.ActualWidth;
-			double dToAdjust = parameter == null ? 0 : double.Parse(parameter.ToString());
-			double dAdjustedWidth = dParentWidth + dToAdjust - 10;
+            if (view.ActualWidth < 0)
+                return 0;
 
-			if (_isScrollBarVisible(view)) {
-			    dAdjustedWidth -= SystemParameters.VerticalScrollBarWidth;
-			}
+            double dParentWidth = view.ActualWidth;
+            double dToAdjust = parameter == null ? 0 : double.Parse(parameter.ToString());
+            double dAdjustedWidth = dParentWidth + dToAdjust - 10;
 
-			return (dAdjustedWidth < 0 ? 0 : dAdjustedWidth);
-		}
+            if (_isScrollBarVisible(view))
+            {
+                dAdjustedWidth -= SystemParameters.VerticalScrollBarWidth;
+            }
 
-		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) {
-			throw new NotImplementedException();
-		}
+            return (dAdjustedWidth < 0 ? 0 : dAdjustedWidth);
+        }
 
-		#endregion
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
 
-		private static bool _isScrollBarVisible(DependencyObject view) {
-			ScrollViewer[] sv = WpfUtilities.FindChildren<ScrollViewer>(view);
+        #endregion IValueConverter Members
 
-			if (sv.Length > 0)
-				return sv[0].ComputedVerticalScrollBarVisibility == Visibility.Visible;
+        private static bool _isScrollBarVisible(DependencyObject view)
+        {
+            ScrollViewer[] sv = WpfUtilities.FindChildren<ScrollViewer>(view);
 
-			return false;
-		}
-	}
+            if (sv.Length > 0)
+                return sv[0].ComputedVerticalScrollBarVisibility == Visibility.Visible;
+
+            return false;
+        }
+    }
 }
