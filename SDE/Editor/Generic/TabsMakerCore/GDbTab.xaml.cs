@@ -27,7 +27,7 @@ namespace SDE.Editor.Generic.TabsMakerCore
             _miCopyTo.InputGestureText = ApplicationShortcut.FindDislayName(ApplicationShortcut.CopyTo);
             _miCut.InputGestureText = ApplicationShortcut.FindDislayName(ApplicationShortcut.Cut);
             _miShowSelected.InputGestureText = ApplicationShortcut.FindDislayName(ApplicationShortcut.Restrict);
-            _miSelectInNotepad.InputGestureText = ApplicationShortcut.FindDislayName(ApplicationShortcut.FromString("Ctrl-W", "Open in Notepad++"));
+            _miSelectInNotepad.InputGestureText = ApplicationShortcut.FindDislayName(ApplicationShortcut.FromString("Ctrl-W", "Text Editor"));
             //_miChangeId.InputGestureText = ApplicationShortcut.FindDislayName(ApplicationShortcut.);
         }
 

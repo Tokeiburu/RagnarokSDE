@@ -320,7 +320,7 @@ namespace SDE.Editor.Generic.TabsMakerCore
                 _miChangeId.Visibility = Visibility.Collapsed;
             }
 
-            var shortcut = ApplicationShortcut.FromString("Ctrl-W", "Open in Notepad++");
+            var shortcut = ApplicationShortcut.FromString("Ctrl-W", "Open in Text Editor");
             ApplicationShortcut.Link(shortcut, () => _miSelectInNotepad_Click(null, null), this);
         }
 

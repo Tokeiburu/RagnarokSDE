@@ -46,7 +46,7 @@
                                 <Image Source="../../../../Resources/cut.png" Width="16" Height="16" RenderOptions.BitmapScalingMode="NearestNeighbor" Stretch="Uniform" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Name="_miSelectInNotepad" Header="Select in Notepad++" >
+                        <MenuItem Name="_miSelectInNotepad" Header="Select in Text Editor" >
                             <MenuItem.Icon>
                                 <Image Source="../../../../Resources/notepad.png" Width="16" Height="16" RenderOptions.BitmapScalingMode="NearestNeighbor" Stretch="Uniform" />
                             </MenuItem.Icon>

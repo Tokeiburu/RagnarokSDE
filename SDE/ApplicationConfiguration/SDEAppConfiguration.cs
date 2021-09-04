@@ -775,8 +775,8 @@ namespace SDE.ApplicationConfiguration
 
         public static string NotepadPath
         {
-            get { return ConfigAsker["[GRFEditor - Notepad++ path]", ""]; }
-            set { ConfigAsker["[GRFEditor - Notepad++ path]"] = value; }
+            get { return ConfigAsker["[GRFEditor - Text Editor path]", ""]; }
+            set { ConfigAsker["[GRFEditor - Text Editor path]"] = value; }
         }
 
         public static bool RevertItemTypes

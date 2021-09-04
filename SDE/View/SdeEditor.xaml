@@ -245,7 +245,7 @@
                             ListView:WpfUtils.IsGridSortable="True" VirtualizingStackPanel.IsVirtualizing="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                 <ListView.ContextMenu>
                                     <ContextMenu>
-                                        <MenuItem Name="_miOpenNotepad" ListView:WpfUtils.ImagePath="treeList.png" Click="_miOpenNotepad_Click" Header="Select in Notepad++" />
+                                        <MenuItem Name="_miOpenNotepad" ListView:WpfUtils.ImagePath="treeList.png" Click="_miOpenNotepad_Click" Header="Select in Text Editor" />
                                         <MenuItem Name="_miOpen" ListView:WpfUtils.ImagePath="arrowdown.png" Click="_miOpen_Click" Header="Open" />
                                         <MenuItem Name="_miCopy" ListView:WpfUtils.ImagePath="copy.png" Click="_miCopy_Click" Header="Copy exception" />
                                     </ContextMenu>
