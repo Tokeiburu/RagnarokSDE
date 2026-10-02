@@ -6,6 +6,7 @@ using SDE.Databases.ClientAchievements.Features;
 using SDE.Databases.Generic.Parser;
 using SDE.Editor.Database;
 using System;
+using System.Linq;
 
 namespace SDE.Databases.Achievements.Parser {
 	public class ClientAchvReaderLua : DatabaseReaderLua {
@@ -79,7 +80,7 @@ namespace SDE.Databases.Achievements.Parser {
 						case "resource":
 							var resource = entry.Value as LList;
 
-							foreach (LKeyValue resourceEntry in resource) {
+							foreach (LKeyValue resourceEntry in resource.OfType<LKeyValue>().Where(p => p.Value is LList)) {
 								model.Resources.Add(LoadResource(resourceEntry));
 							}
 
