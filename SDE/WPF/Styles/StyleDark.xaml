@@ -44,6 +44,7 @@
     <Color x:Key="UIThemeListViewBorderColor">#242529</Color>
     <Color x:Key="UIThemeListViewMouseOverBackgroundColor">#4C4F57</Color>
 	<Color x:Key="UIThemeComboBoxDisabled">#3D4146</Color>
+	<Color x:Key="UIThemeAboutDialogColor">#484C52</Color>
 	<Color x:Key="UIThemeListViewItemBorderColor">#008CE2</Color>
 	<Color x:Key="UIThemeListViewItemMouseOverBorderColor">#FF34B2FF</Color>
 
@@ -70,6 +71,7 @@
     <SolidColorBrush x:Key="UIThemeListViewBorderBrush" Color="{DynamicResource UIThemeListViewBorderColor}"/>
     <SolidColorBrush x:Key="UIThemeListViewMouseOverBackgroundBrush" Color="{DynamicResource UIThemeListViewMouseOverBackgroundColor}"/>
 	<SolidColorBrush x:Key="UIThemeComboBoxDisabledBrush" Color="{DynamicResource UIThemeComboBoxDisabled}"/>
+	<SolidColorBrush x:Key="UIThemeAboutDialogBrush" Color="{DynamicResource UIThemeAboutDialogColor}"/>
 	<SolidColorBrush x:Key="UIThemeListViewItemBorderBrush" Color="{DynamicResource UIThemeListViewItemBorderColor}"/>
 	<SolidColorBrush x:Key="UIThemeListViewItemMouseOverBorderBrush" Color="{DynamicResource UIThemeListViewItemMouseOverBorderColor}"/>
 

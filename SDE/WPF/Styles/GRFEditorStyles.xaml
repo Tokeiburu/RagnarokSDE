@@ -638,9 +638,12 @@
     </Style>
 
     <SolidColorBrush x:Key="ToggleMemoryBorderBrush" Color="#9AA6B6"/>
-    <SolidColorBrush x:Key="UIDragDropBrush" Color="#FFD3FDC5"/>
+	<SolidColorBrush x:Key="UIDragDropBrush" Color="#FFD3FDC5"/>
 
-    <LinearGradientBrush x:Key="SearchDialogSubmenuBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+	<Color x:Key="UIThemeAboutDialogColor">Transparent</Color>
+	<SolidColorBrush x:Key="UIThemeAboutDialogBrush" Color="{DynamicResource UIThemeAboutDialogColor}"/>
+
+	<LinearGradientBrush x:Key="SearchDialogSubmenuBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
         <GradientStop Offset="0" Color="#DEDEDE" />
         <GradientStop Offset="0.5" Color="White" />
     </LinearGradientBrush>

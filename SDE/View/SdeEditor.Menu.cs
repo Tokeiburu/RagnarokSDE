@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Database;
 using ErrorManager;
 using GRF.FileFormats;
@@ -107,7 +108,11 @@ namespace SDE.View {
 				ErrorHandler.HandleException(err.Message, ErrorLevel.Warning);
 			}
 		}
-		private void _menuItemAbout_Click(object sender, RoutedEventArgs e) => WindowProvider.ShowWindow(new AboutDialog(SdeAppConfiguration.PublicVersion, SdeAppConfiguration.RealVersion, SdeAppConfiguration.Author, SdeAppConfiguration.ProgramName, "sdeAboutBackground.jpg"), this);
+		private void _menuItemAbout_Click(object sender, RoutedEventArgs e) {
+			var dialog = new AboutDialog(SdeAppConfiguration.PublicVersion, SdeAppConfiguration.RealVersion, SdeAppConfiguration.Author, SdeAppConfiguration.ProgramName, "sdeAboutBackground.jpg");
+			dialog.AboutTextBox.Background = FindResource("UIThemeAboutDialogBrush") as Brush;
+			WindowProvider.ShowWindow(dialog, this);
+		}
 		private void _menuItemClose_Click(object sender, RoutedEventArgs e) => Close();
 		private void _menuItemAddItem_Click(object sender, RoutedEventArgs e) => _execute(v => v.Commands.AddNewItem());
 
