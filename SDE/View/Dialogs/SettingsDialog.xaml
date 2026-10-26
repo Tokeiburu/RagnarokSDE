@@ -319,6 +319,10 @@
                                     <Styles:FancyButton x:Name="_fbRefreshhortcuts" Click="_fbRefreshhortcuts_Click" HorizontalAlignment="Left" TextHeader="Update" TextDescription="Look for new loaded shortcuts" />
                                 </WrapPanel>
                                 <Rectangle Margin="5" Stroke="#E3E9F1" VerticalAlignment="Stretch" />
+                                <DockPanel>
+                                    <Label Content="Search" />
+                                    <TextBox Name="_tbSearch" Margin="2" TextChanged="_tbSearch_TextChanged" VerticalContentAlignment="Center" />
+                                </DockPanel>
                             </StackPanel>
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Focusable="True" FocusVisualStyle="{x:Null}">
                                 <Grid Name="_gridShortcuts" Focusable="True" FocusVisualStyle="{x:Null}">

@@ -40,6 +40,12 @@ namespace SDE.Editor.LuaTables {
 		}
 		#endregion
 
+		static LuaHelper() {
+			foreach (var c in Latin)
+				_latinCheck[c] = true;
+		}
+
+		private static bool[] _latinCheck = new bool[256];
 		public const string Latin = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789";
 		private static string _debugStatus = "";
 
@@ -800,7 +806,7 @@ namespace SDE.Editor.LuaTables {
 			for (int i = 0; i < value.Length; i++) {
 				c = value[i];
 
-				if (Latin.Contains(c)) {
+				if (_latinCheck[c]) {
 					builder.Append(value[i]);
 				}
 				else {
@@ -812,7 +818,7 @@ namespace SDE.Editor.LuaTables {
 		}
 
 		public static bool IsLatinOnly(string value) {
-			return value.All(c => Latin.Contains(c));
+			return value.All(c => _latinCheck[c]);
 		}
 
 		public static string LatinUpper(string value) {
@@ -822,7 +828,7 @@ namespace SDE.Editor.LuaTables {
 			for (int i = 0; i < value.Length; i++) {
 				c = value[i];
 
-				if (Latin.Contains(c)) {
+				if (_latinCheck[c]) {
 					builder.Append(char.ToUpperInvariant(value[i]));
 				}
 				else {

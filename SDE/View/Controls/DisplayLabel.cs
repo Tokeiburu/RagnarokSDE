@@ -1,3 +1,4 @@
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -6,6 +7,7 @@ using System.Windows.Media;
 using SDE.Databases;
 using SDE.Editor.Database;
 using TokeiLibrary;
+using Utilities;
 
 namespace SDE.View.Controls {
 	public enum DisplayLabelState {
@@ -104,7 +106,7 @@ namespace SDE.View.Controls {
 			
 			if (_db != null) {
 				_db.IsEnabledChanged += (e, v) => {
-					IsContentEnabled = v;
+					this.Dispatch(p => p.IsContentEnabled = v);
 				};
 			}
 

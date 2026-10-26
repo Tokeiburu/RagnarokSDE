@@ -21,8 +21,6 @@ namespace SDE.View.Dialogs {
 	/// Interaction logic for SettingsDialog.xaml
 	/// </summary>
 	public partial class SettingsDialog : TkWindow {
-		private Dictionary<string, SettingsShortcutGenerator.ShortcutVisual> _shortcuts;
-
 		public SettingsDialog() : base("Advanced settings", "settings.png") {
 			InitializeComponent();
 			Binder.Bind(_pbNotepad.TextBox, () => SdeAppConfiguration.NotepadPath);
@@ -55,6 +53,8 @@ namespace SDE.View.Dialogs {
 				ErrorHandler.HandleException(err);
 			}
 		}
+
+		private Dictionary<string, SettingsShortcutGenerator.ShortcutVisual> _shortcuts;
 
 		public void LoadShortcuts() {
 			_gridShortcuts.Children.Clear();
@@ -111,6 +111,24 @@ namespace SDE.View.Dialogs {
 
 		private void _fbRefreshhortcuts_Click(object sender, RoutedEventArgs e) {
 			LoadShortcuts();
+		}
+
+		private void _tbSearch_TextChanged(object sender, TextChangedEventArgs e) {
+			if (_tbSearch.Text == "") {
+				foreach (var key in _shortcuts.Values) {
+					key.Show();
+				}
+			}
+			else {
+				foreach (var key in _shortcuts) {
+					if (key.Key.IndexOf(_tbSearch.Text, StringComparison.OrdinalIgnoreCase) > -1) {
+						key.Value.Show();
+					}
+					else {
+						key.Value.Hide();
+					}
+				}
+			}
 		}
 
 		private void _cbSdeShell_Click(object sender, RoutedEventArgs e) {

@@ -58,7 +58,7 @@ namespace SDE.Databases.Generic.Parser {
 
 			ProcessFile(list, table, db);
 
-			Debug.Ignore(() => DbDebugHelper.OnLoaded(db.Source, metaGrf.FindTkPath(file), db));
+			//Debug.Ignore(() => DbDebugHelper.OnLoaded(db.Source, metaGrf.FindTkPath(file), db));
 		}
 
 		public virtual void ProcessFile(LList list, Table<int, ReadableTuple> table, BaseDatabase db) {

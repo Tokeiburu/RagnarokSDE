@@ -19,7 +19,7 @@ namespace SDE.Editor.Database {
 			if (IsTabContentValid)
 				return;
 
-			if (ActiveFormat != FileType.Error && ActiveFormat == Parser.ReadFileType) {
+			if (ActiveFormat != FileType.Error && ActiveFormat == Parser.ReadFileType && tab.PropertiesGrid.Children.Count != 0) {
 				IsTabContentValid = true;
 				return;
 			}

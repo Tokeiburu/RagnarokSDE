@@ -33,6 +33,11 @@ Source: "SDE\bin\Release\Microsoft.Scripting.Core.dll"; DestDir: "{app}"; Flags:
 Source: "SDE\bin\Release\Microsoft.Scripting.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "SDE\bin\Release\TokeiLibrary.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "SDE\bin\Release\Utilities.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "SDE\bin\Release\System.IO.Hashing.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "SDE\bin\Release\System.Memory.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "SDE\bin\Release\System.Numerics.Vectors.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "SDE\bin\Release\System.Runtime.CompilerServices.Unsafe.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "SDE\bin\Release\K4os.Compression.LZ4.dll"; DestDir: "{app}"; Flags: ignoreversion
 
 Source: "SDE\bin\Release\SDE.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "SDE\bin\Release\SDE.exe.config"; DestDir: "{app}"; Flags: ignoreversion

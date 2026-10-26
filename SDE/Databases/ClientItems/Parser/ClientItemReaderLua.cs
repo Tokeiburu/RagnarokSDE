@@ -85,8 +85,6 @@ namespace SDE.Databases.ClientItems.Parser {
 					_loadEntry(table, item);
 				}
 			}
-
-			Debug.Ignore(() => DbDebugHelper.OnLoaded(db.Source, metaGrf.FindTkPath(file), db));
 		}
 
 		private void _loadEntry(Table<int, ReadableTuple> table, LKeyValue item) {

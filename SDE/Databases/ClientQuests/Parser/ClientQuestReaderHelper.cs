@@ -36,8 +36,6 @@ namespace SDE.Databases.ClientQuests.Parser {
 						table.Commands.Set(tuple, ClientQuestAttributes.Model, model, false);
 					}
 				}
-
-				Debug.Ignore(() => DbDebugHelper.OnLoaded(db.Source, SdeEditor.MetaGrf.FindTkPath(file), db));
 			}
 			catch (Exception err) {
 				if (!context.ReportException(err)) return;
