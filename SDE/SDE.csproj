@@ -1492,7 +1492,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.MonthStamp.Increment" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" />
+      <UserProperties BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.MonthStamp.Increment" />
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup>
@@ -1517,13 +1517,6 @@
     <ExternalDlls Include="$(ExternalDllsPath)Lua.dll" Visible="false" />
     <ExternalDlls Include="$(ExternalDllsPath)TokeiLibrary.dll" Visible="false" />
     <ExternalDlls Include="$(ExternalDllsPath)Utilities.dll" Visible="false" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="K4os.Compression.LZ4.dll" />
-    <Content Include="System.IO.Hashing.dll" />
-    <Content Include="System.Memory.dll" />
-    <Content Include="System.Numerics.Vectors.dll" />
-    <Content Include="System.Runtime.CompilerServices.Unsafe.dll" />
   </ItemGroup>
   <Target Name="CopyExternalDlls" BeforeTargets="BeforeBuild">
     <MakeDir Directories="$(GrfEditorDllsPath)" Condition="!Exists('$(GrfEditorDllsPath)')" />
